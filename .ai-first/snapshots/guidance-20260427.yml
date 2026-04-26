@@ -1,0 +1,41 @@
+id: guidance-20260427
+projectId: proj-h7k3m
+generatedAt: "2026-04-27T00:10:00Z"
+projectMode: brownfield
+currentStage: qa
+confidence: 0.95
+summary: "QA stage complete with all 9 gates passed. 94 tests, 7 skills, 16 commands, 7 standards. Security clean, bug scan clean, optimization suggestions applied. Ready for release."
+whyNow:
+  - "All 9 QA gates passed — logic, security, architecture, architecture_risk, docs, knowledge, testing, consistency, collaboration"
+  - "State consistency fixed — project.yml, symlink, and snapshot all aligned on qa stage"
+  - "Test coverage expanded from ~28 to 94 tests across 7 modules"
+  - "TS strict flags (noUnusedLocals, noUnusedParameters, noImplicitReturns) enabled for stricter compilation"
+  - "No blockers — zero active tasks, zero pending sync events, zero failed reviews"
+primaryAction:
+  id: act-20260427-1
+  title: "Advance to release stage"
+  description: "Execute /advance to transition from qa to release. Prepare release notes, verify all artifacts, and run the release checklist."
+  actionType: release
+  priority: p0
+  recommendedOwner: release-agent
+  requiresConfirmation: false
+alternativeActions:
+  - id: act-20260427-2
+    title: "Build out CI/CD pipeline"
+    description: "Expand .github/workflows/ci.yml with automated test, typecheck, and scan jobs"
+    actionType: implement
+    priority: p1
+    recommendedOwner: builder-agent
+    requiresConfirmation: false
+  - id: act-20260427-3
+    title: "Run wiki generation"
+    description: "Execute /wiki to build initial project wiki from knowledge base and standards"
+    actionType: generate
+    priority: p2
+    recommendedOwner: knowledge-sync-agent
+    requiresConfirmation: false
+risks:
+  - "Single-platform: Claude Code works fully, Codex/Trae/Qoder adapter protocol defined but not E2E validated"
+  - "CI pipeline is placeholder — needs real build/test steps"
+suggestedLeadAgent: release-agent
+reviewStatus: passed

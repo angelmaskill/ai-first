@@ -46,3 +46,13 @@
 2026-04-26T08:52:00Z STRUCTURE Created routing.yml — 9 intent categories, 14 slash commands, deterministic agent lookup table
 2026-04-26T08:53:00Z STATE Updated CLAUDE.md with Routing Protocol section and intent confirmation gate workflow
 2026-04-26T08:54:00Z STRUCTURE Created STANDARD-006: Deterministic Agent Routing Protocol
+2026-04-26T09:00:00Z STRUCTURE Enhanced bug-scanner skill with test→prod leak detection (Phase 1.6: localhost URLs, staging domains, test credentials, debug flags, hardcoded dev ports)
+2026-04-26T09:02:00Z STRUCTURE Created test-generator skill — AI-assisted test generation with coverage analysis, skeleton generation, and gap detection
+2026-04-26T09:04:00Z STRUCTURE Created smoke-case-agent — critical path identification, P0/P1/P2 smoke test organization, CI/CD integration
+2026-04-26T09:05:00Z STRUCTURE Created STANDARD-007: Test Quality and Coverage Standards (unit/integration/e2e/smoke pyramid, test:source ratios, test→prod boundary rules)
+[2026-04-26T15:53:05Z] [STAGE_TRANSITION] stage-02-discovery → stage-03-spec (spec) — mode: skip
+[2026-04-26T15:53:17Z] [STAGE_TRANSITION] stage-03-spec → stage-04-architecture (architecture) — mode: skip
+[2026-04-26T15:53:26Z] [STAGE_TRANSITION] stage-04-architecture → stage-05-scaffold (scaffold) — mode: skip
+[2026-04-26T15:53:35Z] [STAGE_TRANSITION] stage-05-scaffold → stage-06-build (build) — mode: skip
+[2026-04-26T15:53:47Z] [STAGE_TRANSITION] stage-06-build → stage-07-qa (qa) — mode: skip
+[2026-04-26T16:09:01Z] [QA_COMPLETE] 9-gate review passed. Security: CLEAN, Bug-Scan: CLEAN, Optimization: CLEAN. Tests: 94 passing (7 files). TS strict flags enabled.

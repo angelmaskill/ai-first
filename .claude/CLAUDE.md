@@ -59,6 +59,8 @@ Users have these shortcut commands. When invoked, follow the corresponding workf
 | `/wiki` | Build or rebuild the project wiki from knowledge and standards |
 | `/skills` | List registered skills |
 | `/health` | Project health dashboard — test coverage, review status, knowledge sync, risk summary |
+| `/smoke` | Generate smoke test plan — identify critical paths, organize P0/P1/P2 cases → dispatch smoke-case-agent |
+| `/test-gen [file]` | Generate tests for changed or specified files → dispatch smoke-case-agent + test-generator skill |
 | `/standards` | List project standards |
 
 ## Routing Protocol (Deterministic + Confirmation Gate)
@@ -187,6 +189,7 @@ Never guess how to split a complex task — always use the dispatcher.
 | **knowledge-sync-agent** | sonnet | post-build, stage exits, /sync — prevents doc rot, seeds knowledge/ on first run |
 | **state-updater-agent** | haiku | ALL state mutations — symlink, project.yml, task status, timeline append |
 | **skill-recommend-agent** | haiku | /guide, stage entry — match skills to current context, write recommendations |
+| **smoke-case-agent** | sonnet | /smoke, /test-gen — identifies critical paths, organizes smoke tests, generates test skeletons |
 | **marketplace-skill-agent** | haiku | skill discovery from prompts.chat marketplace |
 
 ## Quality Gates

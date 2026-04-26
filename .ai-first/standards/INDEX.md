@@ -22,3 +22,4 @@
 | STANDARD-004 | workflow | Code Review Process | stable |
 | STANDARD-005 | workflow | Knowledge Synchronization | stable |
 | STANDARD-006 | fullstack | Deterministic Agent Routing Protocol | stable |
+| STANDARD-007 | workflow | Test Quality and Coverage Standards | stable |

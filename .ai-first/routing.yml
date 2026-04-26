@@ -127,6 +127,32 @@ routes:
     exclusive: true  # Only this agent can mutate state
     stage_gate: [all]
 
+  testing:
+    keywords:
+      - test
+      - testing
+      - coverage
+      - unit test
+      - generate test
+      - test case
+      - mock
+    description: "Test generation and coverage improvement"
+    primary_agent: smoke-case-agent
+    post_skills: [test-generator]
+    stage_gate: [build, qa]
+
+  smoke-testing:
+    keywords:
+      - smoke
+      - critical path
+      - deployment check
+      - release gate
+      - core test
+      - essential test
+    description: "Smoke test case organization and critical path testing"
+    primary_agent: smoke-case-agent
+    stage_gate: [release, operate]
+
   guidance:
     keywords:
       - guide
@@ -168,3 +194,5 @@ slash_commands:
   /skills:     { agent: skill-recommend-agent }
   /health:     { agent: team-lead-agent }
   /standards:  { agent: team-lead-agent }
+  /smoke:      { agent: smoke-case-agent, output: "reports/smoke-cases-{date}.md" }
+  /test-gen:   { agent: smoke-case-agent, skill: test-generator, output: "reports/test-generation-{date}.md" }

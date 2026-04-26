@@ -4,6 +4,8 @@ import {
   createDispatchPlan,
   aggregateResults,
   defaultSplitConfig,
+  splitTask,
+  resolveAgentForSubtask,
 } from "./subagent-dispatcher.ts";
 
 describe("calculateComplexity", () => {
@@ -124,5 +126,173 @@ describe("defaultSplitConfig", () => {
     const config = defaultSplitConfig();
     expect(config.maxSubtasks).toBe(5);
     expect(config.preferParallel).toBe(true);
+  });
+});
+
+describe("splitTask", () => {
+  const baseTask = {
+    id: "t-split",
+    projectId: "p1",
+    title: "Full-stack feature",
+    description: "Add a feature across frontend and backend",
+    stage: "build",
+    mode: "implement",
+    domainIds: [],
+    status: "todo",
+    priority: "p1",
+    createdAt: "2026-01-01",
+    updatedAt: "2026-01-01",
+  } as any;
+
+  it("returns single subtask for simple single-domain task", () => {
+    const scope = {
+      id: "sc-1", projectId: "p1", taskId: "t-split", summary: "simple",
+      frontendPaths: ["src/Button.tsx"],
+      backendPaths: [],
+      sharedPaths: [],
+      docsPaths: [],
+      riskLevel: "low", parallelSafe: true, lockMode: "none",
+      createdAt: "", updatedAt: "",
+    } as any;
+
+    const subtasks = splitTask(baseTask, scope);
+    expect(subtasks).toHaveLength(1);
+    expect(subtasks[0].assignedTo).toBeDefined();
+  });
+
+  it("splits by domain for full-stack task", () => {
+    const scope = {
+      id: "sc-2", projectId: "p1", taskId: "t-split", summary: "fullstack",
+      frontendPaths: ["src/App.tsx"],
+      backendPaths: ["src/api/routes.ts"],
+      sharedPaths: [],
+      docsPaths: [],
+      riskLevel: "medium", parallelSafe: true, lockMode: "none",
+      createdAt: "", updatedAt: "",
+    } as any;
+
+    const subtasks = splitTask(baseTask, scope);
+    expect(subtasks.length).toBeGreaterThanOrEqual(2);
+    const titles = subtasks.map((s) => s.title);
+    expect(titles.some((t) => t.includes("frontend"))).toBe(true);
+    expect(titles.some((t) => t.includes("backend"))).toBe(true);
+  });
+
+  it("respects maxSubtasks config", () => {
+    const scope = {
+      id: "sc-3", projectId: "p1", taskId: "t-split", summary: "many domains",
+      frontendPaths: ["src/f1.tsx"],
+      backendPaths: ["src/b1.ts"],
+      sharedPaths: ["src/s1.ts"],
+      docsPaths: ["docs/d1.md"],
+      riskLevel: "low", parallelSafe: true, lockMode: "none",
+      createdAt: "", updatedAt: "",
+    } as any;
+
+    const config = { maxSubtasks: 2, targetGranularity: "module" as const, preferParallel: true };
+    const subtasks = splitTask(baseTask, scope, config);
+    expect(subtasks.length).toBeLessThanOrEqual(2);
+  });
+
+  it("splits by file groups for many files in single domain", () => {
+    const scope = {
+      id: "sc-4", projectId: "p1", taskId: "t-split", summary: "many files",
+      frontendPaths: [
+        "src/components/A.tsx", "src/components/B.tsx", "src/components/C.tsx",
+        "src/hooks/useX.ts", "src/hooks/useY.ts", "src/utils/format.ts",
+      ],
+      backendPaths: [],
+      sharedPaths: [],
+      docsPaths: [],
+      riskLevel: "medium", parallelSafe: true, lockMode: "none",
+      createdAt: "", updatedAt: "",
+    } as any;
+
+    const config = { maxSubtasks: 5, targetGranularity: "module" as const, preferParallel: false };
+    const subtasks = splitTask(baseTask, scope, config);
+
+    // With 6 files across 3 groups (components, hooks, utils) and preferParallel=false
+    // they get sequential dependencies
+    expect(subtasks.length).toBeGreaterThan(1);
+  });
+
+  it("assigns correct agent types by domain when mode is not in modeMap", () => {
+    // Use mode "configure" which is NOT in modeMap, so falls through to domain inference
+    const verifyTask = { ...baseTask, mode: "configure" as any };
+    const scope = {
+      id: "sc-5", projectId: "p1", taskId: "t-split", summary: "multi domain with docs",
+      frontendPaths: ["src/App.tsx"],
+      backendPaths: [],
+      sharedPaths: [],
+      docsPaths: ["README.md"],
+      riskLevel: "low", parallelSafe: true, lockMode: "none",
+      createdAt: "", updatedAt: "",
+    } as any;
+
+    const subtasks = splitTask(verifyTask, scope);
+    // hasMultipleDomains is true (frontend + docs), so domain split happens
+    const docsSub = subtasks.find((s) => s.title.includes("docs"));
+    expect(docsSub).toBeDefined();
+    // "docs" domain → inferAgentType("verify", "docs") → domain hint matches → "writer"
+    expect(docsSub!.assignedTo).toBe("writer");
+  });
+
+  it("mode-based mapping takes priority over domain inference", () => {
+    const scope = {
+      id: "sc-6", projectId: "p1", taskId: "t-split", summary: "multi domain with implement",
+      frontendPaths: ["src/App.tsx"],
+      backendPaths: [],
+      sharedPaths: [],
+      docsPaths: ["README.md"],
+      riskLevel: "low", parallelSafe: true, lockMode: "none",
+      createdAt: "", updatedAt: "",
+    } as any;
+
+    const subtasks = splitTask(baseTask, scope);
+    // hasMultipleDomains is true, so domain split happens
+    const docsSub = subtasks.find((s) => s.title.includes("docs"));
+    expect(docsSub).toBeDefined();
+    expect(docsSub!.assignedTo).toBe("executor"); // mode=implement wins over domain=docs
+  });
+});
+
+describe("resolveAgentForSubtask", () => {
+  it("resolves by subagentType string", () => {
+    const registry = {
+      bySubagentType: new Map([
+        ["executor", { id: "a1", name: "executor-agent", role: "builder" }],
+      ]),
+      byRole: new Map(),
+    } as any;
+
+    const subtask = { assignedTo: "executor" } as any;
+    const def = resolveAgentForSubtask(registry, subtask);
+    expect(def).toBeDefined();
+    expect(def!.id).toBe("a1");
+  });
+
+  it("falls back to role mapping", () => {
+    const registry = {
+      bySubagentType: new Map(),
+      byRole: new Map([
+        ["builder", { id: "a2", name: "builder-agent", role: "builder" }],
+      ]),
+    } as any;
+
+    const subtask = { assignedTo: "executor" } as any;
+    const def = resolveAgentForSubtask(registry, subtask);
+    expect(def).toBeDefined();
+    expect(def!.id).toBe("a2");
+  });
+
+  it("returns undefined when no match found", () => {
+    const registry = {
+      bySubagentType: new Map(),
+      byRole: new Map(),
+    } as any;
+
+    const subtask = { assignedTo: "executor" } as any;
+    const def = resolveAgentForSubtask(registry, subtask);
+    expect(def).toBeUndefined();
   });
 });
