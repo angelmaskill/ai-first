@@ -18,3 +18,7 @@
 |----|--------|-------|-----------|
 | STANDARD-001 | fullstack | API Contract Consistency | draft |
 | STANDARD-002 | fullstack | Agent Domain Boundaries | stable |
+| STANDARD-003 | security | Security Scanning Requirements | stable |
+| STANDARD-004 | workflow | Code Review Process | stable |
+| STANDARD-005 | workflow | Knowledge Synchronization | stable |
+| STANDARD-006 | fullstack | Deterministic Agent Routing Protocol | stable |

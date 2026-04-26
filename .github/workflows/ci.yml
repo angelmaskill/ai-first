@@ -1,0 +1,86 @@
+name: AI-First CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  typecheck:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+      - run: npx tsc --noEmit
+
+  test:
+    name: Tests (vitest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+      - run: npm test
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Secret detection
+        run: |
+          echo "=== Secret Detection ==="
+          FINDINGS=$(grep -rn "API_KEY\|SECRET\|TOKEN\|PASSWORD\|password\|secret\|private_key" \
+            --include="*.ts" --include="*.tsx" --include="*.js" \
+            --include="*.json" --include="*.yml" --include="*.yaml" \
+            . --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.ai-first \
+            | grep -v "import\|export\|process\.env\|\.d\.ts" || true)
+          if [ -n "$FINDINGS" ]; then
+            echo "WARNING: Potential secrets found:"
+            echo "$FINDINGS"
+            exit 1
+          fi
+          echo "No secrets detected — OK"
+      - name: Gitignore check
+        run: |
+          test -f .gitignore && grep -E "\.env$" .gitignore || (echo "FAIL: .gitignore missing .env"; exit 1)
+          echo ".gitignore check — OK"
+      - name: Dependency audit
+        run: npm audit --audit-level=high
+
+  bug-scan:
+    name: Bug Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Console statements check
+        run: |
+          CONSOLE_COUNT=$(grep -rn "console\.\(log\|debug\|info\|warn\|error\|trace\)" \
+            --include="*.ts" --include="*.tsx" --include="*.js" \
+            . --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.ai-first \
+            | grep -v "//.*console" | grep -v "/\*.*console" | wc -l)
+          echo "Console statements: $CONSOLE_COUNT"
+          # Allow up to 20 console statements (CLI tools need some)
+          if [ "$CONSOLE_COUNT" -gt 20 ]; then
+            echo "WARNING: High console statement count ($CONSOLE_COUNT)"
+            exit 1
+          fi
+      - name: Empty catch check
+        run: |
+          EMPTY_CATCH=$(grep -rn "catch\s*(\s*[^)]*\s*)\s*{\s*}" \
+            --include="*.ts" --include="*.tsx" . --exclude-dir=node_modules --exclude-dir=.git || true)
+          if [ -n "$EMPTY_CATCH" ]; then
+            echo "FAIL: Empty catch blocks found:"
+            echo "$EMPTY_CATCH"
+            exit 1
+          fi
+          echo "No empty catch blocks — OK"

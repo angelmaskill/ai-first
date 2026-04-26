@@ -58,12 +58,93 @@ Users have these shortcut commands. When invoked, follow the corresponding workf
 | `/task "<title>"` | Create structured task YAML with owner/reviewer/changeScope |
 | `/wiki` | Build or rebuild the project wiki from knowledge and standards |
 | `/skills` | List registered skills |
+| `/health` | Project health dashboard — test coverage, review status, knowledge sync, risk summary |
 | `/standards` | List project standards |
+
+## Routing Protocol (Deterministic + Confirmation Gate)
+
+Agent dispatch MUST follow this protocol. This is the solution to the
+"deterministic routing vs LLM semantic matching" problem.
+
+### Authoritative Routing Source
+
+`.ai-first/routing.yml` is the single source of truth for which agent handles what.
+Agent `.md` descriptions are for agent internal context ONLY — never for dispatch
+decisions. Always read `routing.yml` before dispatching any agent.
+
+### Dispatch Decision Tree
+
+```
+User request received
+  │
+  ├─ Is it a slash command? (/review, /scan, etc.)
+  │    YES → Look up routing.yml → slash_commands → dispatch directly ✅
+  │    NO  → Continue to intent classification ▼
+  │
+  ├─ Classify intent → extract keywords → match against routing.yml routes
+  │    │
+  │    ├─ Single match, confidence >= 0.85
+  │    │    → Confirm: "Dispatching {agent} for {intent}. Proceed? (y/n)"
+  │    │    → User confirms → dispatch ✅
+  │    │
+  │    ├─ Single match, confidence < 0.85
+  │    │    → Present: "I read this as {intent}. Options: [A] {agent1}, [B] {agent2}"
+  │    │    → User selects → dispatch ✅
+  │    │
+  │    └─ Multiple matches or ambiguous
+  │         → Present top 2-3 candidates with descriptions
+  │         → User selects → dispatch ✅
+  │
+  └─ Complexity check (for `implementing` intent)
+       complexity > 0.6 → run subagent-dispatcher.ts for deterministic split plan
+```
+
+### Intent Classification Rules
+
+1. Extract action verbs and domain nouns from user request
+2. Match against `keywords` arrays in routing.yml routes
+3. Score each route by keyword match count + position weight
+4. Select highest-scoring route as primary intent
+5. Confidence = (primary score) / (primary score + runner-up score)
+
+### Confirmation Gate
+
+The confirmation step is MANDATORY for all free-text requests. It is the
+mechanism that eliminates the last probability point in the routing chain.
+
+- **Slash commands**: NO confirmation needed (deterministic by definition)
+- **Free-text, confidence >= 0.85**: Brief confirmation (one line)
+- **Free-text, confidence < 0.85**: Show candidates, require user selection
+- **Free-text, ambiguous**: Always show candidates
+
+### Complexity-Based Splitting
+
+When the `implementing` intent is confirmed AND complexity > threshold (0.6):
+
+```bash
+npx tsx src/core/harness/subagent-dispatcher.ts .ai-first/tasks/{task-file}.yml
+```
+
+This produces a deterministic DispatchPlan with:
+- Topological sort of dependent subtasks
+- Parallel execution groups
+- Estimated duration
+
+Never guess how to split a complex task — always use the dispatcher.
+
+### Agent Selection Rules
+
+- `primary_agent`: dispatched for this intent
+- `parallel_agents`: dispatched simultaneously (independent, no shared state)
+- `fallback_agent`: used if primary is unavailable
+- `chain`: agents dispatched sequentially after primary completes
+- `exclusive: true`: ONLY this agent can perform this intent — never substitute
 
 ## Project State Conventions
 
 ```
 .ai-first/
+  routing.yml                       # authoritative agent routing table
   project.yml                       # project identity, stage, domains
   state/
     current -> stage-01-idea/        # symlink to current stage
@@ -179,6 +260,8 @@ Before advancing to the next stage:
 
 ## What You MUST Do
 
+- Classify intent BEFORE routing — read routing.yml, match keywords, confirm with user
+- Use slash commands for deterministic routing; use confirmation gate for free-text
 - Coordinate agents — never do their work yourself
 - Track stage progression through `.ai-first/state/current`
 - Enforce quality gates before stage transitions
@@ -196,4 +279,4 @@ Before advancing to the next stage:
 - Make security judgments (delegate to security-reviewer-agent)
 - Skip the knowledge sync check — it's the safety fuse
 - Skip gate checks before advancing stages
-- Modify `.ai-first/` system files directly unless orchestrating state transitions
+- Dispatch agents by interpreting their `.md` descriptions — always use routing.yml as the lookup table

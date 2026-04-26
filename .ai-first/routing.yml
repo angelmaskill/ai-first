@@ -1,0 +1,170 @@
+# Deterministic Routing Manifest
+# Maps user intent categories to agents. LLM classifies intent → lookup table dispatches.
+# This is the authoritative routing source. Agent descriptions in .claude/agents/*.md
+# are for agent internal context only — NOT for dispatch decisions.
+
+version: "1.0"
+last_updated: 2026-04-26
+
+# Confidence threshold for auto-dispatch.
+# Above this: auto-dispatch with brief confirmation ("Dispatching X, proceed?")
+# Below this: show top N candidates, let user pick.
+auto_dispatch_threshold: 0.85
+
+routes:
+  planning:
+    keywords:
+      - plan
+      - design
+      - scope
+      - spec
+      - requirement
+      - architecture
+      - milestone
+      - roadmap
+      - decide
+      - decision
+    description: "Planning, design, and requirements work"
+    primary_agent: planner-agent
+    fallback_agent: architect-agent
+    stage_gate: [discovery, spec, architecture, evolve]
+
+  implementing:
+    keywords:
+      - implement
+      - build
+      - code
+      - fix
+      - refactor
+      - scaffold
+      - create
+      - add
+      - write
+      - change
+      - update
+      - modify
+      - remove
+      - delete
+    description: "Code implementation and changes"
+    primary_agent: builder-agent
+    complexity:
+      threshold: 0.6
+      action: "split_via_dispatcher"
+      tool: "npx tsx src/core/harness/subagent-dispatcher.ts"
+    stage_gate: [scaffold, build]
+
+  reviewing:
+    keywords:
+      - review
+      - quality
+      - gate
+      - check
+      - verify
+      - validate
+      - inspect
+    description: "Code and quality review"
+    primary_agent: reviewer-agent
+    parallel_agents:
+      - security-reviewer-agent
+    stage_gate: [qa, release]
+
+  scanning:
+    keywords:
+      - scan
+      - analyze
+      - assess
+      - audit
+      - inspect
+      - detect
+    description: "Project scanning and analysis"
+    primary_agent: repo-scanner-agent
+    post_actions:
+      - stage-assessor-agent
+      - team-lead-agent
+    stage_gate: [all]
+
+  security:
+    keywords:
+      - security
+      - vulnerability
+      - secret
+      - auth
+      - permission
+      - threat
+      - exploit
+      - credential
+      - token
+      - OWASP
+    description: "Security analysis and review"
+    primary_agent: security-reviewer-agent
+    stage_gate: [build, qa, release, operate]
+
+  knowledge-sync:
+    keywords:
+      - sync
+      - knowledge
+      - wiki
+      - docs
+      - document
+      - stale
+      - rot
+    description: "Knowledge synchronization and documentation"
+    primary_agent: knowledge-sync-agent
+    stage_gate: [all]
+
+  state-mutation:
+    keywords:
+      - advance
+      - transition
+      - stage
+      - state
+      - update-status
+      - timeline
+      - lock
+      - unlock
+    description: "Project state changes"
+    primary_agent: state-updater-agent
+    exclusive: true  # Only this agent can mutate state
+    stage_gate: [all]
+
+  guidance:
+    keywords:
+      - guide
+      - health
+      - status
+      - dashboard
+      - recommend
+      - suggest
+      - next
+    description: "Health checks and guidance"
+    primary_agent: team-lead-agent
+    stage_gate: [all]
+
+  release:
+    keywords:
+      - release
+      - deploy
+      - ship
+      - publish
+      - version
+      - changelog
+    description: "Release preparation and execution"
+    primary_agent: release-agent
+    stage_gate: [release]
+
+# Slash commands bypass routing — these are deterministic by definition
+slash_commands:
+  /init:       { agent: intake-agent, stage: idea }
+  /adopt:      { agent: repo-scanner-agent, stage: build, chain: [stage-assessor-agent, knowledge-sync-agent, skill-recommend-agent] }
+  /guide:      { agent: team-lead-agent }
+  /scan:       { agent: repo-scanner-agent, chain: [stage-assessor-agent] }
+  /decide:     { agent: planner-agent, output: "knowledge/KNOW-XXX.md" }
+  /review:     { agent: reviewer-agent, parallel: [security-reviewer-agent] }
+  /sync:       { agent: knowledge-sync-agent }
+  /advance:    { agent: state-updater-agent }
+  /complete:   { agent: builder-agent, chain: [knowledge-sync-agent, reviewer-agent, security-reviewer-agent, state-updater-agent] }
+  /task:       { agent: planner-agent, output: "tasks/task-{date}-{id}.yml" }
+  /wiki:       { agent: knowledge-sync-agent }
+  /skills:     { agent: skill-recommend-agent }
+  /health:     { agent: team-lead-agent }
+  /standards:  { agent: team-lead-agent }
