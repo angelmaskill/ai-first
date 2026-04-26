@@ -1,0 +1,22 @@
+id: task-20260426-e2e
+title: "Add .env to .gitignore for security best practice"
+status: done
+priority: p1
+owner: builder-agent
+reviewer: reviewer-agent
+mode: generate
+createdAt: "2026-04-26T23:00:00Z"
+description: >
+  The .gitignore file is missing .env pattern. This is a basic security
+  practice to prevent accidental credential commits. Add .env to .gitignore.
+changeScope:
+  description: "Add .env to .gitignore file"
+  paths:
+    - .gitignore
+  domains:
+    - domain-config
+  parallelSafe: true
+estimatedComplexity: 0.05
+reviewChecklist:
+  - gitignore covers .env files
+  - no other changes to gitignore

@@ -1,0 +1,27 @@
+# Dispatch Plan: "Implement Snake game core modules"
+# Task: task-20260426-snake01
+# Complexity: 0%
+# Subtasks: 1
+# Parallel groups: 1
+# Estimated duration: 5 min
+
+plan:
+  taskId: task-20260426-snake01
+  subtaskCount: 1
+  parallelGroups: 1
+  estimatedDurationSeconds: 300
+
+executionOrder:
+  - group: 1
+    parallel:
+      - SUB_6889lo
+
+subtasks:
+  - id: SUB_6889lo
+    title: "Implement Snake game core modules"
+    assignedTo: executor
+    status: pending
+    dependencies: []
+    inputs:
+      parentTask: {"id":"task-20260426-snake01","projectId":"proj-snake01","title":"\"Implement Snake game core modules\"","description":">","stage":"build","mode":"execute","domainIds":[],"status":"in_progress","priority":"p0","createdAt":"\"2026-04-26T14:30:00Z\"","updatedAt":"\"2026-04-26T14:30:00Z\""}
+      scope: {"id":"scope-task-20260426-snake01","summary":"\"Implement Snake game core modules\"","frontendPaths":[],"backendPaths":[],"sharedPaths":[],"docsPaths":[],"riskLevel":"medium","parallelSafe":true}

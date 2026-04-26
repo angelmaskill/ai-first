@@ -1,0 +1,32 @@
+id: proj-h7k3m
+name: AI-First
+slug: ai-first
+description: >-
+  An intelligent multi-agent orchestration layer for Claude Code that guides
+  software projects through a structured 10-stage lifecycle from idea to evolve.
+mode: brownfield
+teamMode: fullstack
+ownershipModel: mixed
+rootPath: /Users/angelma/project/AI/ai-first
+codeDomains:
+  - id: domain-frontend
+    name: Frontend
+    kind: frontend
+    paths: []
+  - id: domain-backend
+    name: Backend
+    kind: backend
+    paths: [src/]
+  - id: domain-docs
+    name: Documentation
+    kind: docs
+    paths: [docs/]
+  - id: domain-config
+    name: Configuration
+    kind: infra
+    paths: [.claude/, .ai-first/]
+currentStage: architecture
+status: active
+createdAt: "2026-04-26T00:00:00Z"
+updatedAt: "2026-04-26T00:00:00Z"
+tags: [ai, orchestration, multi-agent, claude-code, lifecycle]

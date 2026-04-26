@@ -1,0 +1,41 @@
+id: guidance-20260426
+projectId: proj-h7k3m
+generatedAt: "2026-04-26T22:50:00Z"
+projectMode: brownfield
+currentStage: build
+confidence: 0.85
+summary: "AI-first project has 14 agents, 13 commands, 6 skills, and complete .ai-first/ skeleton. Ready to advance to QA for formal gate review. Critical gap: zero test coverage."
+whyNow:
+  - "Build stage work is stable — all 14 agents have MUST NOT domain boundaries, rules lock is active, knowledge base has 2 entries with refactoring changelog"
+  - "No active tasks blocking progression — all implementation work from the TypeScript→Markdown refactoring is complete"
+  - "QA stage will surface gaps (test coverage, architecture docs, API docs) through formal gate review before they compound"
+primaryAction:
+  id: act-20260426-1
+  title: "Advance to QA and run full 9-gate review"
+  description: "Execute /advance to transition from build to qa, then run /review against the complete codebase to establish baseline quality metrics"
+  actionType: review
+  priority: p0
+  recommendedOwner: reviewer-agent
+  requiresConfirmation: false
+alternativeActions:
+  - id: act-20260426-2
+    title: "Add test infrastructure before QA"
+    description: "Install vitest, create test config, and add example tests to raise test completeness from 0/100 before entering QA"
+    actionType: implement
+    priority: p1
+    recommendedOwner: builder-agent
+    requiresConfirmation: false
+  - id: act-20260426-3
+    title: "Generate backfill artifacts (architecture.md, requirements.md)"
+    description: "Run architect-agent and planner-agent to create missing stage artifacts for documentation completeness"
+    actionType: generate
+    priority: p2
+    recommendedOwner: architect-agent
+    requiresConfirmation: false
+risks:
+  - "Zero test coverage: all quality gates rely on manual review, no automated regression protection"
+  - "Single-platform lock-in: project uses Claude Code native dispatch, no multi-platform adapter active"
+  - "No CI/CD: all quality gates run manually, no automated pipeline"
+  - "Missing stage artifacts: no goals.md, requirements.md, or architecture.md — limits onboarding and architectural clarity"
+suggestedLeadAgent: reviewer-agent
+reviewStatus: not_started

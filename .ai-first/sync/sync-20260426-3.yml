@@ -1,0 +1,14 @@
+id: sync-20260426-3
+projectId: proj-h7k3m
+triggerType: new_pattern
+relatedTaskId: null
+relatedPaths:
+  - .ai-first/locks/rules.lock
+  - .ai-first/logs/timeline.md
+  - .claude/agents/state-updater-agent.md
+impactedKnowledgeIds: []
+impactedStandardIds: []
+status: dismissed
+summary: "Three novel framework patterns (bible rules locking, append-only timeline, dedicated state-updater agent) are active but not documented as knowledge items. Consider creating KNOW-003-novel-patterns.md."
+createdAt: "2026-04-26T22:55:00Z"
+updatedAt: "2026-04-26T22:55:00Z"

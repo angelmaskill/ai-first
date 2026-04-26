@@ -1,0 +1,14 @@
+id: sync-20260426-2
+projectId: proj-h7k3m
+triggerType: code_change
+relatedTaskId: null
+relatedPaths:
+  - .ai-first/standards/
+  - .claude/agents/
+impactedKnowledgeIds: []
+impactedStandardIds:
+  - STANDARD-001
+status: dismissed
+summary: "Only 1 standard (API consistency) defined, but 14 agents have extensive MUST/MUST NOT conventions. Consider extracting cross-agent conventions into additional standards."
+createdAt: "2026-04-26T22:55:00Z"
+updatedAt: "2026-04-26T22:55:00Z"

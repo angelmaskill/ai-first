@@ -1,0 +1,42 @@
+{
+  "allowedTools": [
+    "Read", "Glob", "Grep", "Write", "Edit", "LSP", "TodoWrite", "AskUserQuestion", "Agent", "Skill", "Bash",
+    "mcp__filesystem__*",
+    "mcp__plugin_oh-my-claudecode_t__*"
+  ],
+  "allowedCommands": {
+    "*": { "policy": "ask", "description": "Default: ask for unknown commands" },
+
+    "git*": { "policy": "allow", "description": "Git read-only" },
+    "git push*": { "policy": "ask", "description": "Push to remote" },
+    "git reset*": { "policy": "ask", "description": "Reset git state" },
+    "git clean*": { "policy": "ask", "description": "Clean untracked files" },
+
+    "ls*": { "policy": "allow", "description": "List directories" },
+    "cat*": { "policy": "allow", "description": "Read file content" },
+    "head*": { "policy": "allow", "description": "Read file head" },
+    "tail*": { "policy": "allow", "description": "Read file tail" },
+    "find*": { "policy": "allow", "description": "Find files" },
+    "grep*": { "policy": "allow", "description": "Search content" },
+    "echo*": { "policy": "allow", "description": "Echo text" },
+    "pwd": { "policy": "allow", "description": "Print working directory" },
+    "which*": { "policy": "allow", "description": "Find command path" },
+
+    "npm*": { "policy": "allow", "description": "NPM commands" },
+    "npx*": { "policy": "allow", "description": "NPX commands" },
+
+    "node*": { "policy": "allow", "description": "Node.js commands" },
+    "mkdir*": { "policy": "allow", "description": "Create directories" },
+    "cp*": { "policy": "allow", "description": "Copy files" },
+    "mv*": { "policy": "allow", "description": "Move files" },
+    "ln*": { "policy": "allow", "description": "Create symlinks" },
+
+    "rm -rf": { "policy": "ask", "description": "Destructive remove" },
+    "rm -r": { "policy": "ask", "description": "Recursive remove" }
+  },
+  "permissions": {
+    "autoAllowRead": true,
+    "autoAllowWrite": true,
+    "autoAllowSafeCommands": true
+  }
+}
