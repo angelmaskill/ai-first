@@ -7,7 +7,10 @@ import { RiskList } from "../components/RiskList";
 import { Timeline } from "../components/Timeline";
 import { SyncStatus } from "../components/SyncStatus";
 import { ActionCard } from "../components/ActionCard";
+import { HealthTrendChart } from "../components/HealthTrendChart";
+import { RiskHeatmap } from "../components/RiskHeatmap";
 import { LanguageSwitcher } from "../components/LanguageSwitcher";
+import { ThemeSwitcher } from "../components/ThemeSwitcher";
 
 interface DashboardProps {
   data: ProjectData;
@@ -52,7 +55,7 @@ export function Dashboard({ data }: DashboardProps) {
           <p
             style={{
               fontSize: "1.0625rem",
-              color: "var(--color-warm-gray)",
+              color: "var(--color-text-secondary)",
               maxWidth: "42ch",
               lineHeight: 1.55,
             }}
@@ -71,8 +74,8 @@ export function Dashboard({ data }: DashboardProps) {
               textTransform: "uppercase",
               padding: "6px 16px",
               borderRadius: 100,
-              background: "var(--color-indigo)",
-              color: "var(--color-cream)",
+              background: "var(--color-primary)",
+              color: "var(--color-bg)",
             }}
           >
             {stageLabels[data.currentStage] ?? data.stageLabel}
@@ -87,11 +90,12 @@ export function Dashboard({ data }: DashboardProps) {
               padding: "6px 16px",
               borderRadius: 100,
               background: "var(--color-sand)",
-              color: "var(--color-warm-gray)",
+              color: "var(--color-text-secondary)",
             }}
           >
             {data.mode}
           </span>
+          <ThemeSwitcher />
           <LanguageSwitcher />
         </div>
       </header>
@@ -127,6 +131,58 @@ export function Dashboard({ data }: DashboardProps) {
           ))}
         </div>
       </section>
+
+      {/* ── Charts Row ── */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 420px), 1fr))",
+          gap: "clamp(2rem, 3vw, 3rem)",
+          marginBottom: "clamp(3rem, 5vw, 5rem)",
+        }}
+      >
+        <section>
+          <h2
+            style={{
+              marginBottom: "clamp(1rem, 1.5vw, 1.5rem)",
+              fontSize: "clamp(1.25rem, 1.8vw, 1.5rem)",
+            }}
+          >
+            {t.dashboard.healthTrend}
+          </h2>
+          <div
+            style={{
+              background: "var(--color-surface)",
+              border: "1px solid var(--color-border-light)",
+              borderRadius: "var(--radius-lg)",
+              padding: "clamp(1rem, 1.5vw, 1.5rem)",
+            }}
+          >
+            <HealthTrendChart data={data.healthTrend} delay={300} />
+          </div>
+        </section>
+
+        <section>
+          <h2
+            style={{
+              marginBottom: "clamp(1rem, 1.5vw, 1.5rem)",
+              fontSize: "clamp(1.25rem, 1.8vw, 1.5rem)",
+            }}
+          >
+            {t.dashboard.riskHeatmap}
+          </h2>
+          <div
+            style={{
+              background: "var(--color-surface)",
+              border: "1px solid var(--color-border-light)",
+              borderRadius: "var(--radius-lg)",
+              padding: "clamp(1rem, 1.5vw, 1.5rem)",
+            }}
+          >
+            <RiskHeatmap risks={data.risks} delay={400} />
+          </div>
+        </section>
+      </div>
 
       {/* ── Suggested Actions ── */}
       {data.suggestedActions.length > 0 && (
@@ -190,8 +246,8 @@ export function Dashboard({ data }: DashboardProps) {
       {/* ── Timeline ── */}
       <section
         style={{
-          background: "var(--color-warm-white)",
-          border: "1px solid oklch(0.89 0.015 84 / 50%)",
+          background: "var(--color-surface)",
+          border: "1px solid var(--color-border-light)",
           borderRadius: "var(--radius-lg)",
           padding: "clamp(1.5rem, 2.5vw, 2.5rem)",
         }}
@@ -212,7 +268,7 @@ export function Dashboard({ data }: DashboardProps) {
         style={{
           marginTop: "clamp(3rem, 5vw, 5rem)",
           paddingTop: "2rem",
-          borderTop: "1px solid oklch(0.89 0.015 84 / 40%)",
+          borderTop: "1px solid var(--color-border-light)",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
@@ -223,7 +279,7 @@ export function Dashboard({ data }: DashboardProps) {
         <span
           style={{
             fontSize: "0.75rem",
-            color: "var(--color-warm-gray)",
+            color: "var(--color-text-secondary)",
             fontFamily: "var(--font-mono)",
           }}
         >

@@ -34,6 +34,11 @@ export interface TimelineEntry {
   message: string;
 }
 
+export interface TrendPoint {
+  label: string;
+  value: number;
+}
+
 export interface ProjectData {
   name: string;
   currentStage: string;
@@ -45,6 +50,7 @@ export interface ProjectData {
   suggestedActions: SuggestedAction[];
   syncEvents: SyncEvent[];
   recentTimeline: TimelineEntry[];
+  healthTrend: TrendPoint[];
 }
 
 export function useProjectData(): { data: ProjectData | null; loading: boolean } {

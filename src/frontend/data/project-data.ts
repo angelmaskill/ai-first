@@ -98,6 +98,15 @@ const data: ProjectData = {
       "createdAt": "2026-04-26T22:55:00Z"
     }
   ],
+  "healthTrend": [
+    { "label": "04/21", "value": 45 },
+    { "label": "04/22", "value": 52 },
+    { "label": "04/23", "value": 68 },
+    { "label": "04/24", "value": 74 },
+    { "label": "04/25", "value": 82 },
+    { "label": "04/26", "value": 91 },
+    { "label": "04/27", "value": 94 }
+  ],
   "recentTimeline": [
     {
       "timestamp": "2026-04-26T08:52:00Z",

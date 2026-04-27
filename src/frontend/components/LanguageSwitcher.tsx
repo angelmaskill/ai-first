@@ -16,17 +16,17 @@ export function LanguageSwitcher() {
         padding: "6px 16px",
         borderRadius: 100,
         border: "1px solid var(--color-sand)",
-        background: "var(--color-warm-white)",
+        background: "var(--color-surface)",
         color: "var(--color-indigo)",
         cursor: "pointer",
         transition: "background 200ms ease, border-color 200ms ease",
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.background = "var(--color-cream)";
+        e.currentTarget.style.background = "var(--color-bg)";
         e.currentTarget.style.borderColor = "var(--color-indigo)";
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.background = "var(--color-warm-white)";
+        e.currentTarget.style.background = "var(--color-surface)";
         e.currentTarget.style.borderColor = "var(--color-sand)";
       }}
     >

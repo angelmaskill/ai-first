@@ -7,6 +7,8 @@ export interface Translations {
     knowledgeSync: string;
     recentActivity: string;
     suggestedActions: string;
+    healthTrend: string;
+    riskHeatmap: string;
     footer: { version: string; generated: string };
   };
   action: {
@@ -39,6 +41,8 @@ const zh: Translations = {
     knowledgeSync: "知识同步",
     recentActivity: "最近活动",
     suggestedActions: "建议操作",
+    healthTrend: "健康趋势",
+    riskHeatmap: "风险热力图",
     footer: {
       version: "AI-First v0.1.0",
       generated: "由 .ai-first/ 控制层生成",
@@ -85,6 +89,8 @@ const en: Translations = {
     knowledgeSync: "Knowledge Sync",
     recentActivity: "Recent Activity",
     suggestedActions: "Suggested Actions",
+    healthTrend: "Health Trend",
+    riskHeatmap: "Risk Heatmap",
     footer: {
       version: "AI-First v0.1.0",
       generated: "Generated from .ai-first/ control layer",

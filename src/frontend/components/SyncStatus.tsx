@@ -12,7 +12,7 @@ export function SyncStatus({ events }: SyncStatusProps) {
     confirmed: { label: t.sync.resolved, color: "var(--color-sage)", bg: "var(--color-sage-pale)" },
     suggested: { label: t.sync.open, color: "var(--color-amber)", bg: "var(--color-amber-pale)" },
     pending: { label: t.sync.pending, color: "var(--color-sky)", bg: "var(--color-sky-pale)" },
-    dismissed: { label: t.sync.dismissed, color: "var(--color-warm-gray)", bg: "var(--color-sand)" },
+    dismissed: { label: t.sync.dismissed, color: "var(--color-text-secondary)", bg: "var(--color-sand)" },
   };
 
   const confirmed = events.filter((e) => e.status === "confirmed").length;

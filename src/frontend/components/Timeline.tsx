@@ -58,7 +58,7 @@ export function Timeline({ entries }: TimelineProps) {
       />
 
       {displayEntries.map((entry, i) => {
-        const tagColor = TAG_COLORS[entry.tag] ?? "var(--color-warm-gray)";
+        const tagColor = TAG_COLORS[entry.tag] ?? "var(--color-text-secondary)";
         return (
           <div
             key={`${entry.timestamp}-${i}`}
@@ -78,7 +78,7 @@ export function Timeline({ entries }: TimelineProps) {
                 height: 8,
                 borderRadius: "50%",
                 background: tagColor,
-                border: "2px solid var(--color-cream)",
+                border: "2px solid var(--color-bg)",
               }}
             />
 
@@ -105,7 +105,7 @@ export function Timeline({ entries }: TimelineProps) {
               <span
                 style={{
                   fontSize: "0.6875rem",
-                  color: "var(--color-warm-gray)",
+                  color: "var(--color-text-secondary)",
                   fontFamily: "var(--font-mono)",
                 }}
               >

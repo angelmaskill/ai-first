@@ -37,7 +37,7 @@ export function StageIndicator({ currentStage }: StageIndicatorProps) {
             fontWeight: 600,
             letterSpacing: "0.12em",
             textTransform: "uppercase",
-            color: "var(--color-warm-gray)",
+            color: "var(--color-text-secondary)",
           }}
         >
           {t.stage.label}
@@ -46,12 +46,13 @@ export function StageIndicator({ currentStage }: StageIndicatorProps) {
           style={{
             fontFamily: "var(--font-display)",
             fontSize: "clamp(1.5rem, 2.2vw, 1.875rem)",
-            color: "var(--color-indigo-deep)",
+            color: "var(--color-primary-deep)",
             fontWeight: 700,
+            animation: "stageNumberIn 500ms 300ms both cubic-bezier(0.16, 1, 0.3, 1)",
           }}
         >
           {currentIndex + 1}
-          <span style={{ color: "var(--color-warm-gray)", fontWeight: 400 }}>
+          <span style={{ color: "var(--color-text-secondary)", fontWeight: 400 }}>
             {t.stage.ofTotal}
           </span>
         </span>
@@ -66,38 +67,49 @@ export function StageIndicator({ currentStage }: StageIndicatorProps) {
           borderRadius: 3,
           overflow: "hidden",
           background: "var(--color-sand)",
+          transition: "background var(--transition-theme)",
         }}
       >
-        {STAGE_ORDER.map((stage, i) => (
-          <div
-            key={stage}
-            title={stageLabels[stage]}
-            style={{
-              flex: 1,
-              background:
-                i < currentIndex
+        {STAGE_ORDER.map((stage, i) => {
+          const isCompleted = i < currentIndex;
+          const isCurrent = i === currentIndex;
+
+          return (
+            <div
+              key={stage}
+              title={stageLabels[stage]}
+              style={{
+                flex: 1,
+                background: isCompleted
                   ? "var(--color-sage)"
-                  : i === currentIndex
+                  : isCurrent
                     ? "var(--color-indigo)"
                     : "transparent",
-              borderRadius: i === 0 ? "3px 0 0 3px" : i === 9 ? "0 3px 3px 0" : 0,
-              transition: "background 400ms ease",
-              position: "relative",
-            }}
-          >
-            {i === currentIndex && (
-              <div
-                style={{
-                  position: "absolute",
-                  inset: -2,
-                  borderRadius: 5,
-                  border: "2px solid var(--color-indigo)",
-                  opacity: 0.25,
-                }}
-              />
-            )}
-          </div>
-        ))}
+                borderRadius: i === 0 ? "3px 0 0 3px" : i === 9 ? "0 3px 3px 0" : 0,
+                transition: "background 400ms ease",
+                position: "relative",
+                transformOrigin: "left center",
+                animation: isCompleted
+                  ? `stageFill 400ms ${250 + i * 60}ms both cubic-bezier(0.16, 1, 0.3, 1)`
+                  : isCurrent
+                    ? `stageFill 400ms ${250 + i * 60}ms both cubic-bezier(0.16, 1, 0.3, 1)`
+                    : "none",
+              }}
+            >
+              {isCurrent && (
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: -2,
+                    borderRadius: 5,
+                    border: "2px solid var(--color-indigo)",
+                    animation: "stagePulse 2200ms 800ms both ease-in-out infinite",
+                  }}
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <div
@@ -111,10 +123,10 @@ export function StageIndicator({ currentStage }: StageIndicatorProps) {
         <span style={{ fontSize: "0.6875rem", color: "var(--color-sage)", fontWeight: 500 }}>
           {stageLabels.idea}
         </span>
-        <span style={{ fontSize: "0.6875rem", color: "var(--color-warm-gray)", fontWeight: 500 }}>
+        <span style={{ fontSize: "0.6875rem", color: "var(--color-text-secondary)", fontWeight: 500 }}>
           {stageLabels.build}
         </span>
-        <span style={{ fontSize: "0.6875rem", color: "var(--color-warm-gray)", fontWeight: 500 }}>
+        <span style={{ fontSize: "0.6875rem", color: "var(--color-text-secondary)", fontWeight: 500 }}>
           {stageLabels.evolve}
         </span>
       </div>

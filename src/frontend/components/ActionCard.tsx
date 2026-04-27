@@ -58,14 +58,14 @@ export function ActionCard({ action, delay }: ActionCardProps) {
             fontWeight: 500,
             letterSpacing: "0.06em",
             textTransform: "uppercase",
-            color: "var(--color-warm-gray)",
+            color: "var(--color-text-secondary)",
           }}
         >
           {typeLabel}
         </span>
       </div>
 
-      <h3 style={{ fontSize: "0.9375rem", fontWeight: 600, color: "var(--color-charcoal)", lineHeight: 1.35 }}>
+      <h3 style={{ fontSize: "0.9375rem", fontWeight: 600, color: "var(--color-text)", lineHeight: 1.35 }}>
         {action.title}
       </h3>
 

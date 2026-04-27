@@ -56,10 +56,11 @@ describe("ClaudeCodeAdapter", () => {
       expect(adapter.supportedStages).toContain("evolve");
     });
 
-    it("supports all 8 agent roles", () => {
-      expect(adapter.supportedRoles).toHaveLength(8);
+    it("supports all 15 agent roles", () => {
+      expect(adapter.supportedRoles).toHaveLength(15);
       expect(adapter.supportedRoles).toContain("builder");
       expect(adapter.supportedRoles).toContain("security_reviewer");
+      expect(adapter.supportedRoles).toContain("smoke_case");
     });
   });
 
@@ -125,7 +126,7 @@ describe("ClaudeCodeAdapter", () => {
       const data = resp.payload.data as any;
       expect(data.toolName).toBe("Claude Code");
       expect(data.supportedStages).toHaveLength(10);
-      expect(data.supportedRoles).toHaveLength(8);
+      expect(data.supportedRoles).toHaveLength(15);
     });
 
     it("passes through unknown resources with params", async () => {

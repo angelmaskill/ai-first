@@ -291,6 +291,7 @@ export type ToolCapabilityProfile = {
 };
 
 export type AgentRole =
+  // Lifecycle agents
   | "intake"
   | "planner"
   | "architect"
@@ -298,7 +299,16 @@ export type AgentRole =
   | "reviewer"
   | "security_reviewer"
   | "release"
-  | "team_lead";
+  | "team_lead"
+  // Pipeline agents
+  | "repo_scanner"
+  | "stage_assessor"
+  | "knowledge_sync"
+  | "state_updater"
+  // Infrastructure agents
+  | "skill_recommend"
+  | "smoke_case"
+  | "marketplace_skill";
 
 export type SubagentType =
   | "executor"

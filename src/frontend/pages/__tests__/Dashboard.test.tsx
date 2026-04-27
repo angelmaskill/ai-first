@@ -35,6 +35,11 @@ const mockData: ProjectData = {
   recentTimeline: [
     { timestamp: "2026-04-27T10:00:00Z", tag: "BUILD", message: "Frontend dashboard built." },
   ],
+  healthTrend: [
+    { label: "Mon", value: 60 },
+    { label: "Tue", value: 75 },
+    { label: "Wed", value: 90 },
+  ],
 };
 
 describe("Dashboard", () => {
@@ -73,7 +78,8 @@ describe("Dashboard", () => {
 
   it("renders risk items", () => {
     renderWithProvider(mockData);
-    expect(screen.getByText("Token expiry")).toBeInTheDocument();
+    const matches = screen.getAllByText("Token expiry");
+    expect(matches.length).toBeGreaterThanOrEqual(1);
   });
 
   it("renders sync events", () => {
@@ -97,6 +103,17 @@ describe("Dashboard", () => {
     renderWithProvider(mockData);
     expect(screen.getByText("AI-First v0.1.0")).toBeInTheDocument();
     expect(screen.getByText("由 .ai-first/ 控制层生成")).toBeInTheDocument();
+  });
+
+  it("renders health trend and risk heatmap sections", () => {
+    renderWithProvider(mockData);
+    expect(screen.getByText("健康趋势")).toBeInTheDocument();
+    expect(screen.getByText("风险热力图")).toBeInTheDocument();
+  });
+
+  it("renders trend chart SVG", () => {
+    const { container } = renderWithProvider(mockData);
+    expect(container.querySelector("svg[aria-label='Health trend chart']")).toBeInTheDocument();
   });
 
   it("hides suggested actions section when empty", () => {

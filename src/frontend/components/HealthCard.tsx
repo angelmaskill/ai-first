@@ -36,7 +36,7 @@ export function HealthCard({ signal, delay, size = "medium" }: HealthCardProps) 
           style={{
             fontSize: size === "large" ? "1.25rem" : "1rem",
             fontWeight: 600,
-            color: "var(--color-charcoal)",
+            color: "var(--color-text)",
           }}
         >
           {signal.name}
@@ -73,7 +73,7 @@ export function HealthCard({ signal, delay, size = "medium" }: HealthCardProps) 
         style={{
           fontSize: "0.9375rem",
           lineHeight: 1.55,
-          color: "var(--color-warm-gray)",
+          color: "var(--color-text-secondary)",
         }}
       >
         {signal.summary}
