@@ -55,6 +55,42 @@ export interface SplitConfig {
 }
 
 /**
+ * Retry strategy for failed subtasks
+ */
+export interface RetryConfig {
+  maxRetries: number;
+  backoffMs: number;
+  backoffMultiplier: number;
+}
+
+/**
+ * Options controlling dispatch execution behavior
+ */
+export interface DispatchOptions {
+  /** Maximum subtasks allowed to run concurrently in a single wave */
+  maxConcurrent: number;
+  /** Timeout in ms for an entire wave before forcing continuation */
+  waveTimeoutMs: number;
+  /** Retry strategy for failed subtasks */
+  retry: RetryConfig;
+  /** If true, continue to next wave even if some subtasks in current wave fail */
+  continueOnPartialFailure: boolean;
+}
+
+export function defaultRetryConfig(): RetryConfig {
+  return { maxRetries: 2, backoffMs: 5000, backoffMultiplier: 2 };
+}
+
+export function defaultDispatchOptions(): DispatchOptions {
+  return {
+    maxConcurrent: 3,
+    waveTimeoutMs: 600_000, // 10 min
+    retry: defaultRetryConfig(),
+    continueOnPartialFailure: false,
+  };
+}
+
+/**
  * Splits a task into executable subtasks based on its scope and complexity
  *
  * MVP Splitting Strategy:
@@ -190,47 +226,111 @@ function createDomainSubtask(task: Task, domainId: string, paths: string[], mode
 }
 
 /**
- * Creates an execution plan from subtasks
- * Determines which subtasks can run in parallel based on dependencies
+ * Creates an execution plan from subtasks with resource-aware scheduling.
+ *
+ * Topological sort groups independent subtasks into waves. Within each wave,
+ * subtasks are batched into sub-waves respecting maxConcurrent. Duration
+ * estimates use per-subtask file counts instead of a fixed per-wave constant.
  */
-export function createDispatchPlan(subtasks: Subtask[]): DispatchPlan {
-  // Build dependency graph
+export function createDispatchPlan(
+  subtasks: Subtask[],
+  options: DispatchOptions = defaultDispatchOptions(),
+): DispatchPlan {
   const depGraph = new Map<string, string[]>();
   for (const subtask of subtasks) {
     depGraph.set(subtask.id, subtask.dependencies);
   }
 
-  // Topological sort to find parallelizable groups
+  // Topological sort → waves of independent subtasks
   const executed = new Set<string>();
-  const executionOrder: string[][] = [];
+  const waves: string[][] = [];
   let remaining = [...subtasks];
 
   while (remaining.length > 0) {
-    // Find all subtasks with no unmet dependencies
-    const ready = remaining.filter((st) => st.dependencies.every((depId) => executed.has(depId)));
+    const ready = remaining.filter((st) =>
+      st.dependencies.every((depId) => executed.has(depId)),
+    );
 
     if (ready.length === 0) {
-      // Circular dependency - force execute remaining
-      executionOrder.push(remaining.map((st) => st.id));
+      waves.push(remaining.map((st) => st.id));
       break;
     }
 
-    executionOrder.push(ready.map((st) => st.id));
+    // Respect maxConcurrent: split large ready sets into sub-waves
+    const ids = ready.map((st) => st.id);
+    for (let i = 0; i < ids.length; i += options.maxConcurrent) {
+      waves.push(ids.slice(i, i + options.maxConcurrent));
+    }
+
     ready.forEach((st) => executed.add(st.id));
     remaining = remaining.filter((st) => !executed.has(st.id));
   }
 
-  // Estimate duration (parallel tasks overlap)
-  const estimatedDuration = executionOrder.reduce((total) => {
-    const maxGroupDuration = 300; // 5 min per group
-    return total + maxGroupDuration;
-  }, 0);
+  const estimatedDuration = estimateTotalDuration(subtasks, waves);
 
-  return {
-    subtasks,
-    executionOrder,
-    estimatedDuration,
-  };
+  return { subtasks, executionOrder: waves, estimatedDuration };
+}
+
+/**
+ * Estimates total wall-clock duration from per-subtask file counts.
+ * Each file adds ~45s; each wave has 15s orchestration overhead.
+ */
+function estimateTotalDuration(subtasks: Subtask[], waves: string[][]): number {
+  const subtaskMap = new Map(subtasks.map((s) => [s.id, s]));
+  const ORCHESTRATION_OVERHEAD_S = 15;
+  const PER_FILE_S = 45;
+
+  let total = 0;
+  for (const wave of waves) {
+    // Within a wave, duration = max of parallel subtasks
+    const maxInWave = wave.reduce((max, id) => {
+      const st = subtaskMap.get(id);
+      const fileCount = Array.isArray(st?.inputs?.paths)
+        ? (st!.inputs.paths as string[]).length
+        : 1;
+      return Math.max(max, fileCount * PER_FILE_S);
+    }, 0);
+    total += maxInWave + ORCHESTRATION_OVERHEAD_S;
+  }
+
+  return total;
+}
+
+/**
+ * Builds a retry execution plan for failed subtasks.
+ * Applies exponential backoff between retry waves.
+ */
+export function createRetryPlan(
+  failed: SubtaskResult[],
+  subtasks: Subtask[],
+  config: RetryConfig = defaultRetryConfig(),
+): { retryWaves: string[][]; totalBackoffMs: number } | null {
+  const retryable = failed.filter((r) => {
+    const st = subtasks.find((s) => s.id === r.subtaskId);
+    if (!st) return false;
+    const attemptCount =
+      (st.inputs._retryAttempt as number | undefined) ?? 0;
+    return attemptCount < config.maxRetries;
+  });
+
+  if (retryable.length === 0) return null;
+
+  // Mark retry attempt on each subtask
+  for (const r of retryable) {
+    const st = subtasks.find((s) => s.id === r.subtaskId)!;
+    st.inputs._retryAttempt = ((st.inputs._retryAttempt as number) ?? 0) + 1;
+    st.status = "pending";
+    st.error = undefined;
+  }
+
+  const retryWaves: string[][] = [retryable.map((r) => r.subtaskId)];
+
+  let totalBackoffMs = 0;
+  for (let i = 0; i < retryable.length; i++) {
+    totalBackoffMs += config.backoffMs * Math.pow(config.backoffMultiplier, i);
+  }
+
+  return { retryWaves, totalBackoffMs };
 }
 
 /**

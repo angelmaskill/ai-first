@@ -5,7 +5,17 @@ export type SmokeTestPriority = "P0" | "P1" | "P2";
 
 export type CriticalPath = {
   id: string;
-  category: "entrypoint" | "api" | "service" | "data" | "route";
+  category:
+    | "entrypoint"
+    | "api"
+    | "service"
+    | "data"
+    | "route"
+    | "middleware"
+    | "websocket"
+    | "webhook"
+    | "graphql"
+    | "static";
   path: string;
   description: string;
   filePath?: string;
@@ -50,13 +60,43 @@ const PRIORITY_RULES: Array<{
 }> = [
   {
     priority: "P0",
-    categories: ["entrypoint", "api"],
-    keywords: ["health", "auth", "login", "startup", "bootstrap", "init", "database"],
+    categories: ["entrypoint", "api", "middleware", "data"],
+    keywords: [
+      "health",
+      "auth",
+      "login",
+      "startup",
+      "bootstrap",
+      "init",
+      "database",
+      "session",
+      "token",
+      "cors",
+      "csrf",
+      "rate-limit",
+      "connection",
+    ],
   },
   {
     priority: "P1",
-    categories: ["service", "route"],
-    keywords: ["search", "upload", "download", "notification", "email", "payment", "checkout"],
+    categories: ["service", "route", "websocket", "webhook", "graphql"],
+    keywords: [
+      "search",
+      "upload",
+      "download",
+      "notification",
+      "email",
+      "payment",
+      "checkout",
+      "subscribe",
+      "publish",
+      "stream",
+      "webhook",
+      "query",
+      "mutation",
+      "cron",
+      "job",
+    ],
   },
 ];
 
@@ -77,8 +117,16 @@ export function classifyPriority(path: CriticalPath): SmokeTestPriority {
   }
 
   // Fallback priorities by category
-  if (path.category === "entrypoint" || path.category === "api") return "P0";
-  if (path.category === "data" || path.category === "service") return "P1";
+  if (path.category === "entrypoint" || path.category === "api" || path.category === "middleware")
+    return "P0";
+  if (
+    path.category === "data" ||
+    path.category === "service" ||
+    path.category === "websocket" ||
+    path.category === "webhook" ||
+    path.category === "graphql"
+  )
+    return "P1";
   return "P2";
 }
 
@@ -120,8 +168,8 @@ function newCase(cp: CriticalPath, priority: SmokeTestPriority, index: number): 
       return {
         ...base,
         endpoint: cp.path,
-        method: cp.path.toLowerCase().includes("health") ? "GET" : "GET",
-        expectedStatus: 200,
+        method: inferMethod(cp),
+        expectedStatus: inferExpectedStatus(cp),
         expectedBodyContains: inferBodyContains(cp),
       };
     case "entrypoint":
@@ -138,9 +186,77 @@ function newCase(cp: CriticalPath, priority: SmokeTestPriority, index: number): 
         method: "GET",
         expectedStatus: 200,
       };
+    case "middleware":
+      return {
+        ...base,
+        endpoint: cp.path,
+        method: "GET",
+        expectedStatus: inferExpectedStatus(cp),
+        expectedBodyContains: inferBodyContains(cp),
+      };
+    case "websocket":
+      return {
+        ...base,
+        endpoint: cp.path,
+        method: "GET",
+        expectedStatus: 101,
+        maxDurationMs: priority === "P0" ? 5000 : priority === "P1" ? 8000 : 15000,
+        expectedBodyContains: inferBodyContains(cp),
+      };
+    case "webhook":
+      return {
+        ...base,
+        endpoint: cp.path,
+        method: "POST",
+        expectedStatus: 200,
+        expectedBodyContains: ["received"],
+      };
+    case "graphql":
+      return {
+        ...base,
+        endpoint: cp.path,
+        method: "POST",
+        expectedStatus: 200,
+        expectedBodyContains: inferBodyContains(cp),
+      };
+    case "data":
+      return {
+        ...base,
+        endpoint: cp.path,
+        method: inferMethod(cp),
+        expectedStatus: 200,
+      };
+    case "static":
+      return {
+        ...base,
+        endpoint: cp.path,
+        method: "GET",
+        expectedStatus: 200,
+        maxDurationMs: 3000,
+      };
     default:
       return base;
   }
+}
+
+function inferMethod(cp: CriticalPath): "GET" | "POST" | "PUT" | "DELETE" | "PATCH" {
+  const lower = cp.path.toLowerCase();
+  if (lower.includes("create") || lower.includes("new") || lower.includes("submit")) return "POST";
+  if (lower.includes("update") || lower.includes("edit") || lower.includes("modify")) return "PUT";
+  if (lower.includes("delete") || lower.includes("remove") || lower.includes("destroy"))
+    return "DELETE";
+  if (lower.includes("patch") || lower.includes("partial")) return "PATCH";
+  return "GET";
+}
+
+function inferExpectedStatus(cp: CriticalPath): number {
+  const lower = cp.path.toLowerCase();
+  if (lower.includes("create") || lower.includes("new")) return 201;
+  if (lower.includes("login") || lower.includes("auth")) return 200;
+  if (lower.includes("health")) return 200;
+  if (lower.includes("rate-limit")) return 429;
+  if (lower.includes("unauthorized") || lower.includes("forbidden")) return 403;
+  return 200;
 }
 
 function inferBodyContains(cp: CriticalPath): string[] | undefined {
@@ -148,6 +264,13 @@ function inferBodyContains(cp: CriticalPath): string[] | undefined {
   if (lower.includes("health")) return ["status"];
   if (lower.includes("auth") || lower.includes("login")) return ["token"];
   if (lower.includes("search")) return ["results"];
+  if (lower.includes("user") || lower.includes("profile")) return ["id"];
+  if (lower.includes("payment") || lower.includes("checkout")) return ["status"];
+  if (lower.includes("upload")) return ["url"];
+  if (lower.includes("graphql") || lower.includes("query")) return ["data"];
+  if (lower.includes("webhook")) return ["received"];
+  if (lower.includes("stream") || lower.includes("subscribe") || lower.includes("event")) return ["event"];
+  if (lower.includes("cors") || lower.includes("csrf")) return undefined;
   return undefined;
 }
 

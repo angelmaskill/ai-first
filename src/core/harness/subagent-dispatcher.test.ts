@@ -4,8 +4,11 @@ import {
   createDispatchPlan,
   aggregateResults,
   defaultSplitConfig,
+  defaultDispatchOptions,
+  defaultRetryConfig,
   splitTask,
   resolveAgentForSubtask,
+  createRetryPlan,
 } from "./subagent-dispatcher.ts";
 
 describe("calculateComplexity", () => {
@@ -332,5 +335,124 @@ describe("resolveAgentForSubtask", () => {
     const subtask = { assignedTo: "executor" } as any;
     const def = resolveAgentForSubtask(registry, subtask);
     expect(def).toBeUndefined();
+  });
+});
+
+describe("defaultRetryConfig", () => {
+  it("returns defaults with exponential backoff", () => {
+    const config = defaultRetryConfig();
+    expect(config.maxRetries).toBe(2);
+    expect(config.backoffMs).toBe(5000);
+    expect(config.backoffMultiplier).toBe(2);
+  });
+});
+
+describe("defaultDispatchOptions", () => {
+  it("returns defaults with resource constraints", () => {
+    const opts = defaultDispatchOptions();
+    expect(opts.maxConcurrent).toBe(3);
+    expect(opts.waveTimeoutMs).toBe(600_000);
+    expect(opts.continueOnPartialFailure).toBe(false);
+    expect(opts.retry).toBeDefined();
+  });
+});
+
+describe("createDispatchPlan with DispatchOptions", () => {
+  it("respects maxConcurrent by batching large ready sets", () => {
+    const subtasks = [
+      { id: "s1", dependencies: [], inputs: { paths: ["a.ts"] } },
+      { id: "s2", dependencies: [], inputs: { paths: ["b.ts"] } },
+      { id: "s3", dependencies: [], inputs: { paths: ["c.ts"] } },
+      { id: "s4", dependencies: [], inputs: { paths: ["d.ts"] } },
+    ] as any;
+
+    const opts = { ...defaultDispatchOptions(), maxConcurrent: 2 };
+    const plan = createDispatchPlan(subtasks, opts);
+
+    // 4 independent subtasks with maxConcurrent=2 → 2 waves of 2
+    expect(plan.executionOrder).toHaveLength(2);
+    expect(plan.executionOrder[0]).toHaveLength(2);
+    expect(plan.executionOrder[1]).toHaveLength(2);
+  });
+
+  it("does not split ready sets smaller than maxConcurrent", () => {
+    const subtasks = [
+      { id: "s1", dependencies: [], inputs: { paths: ["a.ts"] } },
+      { id: "s2", dependencies: [], inputs: { paths: ["b.ts"] } },
+    ] as any;
+
+    const opts = { ...defaultDispatchOptions(), maxConcurrent: 5 };
+    const plan = createDispatchPlan(subtasks, opts);
+
+    expect(plan.executionOrder).toHaveLength(1);
+    expect(plan.executionOrder[0]).toHaveLength(2);
+  });
+
+  it("estimates duration from file counts", () => {
+    const subtasks = [
+      { id: "s1", dependencies: [], inputs: { paths: Array(10).fill("f.ts") } },
+    ] as any;
+
+    const plan = createDispatchPlan(subtasks);
+    // 10 files * 45s + 15s overhead = 465s
+    expect(plan.estimatedDuration).toBe(465);
+  });
+});
+
+describe("createRetryPlan", () => {
+  it("returns retry plan for failed subtasks within limit", () => {
+    const subtasks = [
+      { id: "s1", dependencies: [], inputs: {}, status: "failed" },
+    ] as any;
+
+    const failed = [{ subtaskId: "s1", success: false, error: "timeout", completedAt: "" }] as any;
+
+    const plan = createRetryPlan(failed, subtasks);
+    expect(plan).not.toBeNull();
+    expect(plan!.retryWaves).toHaveLength(1);
+    expect(plan!.retryWaves[0]).toContain("s1");
+    expect(subtasks[0].inputs._retryAttempt).toBe(1);
+    expect(subtasks[0].status).toBe("pending");
+  });
+
+  it("returns null when all failed subtasks exceeded maxRetries", () => {
+    const subtasks = [
+      { id: "s1", dependencies: [], inputs: { _retryAttempt: 2 }, status: "failed" },
+    ] as any;
+
+    const failed = [{ subtaskId: "s1", success: false, error: "timeout", completedAt: "" }] as any;
+
+    const plan = createRetryPlan(failed, subtasks, { maxRetries: 2, backoffMs: 1000, backoffMultiplier: 2 });
+    expect(plan).toBeNull();
+  });
+
+  it("calculates total backoff with exponential growth", () => {
+    const subtasks = [
+      { id: "s1", dependencies: [], inputs: {}, status: "failed" },
+      { id: "s2", dependencies: [], inputs: {}, status: "failed" },
+    ] as any;
+
+    const failed = [
+      { subtaskId: "s1", success: false, error: "e1", completedAt: "" },
+      { subtaskId: "s2", success: false, error: "e2", completedAt: "" },
+    ] as any;
+
+    const config = { maxRetries: 3, backoffMs: 1000, backoffMultiplier: 2 };
+    const plan = createRetryPlan(failed, subtasks, config);
+    expect(plan).not.toBeNull();
+    // 2 retryable: backoffMs * (2^0 + 2^1) = 1000 * (1 + 2) = 3000
+    expect(plan!.totalBackoffMs).toBe(3000);
+  });
+
+  it("resets error and status on retried subtasks", () => {
+    const subtasks = [
+      { id: "s1", dependencies: [], inputs: {}, status: "failed", error: "old error" },
+    ] as any;
+
+    const failed = [{ subtaskId: "s1", success: false, error: "timeout", completedAt: "" }] as any;
+
+    createRetryPlan(failed, subtasks);
+    expect(subtasks[0].status).toBe("pending");
+    expect(subtasks[0].error).toBeUndefined();
   });
 });

@@ -57,6 +57,62 @@ const adminRoute: CriticalPath = {
   description: "Admin dashboard loads",
 };
 
+const rateLimitMiddleware: CriticalPath = {
+  id: "cp-8",
+  category: "middleware",
+  path: "/api/rate-limit",
+  description: "Rate limiting middleware blocks excessive requests",
+};
+
+const corsMiddleware: CriticalPath = {
+  id: "cp-9",
+  category: "middleware",
+  path: "/api/cors",
+  description: "CORS headers are set correctly",
+};
+
+const wsEndpoint: CriticalPath = {
+  id: "cp-10",
+  category: "websocket",
+  path: "/ws/events",
+  description: "WebSocket event stream endpoint",
+};
+
+const webhookReceiver: CriticalPath = {
+  id: "cp-11",
+  category: "webhook",
+  path: "/webhooks/stripe",
+  description: "Stripe webhook receiver",
+};
+
+const graphqlEndpoint: CriticalPath = {
+  id: "cp-12",
+  category: "graphql",
+  path: "/graphql",
+  description: "GraphQL query endpoint",
+};
+
+const createApi: CriticalPath = {
+  id: "cp-13",
+  category: "api",
+  path: "/api/users/create",
+  description: "Create new user",
+};
+
+const deleteApi: CriticalPath = {
+  id: "cp-14",
+  category: "api",
+  path: "/api/users/delete",
+  description: "Delete user account",
+};
+
+const staticFile: CriticalPath = {
+  id: "cp-15",
+  category: "static",
+  path: "/assets/bundle.js",
+  description: "Static asset delivery",
+};
+
 describe("classifyPriority", () => {
   it("classifies health API as P0", () => {
     expect(classifyPriority(healthApi)).toBe("P0");
@@ -74,8 +130,8 @@ describe("classifyPriority", () => {
     expect(classifyPriority(searchService)).toBe("P1");
   });
 
-  it("classifies data layer as P1", () => {
-    expect(classifyPriority(dbLayer)).toBe("P1");
+  it("classifies data layer as P0 (database keyword now P0)", () => {
+    expect(classifyPriority(dbLayer)).toBe("P0");
   });
 
   it("classifies generic routes as P2", () => {
@@ -221,5 +277,144 @@ describe("generateSmokeScript", () => {
 
     expect(script).toContain("#!/usr/bin/env bash");
     expect(script).toContain("exit $EXIT_CODE");
+  });
+});
+
+describe("new categories", () => {
+  it("classifies rate-limit middleware as P0", () => {
+    expect(classifyPriority(rateLimitMiddleware)).toBe("P0");
+  });
+
+  it("classifies CORS middleware as P0 via fallback", () => {
+    expect(classifyPriority(corsMiddleware)).toBe("P0");
+  });
+
+  it("classifies websocket as P1", () => {
+    expect(classifyPriority(wsEndpoint)).toBe("P1");
+  });
+
+  it("classifies webhook as P1", () => {
+    expect(classifyPriority(webhookReceiver)).toBe("P1");
+  });
+
+  it("classifies graphql as P1", () => {
+    expect(classifyPriority(graphqlEndpoint)).toBe("P1");
+  });
+
+  it("classifies static as P2", () => {
+    expect(classifyPriority(staticFile)).toBe("P2");
+  });
+
+  it("classifies database keyword under data as P0", () => {
+    const dbPath: CriticalPath = {
+      id: "cp-db",
+      category: "data",
+      path: "/api/database/status",
+      description: "Database health check",
+    };
+    expect(classifyPriority(dbPath)).toBe("P0");
+  });
+});
+
+describe("method inference", () => {
+  it("infers POST for create paths", () => {
+    const cases = generateSmokeCases([createApi]);
+    expect(cases[0].method).toBe("POST");
+    expect(cases[0].expectedStatus).toBe(201);
+  });
+
+  it("infers DELETE for delete paths", () => {
+    const cases = generateSmokeCases([deleteApi]);
+    expect(cases[0].method).toBe("DELETE");
+  });
+
+  it("infers POST for webhook category", () => {
+    const cases = generateSmokeCases([webhookReceiver]);
+    expect(cases[0].method).toBe("POST");
+    expect(cases[0].expectedBodyContains).toEqual(["received"]);
+  });
+
+  it("infers POST for graphql category", () => {
+    const cases = generateSmokeCases([graphqlEndpoint]);
+    expect(cases[0].method).toBe("POST");
+  });
+});
+
+describe("status code inference", () => {
+  it("returns 101 for websocket upgrade", () => {
+    const cases = generateSmokeCases([wsEndpoint]);
+    expect(cases[0].expectedStatus).toBe(101);
+  });
+
+  it("returns 429 for rate-limit middleware", () => {
+    const cases = generateSmokeCases([rateLimitMiddleware]);
+    expect(cases[0].expectedStatus).toBe(429);
+  });
+});
+
+describe("body content inference", () => {
+  it("returns [token] for auth endpoints", () => {
+    const cases = generateSmokeCases([authApi]);
+    expect(cases[0].expectedBodyContains).toEqual(["token"]);
+  });
+
+  it("returns [data] for graphql endpoints", () => {
+    const cases = generateSmokeCases([graphqlEndpoint]);
+    expect(cases[0].expectedBodyContains).toEqual(["data"]);
+  });
+
+  it("returns undefined for CORS paths", () => {
+    const cases = generateSmokeCases([corsMiddleware]);
+    expect(cases[0].expectedBodyContains).toBeUndefined();
+  });
+
+  it("returns [event] for websocket stream paths", () => {
+    const cases = generateSmokeCases([wsEndpoint]);
+    expect(cases[0].expectedBodyContains).toEqual(["event"]);
+  });
+});
+
+describe("static asset cases", () => {
+  it("sets fast maxDuration for static files", () => {
+    const cases = generateSmokeCases([staticFile]);
+    expect(cases[0].maxDurationMs).toBe(3000);
+  });
+
+  it("uses GET method for static files", () => {
+    const cases = generateSmokeCases([staticFile]);
+    expect(cases[0].method).toBe("GET");
+    expect(cases[0].expectedStatus).toBe(200);
+  });
+});
+
+describe("expanded priority keywords", () => {
+  it("classifies connection keyword as P0", () => {
+    const conn: CriticalPath = {
+      id: "cp-conn",
+      category: "api",
+      path: "/api/connection/pool",
+      description: "Connection pool status",
+    };
+    expect(classifyPriority(conn)).toBe("P0");
+  });
+
+  it("classifies stream keyword as P1", () => {
+    const stream: CriticalPath = {
+      id: "cp-stream",
+      category: "websocket",
+      path: "/ws/stream",
+      description: "Real-time data stream",
+    };
+    expect(classifyPriority(stream)).toBe("P1");
+  });
+
+  it("classifies cron job as P1", () => {
+    const cron: CriticalPath = {
+      id: "cp-cron",
+      category: "service",
+      path: "/jobs/cleanup",
+      description: "Nightly cleanup cron job",
+    };
+    expect(classifyPriority(cron)).toBe("P1");
   });
 });
