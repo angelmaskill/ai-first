@@ -23,15 +23,14 @@ export function ActionCard({ action, delay }: ActionCardProps) {
     <article
       className="card"
       style={{
-        flex: "1 1 300px",
-        minWidth: 260,
-        maxWidth: 420,
         animation: `fadeIn 500ms ${delay}ms both cubic-bezier(0.16, 1, 0.3, 1)`,
         display: "flex",
         flexDirection: "column",
         gap: "clamp(0.5rem, 1vw, 0.75rem)",
         padding: "clamp(1rem, 1.5vw, 1.5rem)",
         cursor: "default",
+        height: "100%",
+        boxSizing: "border-box",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>

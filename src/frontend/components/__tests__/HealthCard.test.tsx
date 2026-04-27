@@ -53,14 +53,14 @@ describe("HealthCard", () => {
     expect(screen.getByText("严重")).toBeInTheDocument();
   });
 
-  it("does not render score section when score is undefined", () => {
-    const { container } = renderWithProvider({
+  it("hides score section when score is undefined", () => {
+    renderWithProvider({
       ...baseSignal,
       score: undefined,
     });
-    expect(screen.queryByText("/ 100")).not.toBeInTheDocument();
-    // No stat-value element
-    expect(container.querySelector(".stat-value")).not.toBeInTheDocument();
+    // Score section is present but hidden for alignment
+    expect(screen.getByText("/ 100")).toBeInTheDocument();
+    expect(screen.getByText("/ 100")).not.toBeVisible();
   });
 
   it("renders progress bar when score is defined", () => {

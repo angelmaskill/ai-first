@@ -22,7 +22,7 @@ export function HealthTrendChart({
   const containerRef = useRef<HTMLDivElement>(null);
 
   const pathData = useMemo(() => {
-    if (data.length < 2) return { line: "", area: "", points: [] as { x: number; y: number }[] };
+    if (!data || data.length < 2) return { line: "", area: "", points: [] as { x: number; y: number }[] };
 
     const padX = 16;
     const padY = 16;

@@ -50,6 +50,7 @@ interface ProjectData {
   suggestedActions: SuggestedAction[];
   syncEvents: SyncEvent[];
   recentTimeline: TimelineEntry[];
+  healthTrend: { label: string; value: number }[];
 }
 
 function readYaml(filePath: string): string {
@@ -202,6 +203,22 @@ function main() {
           { name: "Security", status: "warning", summary: "No scan data available" },
         ];
 
+  // Compute health trend from timeline: count entries per day for last 7 days
+  const timelineEntries = parseTimeline(timelineMd);
+  const trendDays = 7;
+  const healthTrend: { label: string; value: number }[] = [];
+  const now = new Date();
+  for (let i = trendDays - 1; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().slice(0, 10);
+    const label = `${d.getMonth() + 1}/${d.getDate()}`;
+    const count = timelineEntries.filter((e) => e.timestamp.startsWith(dateStr)).length;
+    // Scale activity count to a 0-100 health score (1 entry ≈ 15 pts, cap at 100)
+    const value = Math.min(100, count * 15 + 20);
+    healthTrend.push({ label, value });
+  }
+
   const data: ProjectData = {
     name: project.name,
     currentStage: project.stage,
@@ -211,7 +228,8 @@ function main() {
     risks: parseSnapshotRisks(snapshotYml),
     suggestedActions: parseSnapshotActions(snapshotYml),
     syncEvents,
-    recentTimeline: parseTimeline(timelineMd).slice(-24),
+    recentTimeline: timelineEntries.slice(-24),
+    healthTrend,
   };
 
   // Generate TypeScript module

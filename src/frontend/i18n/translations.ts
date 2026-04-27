@@ -9,6 +9,14 @@ export interface Translations {
     suggestedActions: string;
     healthTrend: string;
     riskHeatmap: string;
+    searchPlaceholder: string;
+    filterAll: string;
+    filterGood: string;
+    filterWarning: string;
+    filterCritical: string;
+    showingEntries: string;
+    loadMore: string;
+    noResults: string;
     footer: { version: string; generated: string };
   };
   action: {
@@ -16,7 +24,7 @@ export interface Translations {
     type: Record<string, string>;
   };
   stage: { label: string; ofTotal: string };
-  health: { scoreUnit: string };
+  health: { scoreUnit: string; detailTitle: string; closeDetail: string; overview: string; metrics: string };
   status: { healthy: string; attention: string; critical: string };
   severity: { high: string; medium: string; low: string };
   sync: {
@@ -43,6 +51,14 @@ const zh: Translations = {
     suggestedActions: "建议操作",
     healthTrend: "健康趋势",
     riskHeatmap: "风险热力图",
+    searchPlaceholder: "搜索项目、风险或活动...",
+    filterAll: "全部",
+    filterGood: "健康",
+    filterWarning: "注意",
+    filterCritical: "严重",
+    showingEntries: "显示 {shown} / {total} 条",
+    loadMore: "加载更多",
+    noResults: "没有匹配的结果",
     footer: {
       version: "AI-First v0.1.0",
       generated: "由 .ai-first/ 控制层生成",
@@ -53,7 +69,7 @@ const zh: Translations = {
     type: { transition: "阶段转换", implement: "实施开发", default: "其他" },
   },
   stage: { label: "生命周期", ofTotal: "/ 10" },
-  health: { scoreUnit: "/ 100" },
+  health: { scoreUnit: "/ 100", detailTitle: "健康详情", closeDetail: "关闭", overview: "概览", metrics: "指标" },
   status: { healthy: "健康", attention: "注意", critical: "严重" },
   severity: { high: "高", medium: "中", low: "低" },
   sync: {
@@ -91,6 +107,14 @@ const en: Translations = {
     suggestedActions: "Suggested Actions",
     healthTrend: "Health Trend",
     riskHeatmap: "Risk Heatmap",
+    searchPlaceholder: "Search projects, risks, or activity...",
+    filterAll: "All",
+    filterGood: "Healthy",
+    filterWarning: "Warning",
+    filterCritical: "Critical",
+    showingEntries: "Showing {shown} / {total}",
+    loadMore: "Load More",
+    noResults: "No matching results",
     footer: {
       version: "AI-First v0.1.0",
       generated: "Generated from .ai-first/ control layer",
@@ -101,7 +125,7 @@ const en: Translations = {
     type: { transition: "Stage Transition", implement: "Implementation", default: "General" },
   },
   stage: { label: "Lifecycle", ofTotal: "/ 10" },
-  health: { scoreUnit: "/ 100" },
+  health: { scoreUnit: "/ 100", detailTitle: "Health Detail", closeDetail: "Close", overview: "Overview", metrics: "Metrics" },
   status: { healthy: "Healthy", attention: "Attention", critical: "Critical" },
   severity: { high: "High", medium: "Medium", low: "Low" },
   sync: {
