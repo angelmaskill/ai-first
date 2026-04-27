@@ -1,7 +1,7 @@
 id: snap-20260427
 projectId: proj-h7k3m
 createdAt: "2026-04-27T00:10:00Z"
-currentStage: qa
+currentStage: evolve
 stageConfidence: 0.95
 goals: []
 blockers: []
@@ -22,8 +22,8 @@ healthSignals:
     summary: "README + 8 design docs + 7 standards + 4 review reports"
   - name: Test Completeness
     status: good
-    score: 85
-    summary: "94 tests across 7 files, all passing. Core modules (mappings, adapters, dispatcher) well covered."
+    score: 95
+    summary: "265 tests across 20 files, all passing. Frontend (143), backend (94), snake game (78)."
   - name: Agent Coverage
     status: good
     summary: "14 agents defined covering all 10 lifecycle stages"
@@ -40,20 +40,13 @@ healthSignals:
 activeTasks: []
 suggestedNextActions:
   - id: act-20260427-1
-    title: Advance to release stage
-    description: All 9 QA gates passed. Ready for release preparation.
-    actionType: transition
-    priority: p0
-    recommendedOwner: release-agent
-    requiresConfirmation: false
-  - id: act-20260427-2
     title: Strengthen CI pipeline
     description: Expand .github/workflows/ci.yml with real build, test, typecheck, and scan steps
     actionType: implement
     priority: p1
     recommendedOwner: builder-agent
     requiresConfirmation: false
-  - id: act-20260427-3
+  - id: act-20260427-2
     title: Multi-platform adapter verification
     description: End-to-end test the Codex adapter against a real Codex CLI session
     actionType: implement

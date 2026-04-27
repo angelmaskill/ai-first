@@ -3,7 +3,7 @@ import type { ProjectData } from "../../hooks/useProjectData.js";
 
 const data: ProjectData = {
   "name": "AI-First",
-  "currentStage": "qa",
+  "currentStage": "evolve",
   "mode": "brownfield",
   "status": "active",
   "healthSignals": [
@@ -16,8 +16,8 @@ const data: ProjectData = {
     {
       "name": "Test Completeness",
       "status": "good",
-      "score": 85,
-      "summary": "94 tests across 7 files, all passing. Core modules (mappings, adapters, dispatcher) well covered."
+      "score": 95,
+      "summary": "265 tests across 20 files, all passing. Frontend (143), backend (94), snake game (78)."
     },
     {
       "name": "Agent Coverage",
@@ -58,20 +58,13 @@ const data: ProjectData = {
   "suggestedActions": [
     {
       "id": "act-20260427-1",
-      "title": "Advance to release stage",
-      "description": "All 9 QA gates passed. Ready for release preparation.",
-      "actionType": "transition",
-      "priority": "p0"
-    },
-    {
-      "id": "act-20260427-2",
       "title": "Strengthen CI pipeline",
       "description": "Expand .github/workflows/ci.yml with real build, test, typecheck, and scan steps",
       "actionType": "implement",
       "priority": "p1"
     },
     {
-      "id": "act-20260427-3",
+      "id": "act-20260427-2",
       "title": "Multi-platform adapter verification",
       "description": "End-to-end test the Codex adapter against a real Codex CLI session",
       "actionType": "implement",
@@ -79,6 +72,18 @@ const data: ProjectData = {
     }
   ],
   "syncEvents": [
+    {
+      "id": "sync-20260427-snake01",
+      "status": "confirmed",
+      "summary": ">",
+      "createdAt": ""
+    },
+    {
+      "id": "sync-20260427-iter2",
+      "status": "confirmed",
+      "summary": ">",
+      "createdAt": ""
+    },
     {
       "id": "sync-20260426-3",
       "status": "confirmed",
