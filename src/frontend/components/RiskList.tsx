@@ -1,10 +1,23 @@
 import type { Risk } from "../hooks/useProjectData";
 import { useT } from "../i18n/LanguageContext";
 
+/**
+ * Props for the RiskList component.
+ */
 interface RiskListProps {
+  /** Array of risk items to display. */
   risks: Risk[];
 }
 
+/**
+ * Renders a list of project risks with severity badges.
+ *
+ * Shows an empty-state message when there are no risks.
+ *
+ * @param props - Component props
+ * @param props.risks - Risk items to render
+ * @returns A list of risk cards or an empty-state message
+ */
 export function RiskList({ risks }: RiskListProps) {
   const { t } = useT();
 

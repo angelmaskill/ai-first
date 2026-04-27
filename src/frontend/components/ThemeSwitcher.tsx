@@ -1,5 +1,12 @@
 import { useTheme } from "../i18n/ThemeContext";
 
+/**
+ * Theme toggle button that switches between light and dark mode.
+ *
+ * Uses animated sun/moon SVG icons that cross-fade on theme change.
+ *
+ * @returns A circular toggle button
+ */
 export function ThemeSwitcher() {
   const { theme, toggleTheme } = useTheme();
 

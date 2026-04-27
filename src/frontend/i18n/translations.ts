@@ -23,7 +23,7 @@ export interface Translations {
     priority: { p0: string; p1: string; p2: string };
     type: Record<string, string>;
   };
-  stage: { label: string; ofTotal: string };
+  stage: { label: string; ofTotal: string; unknownFallback: string };
   health: { scoreUnit: string; detailTitle: string; closeDetail: string; overview: string; metrics: string };
   status: { healthy: string; attention: string; critical: string };
   severity: { high: string; medium: string; low: string };
@@ -68,7 +68,7 @@ const zh: Translations = {
     priority: { p0: "P0 紧急", p1: "P1 重要", p2: "P2 建议" },
     type: { transition: "阶段转换", implement: "实施开发", default: "其他" },
   },
-  stage: { label: "生命周期", ofTotal: "/ 10" },
+  stage: { label: "生命周期", ofTotal: "/ 10", unknownFallback: "未知阶段: {stage}" },
   health: { scoreUnit: "/ 100", detailTitle: "健康详情", closeDetail: "关闭", overview: "概览", metrics: "指标" },
   status: { healthy: "健康", attention: "注意", critical: "严重" },
   severity: { high: "高", medium: "中", low: "低" },
@@ -124,7 +124,7 @@ const en: Translations = {
     priority: { p0: "P0 Critical", p1: "P1 Important", p2: "P2 Nice-to-have" },
     type: { transition: "Stage Transition", implement: "Implementation", default: "General" },
   },
-  stage: { label: "Lifecycle", ofTotal: "/ 10" },
+  stage: { label: "Lifecycle", ofTotal: "/ 10", unknownFallback: "Unknown stage: {stage}" },
   health: { scoreUnit: "/ 100", detailTitle: "Health Detail", closeDetail: "Close", overview: "Overview", metrics: "Metrics" },
   status: { healthy: "Healthy", attention: "Attention", critical: "Critical" },
   severity: { high: "High", medium: "Medium", low: "Low" },

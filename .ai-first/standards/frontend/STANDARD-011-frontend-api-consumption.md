@@ -2,7 +2,7 @@
 id: STANDARD-011
 domain: frontend
 title: Frontend API Consumption
-stability: draft
+stability: stable
 severity: recommended
 relatedPaths: [.ai-first/standards/fullstack/STANDARD-001-api-consistency.md]
 ---
@@ -42,5 +42,9 @@ consistently across all service functions.
 
 ## Status
 
-This standard is `draft`. It will stabilize when the first frontend service
-layer is implemented and reviewed.
+This standard is `stable`. It has been reviewed through a full lifecycle
+cycle and is ready for enforcement.
+
+Note: Future iterations should consider adding conventions for
+request caching, optimistic update patterns, and request cancellation
+(AbortController integration).

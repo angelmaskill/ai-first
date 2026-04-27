@@ -1,0 +1,45 @@
+id: task-20260427-iter2
+title: "v0.1.1 — Frontend fixes, JSDoc, and standards stabilization"
+status: done
+completedAt: "2026-04-27T10:30:00Z"
+reviewRef: reviews/iter2-review-20260427.md
+priority: p1
+stage: evolve
+owner: builder-agent
+reviewer: reviewer-agent
+createdAt: "2026-04-27T10:15:00Z"
+description: >
+  Next iteration based on health dashboard findings.
+  Three independent work streams covering all 3 P1 recommendations.
+
+changeScope:
+  description: "Frontend JSDoc + logic fixes + standards stabilization"
+  paths:
+    - src/frontend/
+    - .ai-first/standards/frontend/
+    - .ai-first/standards/backend/
+  domains:
+    - domain-frontend
+    - domain-config
+  parallelSafe: true
+
+subtasks:
+  - id: SUB-frontend-fixes
+    title: "Frontend JSDoc + logic fixes"
+    description: >
+      DOCS-01: Add JSDoc/TsDoc to all frontend components, functions, interfaces.
+      DOCS-02: Document non-obvious maxWidth: "1fr" behavior in ActionCard.
+      LOGIC-01: Fix invalid CSS maxWidth: "1fr" in ActionCard — use legal CSS value.
+      LOGIC-02: Clamp score percentage in HealthCard to prevent overflow at score > 100.
+      LOGIC-03: Add guard in StageIndicator for unknown stage names (currently shows "0/10").
+    dependsOn: []
+
+  - id: SUB-standards-stabilize
+    title: "Stabilize 4 draft standards"
+    description: >
+      STANDARD-010 (frontend component conventions),
+      STANDARD-011 (frontend API consumption),
+      STANDARD-012 (backend API design),
+      STANDARD-013 (backend data access)
+      — review content, promote from draft to stable status.
+    dependsOn: []

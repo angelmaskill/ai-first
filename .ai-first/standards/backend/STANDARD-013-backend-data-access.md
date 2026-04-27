@@ -2,7 +2,7 @@
 id: STANDARD-013
 domain: backend
 title: Backend Data Access
-stability: draft
+stability: stable
 severity: recommended
 relatedPaths: [src/]
 ---
@@ -41,5 +41,9 @@ interface Repository<T> {
 
 ## Status
 
-This standard is `draft`. It will stabilize when the first data access
-layer is implemented under this convention.
+This standard is `stable`. It has been reviewed through a full lifecycle
+cycle and is ready for enforcement.
+
+Note: Future iterations should consider adding conventions for
+database migration strategy, seed data management, and query optimization
+guidelines (index usage, N+1 prevention).

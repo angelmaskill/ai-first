@@ -1,8 +1,13 @@
 import type { SuggestedAction } from "../hooks/useProjectData";
 import { useT } from "../i18n/LanguageContext";
 
+/**
+ * Props for the ActionCard component.
+ */
 interface ActionCardProps {
+  /** The suggested action to display. */
   action: SuggestedAction;
+  /** Animation delay in milliseconds for staggered entry. */
   delay: number;
 }
 
@@ -12,6 +17,21 @@ const PRIORITY_STYLES: Record<string, { bg: string; accent: string }> = {
   p2: { bg: "var(--color-sky-pale)", accent: "var(--color-sky)" },
 };
 
+/**
+ * Renders a suggested action card with priority-based styling.
+ *
+ * @param props - Component props
+ * @param props.action - The suggested action data to render
+ * @param props.delay - Animation delay in milliseconds for staggered entry
+ * @returns A card element displaying action title, description, priority badge, and type label
+ *
+ * NOTE (DOCS-02): `maxWidth` does not accept CSS Grid fractional units (like "1fr").
+ * The `fr` unit is only valid inside `grid-template-columns` and `grid-template-rows`.
+ * Using `maxWidth: "1fr"` would be silently ignored by all major browsers (it is an
+ * invalid property value that triggers a parse error), so the element would render
+ * with its default max-width. Use `"100%"`, a fixed pixel value, or remove the
+ * property entirely instead.
+ */
 export function ActionCard({ action, delay }: ActionCardProps) {
   const { t } = useT();
 

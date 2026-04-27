@@ -1,7 +1,11 @@
 import { useT } from "../i18n/LanguageContext";
 import { getStageLabels } from "../i18n/translations";
 
+/**
+ * Props for the StageIndicator component.
+ */
 interface StageIndicatorProps {
+  /** The current stage identifier (e.g. "idea", "build", "qa"). */
   currentStage: string;
 }
 
@@ -10,10 +14,43 @@ const STAGE_ORDER = [
   "build", "qa", "release", "operate", "evolve",
 ];
 
+/**
+ * Visual indicator showing the current stage position within the 10-stage
+ * AI-first lifecycle, rendered as a progress bar with labeled segments.
+ *
+ * If the `currentStage` is not one of the 10 known stages, a fallback message
+ * is displayed instead of an incorrect "1/10" position.
+ *
+ * @param props - Component props
+ * @param props.currentStage - The current stage identifier
+ * @returns A stage progress indicator or a fallback for unknown stages
+ */
 export function StageIndicator({ currentStage }: StageIndicatorProps) {
   const { t, lang } = useT();
   const stageLabels = getStageLabels(lang);
-  const currentIndex = Math.max(0, STAGE_ORDER.indexOf(currentStage));
+  const rawIndex = STAGE_ORDER.indexOf(currentStage);
+  const isKnownStage = rawIndex !== -1;
+  const currentIndex = Math.max(0, rawIndex);
+
+  // Guard: unknown stage name — show fallback instead of misleading "1/10"
+  if (!isKnownStage) {
+    return (
+      <div
+        style={{
+          marginBottom: "clamp(2.5rem, 4vw, 4rem)",
+          animation: "fadeIn 600ms 100ms both cubic-bezier(0.16, 1, 0.3, 1)",
+          fontFamily: "var(--font-display)",
+          fontStyle: "italic",
+          fontSize: "1.125rem",
+          color: "var(--color-text-secondary)",
+        }}
+      >
+        {t.stage.unknownFallback
+          ? t.stage.unknownFallback.replace("{stage}", currentStage)
+          : `Unknown stage: ${currentStage}`}
+      </div>
+    );
+  }
 
   return (
     <div

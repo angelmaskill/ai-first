@@ -23,7 +23,7 @@
 | STANDARD-005 | workflow | Knowledge Synchronization | stable |
 | STANDARD-006 | fullstack | Deterministic Agent Routing Protocol | stable |
 | STANDARD-007 | workflow | Test Quality and Coverage Standards | stable |
-| STANDARD-010 | frontend | Frontend Component Conventions | draft |
-| STANDARD-011 | frontend | Frontend API Consumption | draft |
-| STANDARD-012 | backend | Backend API Design | draft |
-| STANDARD-013 | backend | Backend Data Access | draft |
+| STANDARD-010 | frontend | Frontend Component Conventions | stable |
+| STANDARD-011 | frontend | Frontend API Consumption | stable |
+| STANDARD-012 | backend | Backend API Design | stable |
+| STANDARD-013 | backend | Backend Data Access | stable |

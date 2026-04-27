@@ -1,5 +1,10 @@
 import { useT } from "../i18n/LanguageContext";
 
+/**
+ * Language toggle button that switches between English and Chinese (zh).
+ *
+ * @returns A pill-shaped toggle button
+ */
 export function LanguageSwitcher() {
   const { lang, toggleLang } = useT();
 

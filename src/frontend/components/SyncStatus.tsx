@@ -1,10 +1,24 @@
 import type { SyncEvent } from "../hooks/useProjectData";
 import { useT } from "../i18n/LanguageContext";
 
+/**
+ * Props for the SyncStatus component.
+ */
 interface SyncStatusProps {
+  /** Array of knowledge sync events to display. */
   events: SyncEvent[];
 }
 
+/**
+ * Displays knowledge sync event status with summary counts and individual event cards.
+ *
+ * Shows a resolved/open counter and individual event entries with status dots
+ * and summaries. Displays an empty-state message when there are no events.
+ *
+ * @param props - Component props
+ * @param props.events - Sync event items to render
+ * @returns A sync status panel with event list or empty-state
+ */
 export function SyncStatus({ events }: SyncStatusProps) {
   const { t } = useT();
 

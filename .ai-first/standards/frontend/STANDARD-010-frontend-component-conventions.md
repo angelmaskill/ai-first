@@ -2,7 +2,7 @@
 id: STANDARD-010
 domain: frontend
 title: Frontend Component Conventions
-stability: draft
+stability: stable
 severity: recommended
 relatedPaths: [.claude/skills/code-scaffold/SKILL.md]
 ---
@@ -49,5 +49,8 @@ src/frontend/
 
 ## Status
 
-This standard is `draft`. It will stabilize when frontend paths
-are populated and at least one build cycle has validated these conventions.
+This standard is `stable`. It has been reviewed through a full lifecycle
+cycle and is ready for enforcement.
+
+Note: Future iterations should consider adding conventions for
+accessibility (a11y) requirements and component-level testing patterns.

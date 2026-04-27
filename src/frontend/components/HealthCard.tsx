@@ -1,14 +1,38 @@
 import type { HealthSignal } from "../hooks/useProjectData";
 import { useT } from "../i18n/LanguageContext";
 
+/**
+ * Props for the HealthCard component.
+ */
 interface HealthCardProps {
+  /** The health signal data to display. */
   signal: HealthSignal;
+  /** Animation delay in milliseconds for staggered entry. */
   delay: number;
+  /** Card size variant controlling layout and typography scale. */
   size?: "small" | "medium" | "large";
+  /** Optional click handler — when provided, the card becomes interactive. */
   onClick?: () => void;
+  /** Whether the card is in an expanded/detail state. */
   isExpanded?: boolean;
 }
 
+/**
+ * Displays a single health signal as a card with status badge, score meter,
+ * summary text, and a clamped progress bar (0-100 range).
+ *
+ * When `onClick` is provided, the card is interactive (button role, keyboard
+ * accessible, expand/collapse arrow). The score progress bar width is clamped
+ * to [0, 100] to prevent visual overflow from out-of-range score values.
+ *
+ * @param props - Component props
+ * @param props.signal - Health signal data (name, status, score, summary)
+ * @param props.delay - Animation delay in milliseconds
+ * @param props.size - Card size variant (default: "medium")
+ * @param props.onClick - Optional click handler for expand/collapse
+ * @param props.isExpanded - Whether the card is expanded (default: false)
+ * @returns A card element displaying health signal information
+ */
 export function HealthCard({ signal, delay, size = "medium", onClick, isExpanded = false }: HealthCardProps) {
   const { t } = useT();
 

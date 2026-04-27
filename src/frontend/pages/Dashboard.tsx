@@ -14,12 +14,28 @@ import { LanguageSwitcher } from "../components/LanguageSwitcher";
 import { ThemeSwitcher } from "../components/ThemeSwitcher";
 import { SearchBar } from "../components/SearchBar";
 
+/**
+ * Props for the Dashboard page component.
+ */
 interface DashboardProps {
+  /** Full project data payload to render. */
   data: ProjectData;
 }
 
 type StatusFilter = "all" | "good" | "warning" | "critical";
 
+/**
+ * Main dashboard page rendering all project health, risk, action, sync,
+ * and timeline sections with search/filter support.
+ *
+ * Composes all sub-components (StageIndicator, HealthCard, RiskList, Timeline,
+ * SyncStatus, ActionCard, HealthTrendChart, RiskHeatmap) in a responsive grid
+ * layout with sticky header, i18n, and theme support.
+ *
+ * @param props - Component props
+ * @param props.data - Full project data to render
+ * @returns The complete dashboard page
+ */
 export function Dashboard({ data }: DashboardProps) {
   const { t, lang } = useT();
   const stageLabels = getStageLabels(lang);

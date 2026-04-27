@@ -1,9 +1,16 @@
 import { useT } from "../i18n/LanguageContext";
 
+/**
+ * Props for the SearchBar component.
+ */
 interface SearchBarProps {
+  /** Current search query text. */
   query: string;
+  /** Callback fired when the search query changes. */
   onQueryChange: (q: string) => void;
+  /** Currently active status filter value. */
   statusFilter: "all" | "good" | "warning" | "critical";
+  /** Callback fired when the status filter changes. */
   onStatusFilterChange: (s: "all" | "good" | "warning" | "critical") => void;
 }
 
@@ -14,6 +21,16 @@ const FILTERS: Array<{ value: "all" | "good" | "warning" | "critical"; key: "fil
   { value: "critical", key: "filterCritical" },
 ];
 
+/**
+ * Search and filter bar with a text input and status filter toggle buttons.
+ *
+ * @param props - Component props
+ * @param props.query - Current search query text
+ * @param props.onQueryChange - Callback for search query changes
+ * @param props.statusFilter - Active status filter value
+ * @param props.onStatusFilterChange - Callback for filter changes
+ * @returns A search input with filter buttons
+ */
 export function SearchBar({ query, onQueryChange, statusFilter, onStatusFilterChange }: SearchBarProps) {
   const { t } = useT();
 

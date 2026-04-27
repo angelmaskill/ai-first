@@ -2,8 +2,13 @@ import { useState } from "react";
 import type { TimelineEntry } from "../hooks/useProjectData";
 import { useT } from "../i18n/LanguageContext";
 
+/**
+ * Props for the Timeline component.
+ */
 interface TimelineProps {
+  /** Timeline entries to display (newest-first). */
   entries: TimelineEntry[];
+  /** Number of entries to show per page (default: 8). */
   pageSize?: number;
 }
 
@@ -34,6 +39,15 @@ function formatTime(iso: string, lang: string): string {
   }
 }
 
+/**
+ * Vertical timeline showing recent project activity with color-coded tags
+ * and pagination ("load more" button).
+ *
+ * @param props - Component props
+ * @param props.entries - Timeline entries (newest-first)
+ * @param props.pageSize - Entries per page (default: 8)
+ * @returns A vertical timeline with load-more pagination
+ */
 export function Timeline({ entries, pageSize = 8 }: TimelineProps) {
   const { t, lang } = useT();
   const [visibleCount, setVisibleCount] = useState(pageSize);

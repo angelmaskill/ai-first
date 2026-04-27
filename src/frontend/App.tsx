@@ -3,6 +3,14 @@ import { useT } from "./i18n/LanguageContext";
 import { ThemeProvider } from "./i18n/ThemeContext";
 import { Dashboard } from "./pages/Dashboard";
 
+/**
+ * Root application component.
+ *
+ * Wraps the application in ThemeProvider and renders the inner app shell
+ * (loading state, empty state, or Dashboard).
+ *
+ * @returns The root React element tree
+ */
 export function App() {
   return (
     <ThemeProvider>

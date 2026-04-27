@@ -2,7 +2,7 @@
 id: STANDARD-012
 domain: backend
 title: Backend API Design
-stability: draft
+stability: stable
 severity: recommended
 relatedPaths: [src/, .claude/skills/code-scaffold/SKILL.md]
 ---
@@ -59,5 +59,9 @@ Each route handler must:
 
 ## Status
 
-This standard is `draft`. It will stabilize after the first build cycle
-that creates or modifies backend routes under this convention.
+This standard is `stable`. It has been reviewed through a full lifecycle
+cycle and is ready for enforcement.
+
+Note: Future iterations should consider adding conventions for
+API versioning strategy, rate limiting, and authentication/authorization
+header standards.

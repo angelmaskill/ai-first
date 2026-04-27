@@ -1,17 +1,42 @@
 import { useRef, useState, useMemo } from "react";
 
+/**
+ * A single data point on a trend chart (re-exported for component use).
+ */
 export type TrendPoint = {
+  /** X-axis label (e.g. date string). */
   label: string;
-  value: number; // 0-100
+  /** Numeric value in the 0-100 range. */
+  value: number;
 };
 
+/**
+ * Props for the HealthTrendChart component.
+ */
 interface HealthTrendChartProps {
+  /** Trend data points to plot. */
   data: TrendPoint[];
+  /** SVG viewport width (default: 600). */
   width?: number;
+  /** SVG viewport height (default: 180). */
   height?: number;
+  /** Animation delay in milliseconds. */
   delay?: number;
 }
 
+/**
+ * SVG line chart showing health score trends over time.
+ *
+ * Features a smooth cubic bezier curve, area gradient fill, grid lines,
+ * and interactive data point tooltips on hover.
+ *
+ * @param props - Component props
+ * @param props.data - Trend data points
+ * @param props.width - SVG viewport width (default: 600)
+ * @param props.height - SVG viewport height (default: 180)
+ * @param props.delay - Animation delay in milliseconds (default: 0)
+ * @returns An SVG line chart element
+ */
 export function HealthTrendChart({
   data,
   width = 600,

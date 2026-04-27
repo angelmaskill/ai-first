@@ -1,8 +1,13 @@
 import { useMemo } from "react";
 import type { Risk } from "../hooks/useProjectData";
 
+/**
+ * Props for the RiskHeatmap component.
+ */
 interface RiskHeatmapProps {
+  /** Risks to distribute across the heatmap grid. */
   risks: Risk[];
+  /** Animation delay in milliseconds. */
   delay?: number;
 }
 
@@ -40,6 +45,18 @@ function severityToScore(severity: string): number {
   }
 }
 
+/**
+ * 3x3 risk heatmap grid showing risk distribution by probability vs impact.
+ *
+ * Uses severity as a proxy for both axes. Each cell shows the count of risks
+ * and the name of the first risk (truncated). Cells are color-coded from sage
+ * (safe) through amber (moderate) to rust (critical).
+ *
+ * @param props - Component props
+ * @param props.risks - Risk items to distribute across the grid
+ * @param props.delay - Animation delay in milliseconds (default: 0)
+ * @returns A 3x3 heatmap grid with axis labels
+ */
 export function RiskHeatmap({ risks, delay = 0 }: RiskHeatmapProps) {
   const grid = useMemo(() => {
     const cells: HeatCell[][] = [];
