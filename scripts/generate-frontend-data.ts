@@ -166,6 +166,154 @@ function parseTimeline(raw: string): TimelineEntry[] {
   return entries;
 }
 
+// ── Live health signal computation ──
+
+function walkFiles(dir: string, pattern: RegExp, maxDepth = 10): number {
+  let count = 0;
+  try {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.name.startsWith(".") || entry.name === "node_modules") continue;
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory() && maxDepth > 0) {
+        count += walkFiles(full, pattern, maxDepth - 1);
+      } else if (entry.isFile() && pattern.test(entry.name)) {
+        count++;
+      }
+    }
+  } catch { /* dir missing, return 0 */ }
+  return count;
+}
+
+function computeDocsCompleteness(): HealthSignal {
+  const knowledgeCount = walkFiles(path.join(AI_FIRST, "knowledge"), /\.md$/, 1);
+  const standardsCount = walkFiles(path.join(AI_FIRST, "standards"), /\.md$/, 3);
+  const total = knowledgeCount + standardsCount;
+  const score = Math.min(100, total * 8 + 20);
+  return {
+    name: "Docs Completeness",
+    status: score >= 70 ? "good" : score >= 40 ? "warning" : "critical",
+    score,
+    summary: `${knowledgeCount} knowledge items, ${standardsCount} standards`,
+  };
+}
+
+function computeTestCompleteness(): HealthSignal {
+  const testCount = walkFiles(path.join(ROOT, "src"), /\.(test|spec)\.(ts|tsx)$/, 5);
+  const sourceCount = walkFiles(path.join(ROOT, "src"), /(?<!\.test|\.spec)\.(ts|tsx)$/, 5);
+  const ratio = testCount / Math.max(1, sourceCount);
+  const score = Math.min(100, Math.round(ratio * 300));
+  return {
+    name: "Test Completeness",
+    status: ratio >= 0.15 ? "good" : ratio >= 0.05 ? "warning" : "critical",
+    score,
+    summary: `${testCount} test files, ${sourceCount} source files (ratio: ${(ratio * 100).toFixed(0)}%)`,
+  };
+}
+
+function computeAgentCoverage(): HealthSignal {
+  const agentCount = walkFiles(path.join(ROOT, ".claude", "agents"), /\.md$/, 1);
+  const expected = 14;
+  const score = Math.min(100, Math.round((agentCount / expected) * 100));
+  return {
+    name: "Agent Coverage",
+    status: score >= 80 ? "good" : score >= 50 ? "warning" : "critical",
+    score,
+    summary: `${agentCount} agents defined (expected ${expected})`,
+  };
+}
+
+function computeCommandCoverage(): HealthSignal {
+  const commandCount = walkFiles(path.join(ROOT, ".claude", "commands"), /\.md$/, 1);
+  const routingYml = readYaml(path.join(AI_FIRST, "routing.yml"));
+  const slashMatch = routingYml.match(/slash_commands:/);
+  const expected = slashMatch ? routingYml.match(/\/[a-z-]+/g)?.length ?? 14 : 14;
+  const score = Math.min(100, Math.round((commandCount / expected) * 100));
+  return {
+    name: "Command Coverage",
+    status: score >= 80 ? "good" : score >= 50 ? "warning" : "critical",
+    score,
+    summary: `${commandCount} commands for ${expected} slash commands`,
+  };
+}
+
+function computeSkillCoverage(): HealthSignal {
+  const skillsDir = path.join(ROOT, ".claude", "skills");
+  let skillCount = 0;
+  try {
+    for (const entry of fs.readdirSync(skillsDir, { withFileTypes: true })) {
+      if (entry.isDirectory() && fs.existsSync(path.join(skillsDir, entry.name, "SKILL.md"))) {
+        skillCount++;
+      }
+    }
+  } catch { /* dir missing */ }
+  const score = Math.min(100, skillCount * 20);
+  return {
+    name: "Skill Coverage",
+    status: skillCount >= 4 ? "good" : skillCount >= 1 ? "warning" : "critical",
+    score: skillCount > 0 ? score : undefined,
+    summary: `${skillCount} skills registered`,
+  };
+}
+
+function computeSecurityScore(): HealthSignal | null {
+  const reportsDir = path.join(AI_FIRST, "reports");
+  let latestFile = "";
+  let latestMtime = 0;
+  try {
+    for (const entry of fs.readdirSync(reportsDir)) {
+      if (!entry.startsWith("security-") || !entry.endsWith(".md")) continue;
+      const stat = fs.statSync(path.join(reportsDir, entry));
+      if (stat.mtimeMs > latestMtime) {
+        latestMtime = stat.mtimeMs;
+        latestFile = entry;
+      }
+    }
+  } catch { return null; }
+
+  if (!latestFile) return null;
+  const content = readYaml(path.join(reportsDir, latestFile));
+  const verdictMatch = content.match(/\*\*Verdict\*\*:\s*(CLEAN|NEEDS[\s_]*REVIEW|BLOCKING|NEEDS[\s_]*CLEANUP)/i);
+  const verdict = verdictMatch?.[1]?.toUpperCase() ?? "";
+  const isClean = verdict === "CLEAN" || content.includes("0 vulnerabilities") || content.includes("0 vulns");
+
+  return {
+    name: "Security",
+    status: isClean ? "good" : verdict === "BLOCKING" ? "critical" : "warning",
+    score: isClean ? 100 : verdict === "BLOCKING" ? 20 : 60,
+    summary: isClean
+      ? `Security scan CLEAN (${latestFile})`
+      : `Security scan: ${verdict} (${latestFile})`,
+  };
+}
+
+function computeLiveHealthSignals(): HealthSignal[] {
+  const signals: HealthSignal[] = [];
+  const sec = computeSecurityScore();
+  if (sec) signals.push(sec);
+  signals.push(computeDocsCompleteness());
+  signals.push(computeTestCompleteness());
+  signals.push(computeAgentCoverage());
+  signals.push(computeCommandCoverage());
+  signals.push(computeSkillCoverage());
+  return signals;
+}
+
+function mergeHealthSignals(live: HealthSignal[], snapshot: HealthSignal[]): HealthSignal[] {
+  const snapMap = new Map(snapshot.map(s => [s.name, s]));
+  const liveMap = new Map(live.map(s => [s.name, s]));
+
+  return Array.from(liveMap.keys()).map(name => {
+    const l = liveMap.get(name)!;
+    const s = snapMap.get(name);
+
+    const liveIsMeaningful = l.score !== undefined && l.score > 0;
+
+    if (liveIsMeaningful) return l;
+    if (s) return s;
+    return { name: l.name, status: "warning", summary: `No data available for ${l.name}` };
+  });
+}
+
 function main() {
   console.log("Generating frontend data...");
 
@@ -194,14 +342,9 @@ function main() {
     if (evt) syncEvents.push(evt);
   }
 
-  const healthSignals =
-    parseSnapshotHealth(snapshotYml).length > 0
-      ? parseSnapshotHealth(snapshotYml)
-      : [
-          { name: "Stage", status: "good", summary: `Currently at ${project.stage}` },
-          { name: "Tests", status: "warning", score: 0, summary: "No test data available" },
-          { name: "Security", status: "warning", summary: "No scan data available" },
-        ];
+  const liveSignals = computeLiveHealthSignals();
+  const snapshotSignals = parseSnapshotHealth(snapshotYml);
+  const healthSignals = mergeHealthSignals(liveSignals, snapshotSignals);
 
   // Compute health trend from timeline: count entries per day for last 7 days
   const timelineEntries = parseTimeline(timelineMd);

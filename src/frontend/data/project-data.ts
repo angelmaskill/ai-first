@@ -8,37 +8,40 @@ const data: ProjectData = {
   "status": "active",
   "healthSignals": [
     {
+      "name": "Security",
+      "status": "good",
+      "score": 100,
+      "summary": "Security scan CLEAN (security-iter2-20260427.md)"
+    },
+    {
       "name": "Docs Completeness",
       "status": "good",
-      "score": 85,
-      "summary": "README + 8 design docs + 7 standards + 4 review reports"
+      "score": 100,
+      "summary": "5 knowledge items, 12 standards"
     },
     {
       "name": "Test Completeness",
       "status": "good",
-      "score": 95,
-      "summary": "265 tests across 20 files, all passing. Frontend (143), backend (94), snake game (78)."
+      "score": 100,
+      "summary": "20 test files, 35 source files (ratio: 57%)"
     },
     {
       "name": "Agent Coverage",
       "status": "good",
-      "summary": "14 agents defined covering all 10 lifecycle stages"
+      "score": 100,
+      "summary": "15 agents defined (expected 14)"
     },
     {
       "name": "Command Coverage",
-      "status": "good",
-      "summary": "16 slash commands registered matching original requirements"
+      "status": "warning",
+      "score": 61,
+      "summary": "14 commands for 23 slash commands"
     },
     {
       "name": "Skill Coverage",
       "status": "good",
-      "summary": "7 skills registered (security-scan, bug-scan, optimization-scanner, code-scaffold, prd-generator, test-generator, wiki-generator)"
-    },
-    {
-      "name": "Security",
-      "status": "good",
       "score": 100,
-      "summary": "0 vulns, 0 secrets, TS strict mode enforced"
+      "summary": "7 skills registered"
     }
   ],
   "risks": [
