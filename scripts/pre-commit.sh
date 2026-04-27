@@ -65,12 +65,36 @@ check_console() {
     [[ -f "$file" ]] || continue
     case "$file" in
       *.ts|*.tsx|*.js|*.jsx)
-        if grep -n 'console\.\(log\|warn\|error\|debug\|info\)(' "$file" 2>/dev/null; then
-          echo "  [STYLE] console statement in $file"
+        local count=$(grep -c 'console\.\(log\|warn\|error\|debug\|info\)(' "$file" 2>/dev/null || echo 0)
+        if [ "$count" -gt 20 ]; then
+          echo "  [STYLE] $file has $count console statements (limit: 20)"
+          EXIT_CODE=1
+        elif [ "$count" -gt 0 ]; then
+          echo "  [STYLE] $file has $count console statements (under limit of 20)"
         fi
         ;;
     esac
   done
+}
+
+check_typecheck() {
+  echo "  [TYPE] Running tsc --noEmit..."
+  if npx tsc --noEmit 2>&1; then
+    echo "  [TYPE] TypeScript compilation: PASS"
+  else
+    echo "  [TYPE] TypeScript compilation: FAIL"
+    EXIT_CODE=1
+  fi
+}
+
+check_tests() {
+  echo "  [TEST] Running vitest run --changed..."
+  if npx vitest run --changed 2>&1; then
+    echo "  [TEST] Tests: PASS"
+  else
+    echo "  [TEST] Tests: FAIL"
+    EXIT_CODE=1
+  fi
 }
 
 echo "AI-first pre-commit: scanning staged files..."
@@ -78,6 +102,8 @@ check_secrets
 check_env_files
 check_empty_catch
 check_console
+check_typecheck
+check_tests
 
 if [[ $EXIT_CODE -ne 0 ]]; then
   echo ""

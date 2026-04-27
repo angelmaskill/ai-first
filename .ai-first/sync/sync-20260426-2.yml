@@ -8,7 +8,7 @@ relatedPaths:
 impactedKnowledgeIds: []
 impactedStandardIds:
   - STANDARD-001
-status: dismissed
+status: confirmed
 summary: "Only 1 standard (API consistency) defined, but 14 agents have extensive MUST/MUST NOT conventions. Consider extracting cross-agent conventions into additional standards."
 createdAt: "2026-04-26T22:55:00Z"
 updatedAt: "2026-04-26T22:55:00Z"

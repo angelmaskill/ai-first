@@ -92,6 +92,33 @@ Look for knowledge items that reference the changed paths:
 find .ai-first/knowledge -name "*.md" | xargs grep -l "{path pattern}"
 ```
 
+### 3.5. Check Knowledge Expiry
+After checking staleness, scan ALL knowledge items for expiry:
+
+```bash
+# Find items past their reviewDate
+now_ts=$(date -u +%s)
+for f in .ai-first/knowledge/KNOW-*.md; do
+  review_date=$(grep -oP 'reviewDate:\s*"\K[^"]+' "$f" 2>/dev/null || echo "")
+  if [ -n "$review_date" ]; then
+    review_ts=$(date -jf "%Y-%m-%d" "$review_date" +%s 2>/dev/null || date -d "$review_date" +%s 2>/dev/null)
+    if [ $review_ts -lt $now_ts ]; then
+      echo "EXPIRED: $f (reviewDate: $review_date)"
+    fi
+  fi
+  
+  expires_at=$(grep -oP 'expiresAt:\s*"\K[^"]+' "$f" 2>/dev/null || echo "")
+  if [ -n "$expires_at" ] && [ "$expires_at" != "null" ]; then
+    expires_ts=$(date -jf "%Y-%m-%d" "$expires_at" +%s 2>/dev/null || date -d "$expires_at" +%s 2>/dev/null)
+    if [ $expires_ts -lt $now_ts ]; then
+      echo "EXPIRED_PERMANENT: $f (expiresAt: $expires_at) -- archive recommended"
+    fi
+  fi
+done
+```
+
+For each expired item, create a sync event with `triggerType: knowledge_expired`.
+
 ### 4. Generate Sync Events
 For each stale match, create a sync event file:
 ```bash
@@ -121,6 +148,40 @@ For each sync event, suggest the specific update needed:
 
 ### 6. Report
 Write a sync report to `.ai-first/reports/sync-{timestamp}.md`.
+
+### 7. Process Existing Open Sync Events
+
+Check for sync events that are still open (not resolved):
+
+```bash
+# Find all sync events that are not confirmed or dismissed
+grep -l "status: suggested" .ai-first/sync/*.yml 2>/dev/null
+grep -l "status: pending" .ai-first/sync/*.yml 2>/dev/null
+```
+
+For each open event:
+1. Read the event to understand what knowledge item needs updating
+2. Check if the underlying issue has since been resolved (e.g., KNOW-XXX has been updated)
+3. If resolved, mark the event `status: confirmed`
+4. If still unresolved, include it in the sync report with an escalated severity warning
+5. If an event has been open > 7 days, escalate to the user: "Unresolved sync event <id> is now X days old"
+
+Open events MUST appear in the sync report with age and escalation status.
+
+### 8. Trigger Wiki Regeneration
+
+If any sync event changed knowledge items (confirmed), or if the wiki directory is empty:
+
+```bash
+# Check if wiki needs regeneration
+if [ ! -f .ai-first/wiki/index.md ] || [ "$(ls .ai-first/wiki/*.md 2>/dev/null | wc -l)" -eq 0 ]; then
+  echo "Wiki is empty — recommend running /wiki"
+fi
+```
+
+Add a line to the sync report Actions Required section: `[ ] Regenerate wiki (run /wiki) — detected {N} knowledge changes since last wiki build`
+
+The wiki must be regenerated after any knowledge item is created, updated, or confirmed.
 
 ## Output Format
 
@@ -165,7 +226,7 @@ Write a sync report to `.ai-first/reports/sync-{timestamp}.md`.
 
 ### YOU MUST NOT
 - Modify knowledge files directly (only suggest changes)
-- Auto-confirm sync events (always leave status as `suggested`)
+- Auto-confirm sync events — only confirm when you have verified the underlying issue has been addressed by reading the actual knowledge file
 - Skip files because they seem "unimportant"
 - Delete or modify existing sync events without explicit instruction
 

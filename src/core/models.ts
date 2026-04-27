@@ -50,7 +50,15 @@ export type NextAction = {
   id: string;
   title: string;
   description: string;
-  actionType: "analyze" | "generate" | "reuse" | "skip" | "implement" | "review" | "sync" | "release";
+  actionType:
+    | "analyze"
+    | "generate"
+    | "reuse"
+    | "skip"
+    | "implement"
+    | "review"
+    | "sync"
+    | "release";
   priority: "p0" | "p1" | "p2" | "p3";
   recommendedOwner: AgentRole | "user";
   requiresConfirmation: boolean;
@@ -156,7 +164,14 @@ export type DomainMap = {
 export type ReviewFinding = {
   id: string;
   severity: "critical" | "high" | "medium" | "low";
-  category: "logic" | "security" | "architecture" | "docs" | "knowledge" | "testing" | "consistency";
+  category:
+    | "logic"
+    | "security"
+    | "architecture"
+    | "docs"
+    | "knowledge"
+    | "testing"
+    | "consistency";
   title: string;
   detail: string;
   relatedPaths?: string[];
@@ -206,7 +221,15 @@ export type KnowledgeItem = {
   projectId: string;
   name: string;
   description: string;
-  category: "api-contract" | "data-model" | "architecture" | "security" | "config" | "dependency" | "feature" | "workflow";
+  category:
+    | "api-contract"
+    | "data-model"
+    | "architecture"
+    | "security"
+    | "config"
+    | "dependency"
+    | "feature"
+    | "workflow";
   relatedPaths: string[];
   content: string;
   stability: "stable" | "draft" | "deprecated";

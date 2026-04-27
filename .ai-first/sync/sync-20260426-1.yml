@@ -8,7 +8,7 @@ relatedPaths:
 impactedKnowledgeIds:
   - KNOW-001
 impactedStandardIds: []
-status: dismissed
+status: confirmed
 summary: "KNOW-001 project overview references 8 agents and 6 skills; actual state is 14 agents and 13 commands. Update agent catalog and slash command list."
 createdAt: "2026-04-26T22:55:00Z"
 updatedAt: "2026-04-26T22:55:00Z"

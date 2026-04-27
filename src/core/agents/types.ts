@@ -1,4 +1,10 @@
-import type { AgentDefinition, AgentRole, AgentType, ProjectStage, SubagentType } from "../models.ts";
+import type {
+  AgentDefinition,
+  AgentRole,
+  AgentType,
+  ProjectStage,
+  SubagentType,
+} from "../models.ts";
 
 export type { AgentDefinition, AgentRole, AgentType, SubagentType };
 

@@ -3,6 +3,8 @@ id: KNOW-001
 type: project_fact
 title: Project Overview
 stability: stable
+reviewDate: "2026-06-26"
+expiresAt: null
 relatedPaths: [.claude/CLAUDE.md, .ai-first/project.yml]
 sourceRefs: [docs/AI-first-vibe-coding-脚手架-产品能力地图与MVP范围定义.md]
 ---
@@ -23,8 +25,8 @@ native agent/skill dispatch via `.claude/agents/*.md` and `.claude/skills/*/SKIL
 
 ## Key Components
 
-- **14 specialized agents**: intake, planner, architect, builder, reviewer, security-reviewer, release, team-lead, repo-scanner, stage-assessor, knowledge-sync, state-updater, skill-recommend, marketplace-skill
-- **13 slash commands**: init, adopt, guide, scan, decide, review, sync, advance, complete, task, wiki, skills, standards
-- **6 skills**: security-scan, bug-scan, optimization-scanner, wiki-generator, prd-generator, code-scaffold
+- **15 specialized agents**: intake, planner, architect, builder, reviewer, security-reviewer, release, team-lead, repo-scanner, stage-assessor, knowledge-sync, state-updater, skill-recommend, smoke-case, marketplace-skill
+- **14 slash commands**: init, adopt, guide, scan, decide, review, sync, advance, complete, task, wiki, skills, standards, health
+- **7 skills**: security-scan, bug-scan, optimization-scanner, wiki-generator, prd-generator, code-scaffold, test-generator
 - Subagent dispatcher with topological sort for parallel execution
 - Symlink-based stage tracking: `state/current → stage-XX-{stage}`

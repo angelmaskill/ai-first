@@ -146,13 +146,19 @@ describe("splitTask", () => {
 
   it("returns single subtask for simple single-domain task", () => {
     const scope = {
-      id: "sc-1", projectId: "p1", taskId: "t-split", summary: "simple",
+      id: "sc-1",
+      projectId: "p1",
+      taskId: "t-split",
+      summary: "simple",
       frontendPaths: ["src/Button.tsx"],
       backendPaths: [],
       sharedPaths: [],
       docsPaths: [],
-      riskLevel: "low", parallelSafe: true, lockMode: "none",
-      createdAt: "", updatedAt: "",
+      riskLevel: "low",
+      parallelSafe: true,
+      lockMode: "none",
+      createdAt: "",
+      updatedAt: "",
     } as any;
 
     const subtasks = splitTask(baseTask, scope);
@@ -162,13 +168,19 @@ describe("splitTask", () => {
 
   it("splits by domain for full-stack task", () => {
     const scope = {
-      id: "sc-2", projectId: "p1", taskId: "t-split", summary: "fullstack",
+      id: "sc-2",
+      projectId: "p1",
+      taskId: "t-split",
+      summary: "fullstack",
       frontendPaths: ["src/App.tsx"],
       backendPaths: ["src/api/routes.ts"],
       sharedPaths: [],
       docsPaths: [],
-      riskLevel: "medium", parallelSafe: true, lockMode: "none",
-      createdAt: "", updatedAt: "",
+      riskLevel: "medium",
+      parallelSafe: true,
+      lockMode: "none",
+      createdAt: "",
+      updatedAt: "",
     } as any;
 
     const subtasks = splitTask(baseTask, scope);
@@ -180,13 +192,19 @@ describe("splitTask", () => {
 
   it("respects maxSubtasks config", () => {
     const scope = {
-      id: "sc-3", projectId: "p1", taskId: "t-split", summary: "many domains",
+      id: "sc-3",
+      projectId: "p1",
+      taskId: "t-split",
+      summary: "many domains",
       frontendPaths: ["src/f1.tsx"],
       backendPaths: ["src/b1.ts"],
       sharedPaths: ["src/s1.ts"],
       docsPaths: ["docs/d1.md"],
-      riskLevel: "low", parallelSafe: true, lockMode: "none",
-      createdAt: "", updatedAt: "",
+      riskLevel: "low",
+      parallelSafe: true,
+      lockMode: "none",
+      createdAt: "",
+      updatedAt: "",
     } as any;
 
     const config = { maxSubtasks: 2, targetGranularity: "module" as const, preferParallel: true };
@@ -196,16 +214,26 @@ describe("splitTask", () => {
 
   it("splits by file groups for many files in single domain", () => {
     const scope = {
-      id: "sc-4", projectId: "p1", taskId: "t-split", summary: "many files",
+      id: "sc-4",
+      projectId: "p1",
+      taskId: "t-split",
+      summary: "many files",
       frontendPaths: [
-        "src/components/A.tsx", "src/components/B.tsx", "src/components/C.tsx",
-        "src/hooks/useX.ts", "src/hooks/useY.ts", "src/utils/format.ts",
+        "src/components/A.tsx",
+        "src/components/B.tsx",
+        "src/components/C.tsx",
+        "src/hooks/useX.ts",
+        "src/hooks/useY.ts",
+        "src/utils/format.ts",
       ],
       backendPaths: [],
       sharedPaths: [],
       docsPaths: [],
-      riskLevel: "medium", parallelSafe: true, lockMode: "none",
-      createdAt: "", updatedAt: "",
+      riskLevel: "medium",
+      parallelSafe: true,
+      lockMode: "none",
+      createdAt: "",
+      updatedAt: "",
     } as any;
 
     const config = { maxSubtasks: 5, targetGranularity: "module" as const, preferParallel: false };
@@ -220,13 +248,19 @@ describe("splitTask", () => {
     // Use mode "configure" which is NOT in modeMap, so falls through to domain inference
     const verifyTask = { ...baseTask, mode: "configure" as any };
     const scope = {
-      id: "sc-5", projectId: "p1", taskId: "t-split", summary: "multi domain with docs",
+      id: "sc-5",
+      projectId: "p1",
+      taskId: "t-split",
+      summary: "multi domain with docs",
       frontendPaths: ["src/App.tsx"],
       backendPaths: [],
       sharedPaths: [],
       docsPaths: ["README.md"],
-      riskLevel: "low", parallelSafe: true, lockMode: "none",
-      createdAt: "", updatedAt: "",
+      riskLevel: "low",
+      parallelSafe: true,
+      lockMode: "none",
+      createdAt: "",
+      updatedAt: "",
     } as any;
 
     const subtasks = splitTask(verifyTask, scope);
@@ -239,13 +273,19 @@ describe("splitTask", () => {
 
   it("mode-based mapping takes priority over domain inference", () => {
     const scope = {
-      id: "sc-6", projectId: "p1", taskId: "t-split", summary: "multi domain with implement",
+      id: "sc-6",
+      projectId: "p1",
+      taskId: "t-split",
+      summary: "multi domain with implement",
       frontendPaths: ["src/App.tsx"],
       backendPaths: [],
       sharedPaths: [],
       docsPaths: ["README.md"],
-      riskLevel: "low", parallelSafe: true, lockMode: "none",
-      createdAt: "", updatedAt: "",
+      riskLevel: "low",
+      parallelSafe: true,
+      lockMode: "none",
+      createdAt: "",
+      updatedAt: "",
     } as any;
 
     const subtasks = splitTask(baseTask, scope);
@@ -274,9 +314,7 @@ describe("resolveAgentForSubtask", () => {
   it("falls back to role mapping", () => {
     const registry = {
       bySubagentType: new Map(),
-      byRole: new Map([
-        ["builder", { id: "a2", name: "builder-agent", role: "builder" }],
-      ]),
+      byRole: new Map([["builder", { id: "a2", name: "builder-agent", role: "builder" }]]),
     } as any;
 
     const subtask = { assignedTo: "executor" } as any;

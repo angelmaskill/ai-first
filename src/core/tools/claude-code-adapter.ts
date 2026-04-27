@@ -1,4 +1,9 @@
-import type { ToolAdapter, ToolCapabilityProfile, ToolMessage, AdapterStatus } from "./tool-adapter-protocol.ts";
+import type {
+  ToolAdapter,
+  ToolCapabilityProfile,
+  ToolMessage,
+  AdapterStatus,
+} from "./tool-adapter-protocol.ts";
 import type { ProjectStage, AgentRole } from "../models.ts";
 
 const CLAUDE_CODE_PROFILE: ToolCapabilityProfile = {
@@ -17,13 +22,27 @@ const CLAUDE_CODE_PROFILE: ToolCapabilityProfile = {
 };
 
 const ALL_STAGES: ProjectStage[] = [
-  "idea", "discovery", "spec", "architecture", "scaffold",
-  "build", "qa", "release", "operate", "evolve",
+  "idea",
+  "discovery",
+  "spec",
+  "architecture",
+  "scaffold",
+  "build",
+  "qa",
+  "release",
+  "operate",
+  "evolve",
 ];
 
 const ALL_ROLES: AgentRole[] = [
-  "intake", "planner", "architect", "builder",
-  "reviewer", "security_reviewer", "release", "team_lead",
+  "intake",
+  "planner",
+  "architect",
+  "builder",
+  "reviewer",
+  "security_reviewer",
+  "release",
+  "team_lead",
 ];
 
 export class ClaudeCodeAdapter implements ToolAdapter {

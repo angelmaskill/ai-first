@@ -2,6 +2,9 @@
 id: KNOW-002
 title: TypeScript→Markdown Refactoring Changelog
 type: changelog
+stability: stable
+reviewDate: "2026-06-26"
+expiresAt: null
 created: 2026-04-26
 tags: [refactoring, changelog, typescript, markdown, claude-book]
 ---

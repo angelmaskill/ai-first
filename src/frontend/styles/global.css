@@ -1,0 +1,204 @@
+@layer tokens, reset, base, components, utilities;
+
+/* ── Design Tokens ── */
+@layer tokens {
+  :root {
+    --color-cream: #faf7f2;
+    --color-warm-white: #f5f0e8;
+    --color-sand: #e8e0d5;
+    --color-charcoal: #1a1a1a;
+    --color-warm-gray: #6b6560;
+    --color-slate: #4a4550;
+    --color-indigo: #2d2a5e;
+    --color-indigo-deep: #1f1d42;
+    --color-sage: #6b8f71;
+    --color-sage-pale: #e8efe6;
+    --color-amber: #c4823e;
+    --color-amber-pale: #faf3e8;
+    --color-rust: #b8443a;
+    --color-rust-pale: #faf0ee;
+    --color-sky: #5b8c9e;
+    --color-sky-pale: #eaf2f5;
+
+    --font-display: "Playfair Display", Georgia, "Times New Roman", serif;
+    --font-body: "DM Sans", "SF Pro Text", -apple-system, sans-serif;
+    --font-mono: "JetBrains Mono", "SF Mono", "Cascadia Code", monospace;
+
+    --shadow-sm: 0 1px 2px oklch(0.12 0.01 84 / 4%);
+    --shadow-md: 0 4px 16px oklch(0.12 0.01 84 / 6%);
+    --shadow-lg: 0 12px 40px oklch(0.12 0.01 84 / 8%);
+
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+
+    --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-out: 350ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+/* ── Reset ── */
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--color-cream);
+    color: var(--color-charcoal);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+}
+
+/* ── Base ── */
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+  }
+
+  h1 {
+    font-size: clamp(2.25rem, 3.5vw, 3.25rem);
+    color: var(--color-indigo-deep);
+  }
+
+  h2 {
+    font-size: clamp(1.5rem, 2.2vw, 1.875rem);
+    color: var(--color-slate);
+  }
+
+  h3 {
+    font-size: 1.125rem;
+    color: var(--color-charcoal);
+  }
+
+  p {
+    color: var(--color-warm-gray);
+  }
+
+  ::selection {
+    background: var(--color-indigo);
+    color: var(--color-cream);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-sand);
+    border-radius: 3px;
+  }
+}
+
+/* ── Components ── */
+@layer components {
+  .card {
+    background: var(--color-warm-white);
+    border: 1px solid oklch(0.89 0.015 84 / 60%);
+    border-radius: var(--radius-md);
+    padding: clamp(1.25rem, 2vw, 2rem);
+    transition: box-shadow var(--transition-base);
+  }
+  .card:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-body);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 100px;
+    letter-spacing: 0.01em;
+  }
+
+  .stat-value {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 3vw, 3rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--color-indigo-deep);
+  }
+
+  .stat-label {
+    font-size: 0.875rem;
+    color: var(--color-warm-gray);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  .divider {
+    height: 1px;
+    background: oklch(0.89 0.015 84 / 50%);
+    border: none;
+    margin: 0;
+  }
+}
+
+/* ── Utilities ── */
+@layer utilities {
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+}
+
+/* ── Shared Animations ── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInLeft {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  @layer base {
+    h1 { font-size: 1.75rem; }
+    h2 { font-size: 1.25rem; }
+  }
+
+  @layer components {
+    .stat-value { font-size: 1.75rem; }
+    .card { padding: 1rem; }
+  }
+}

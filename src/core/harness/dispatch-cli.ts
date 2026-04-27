@@ -12,7 +12,12 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { splitTask, createDispatchPlan, calculateComplexity, defaultSplitConfig } from "./subagent-dispatcher.ts";
+import {
+  splitTask,
+  createDispatchPlan,
+  calculateComplexity,
+  defaultSplitConfig,
+} from "./subagent-dispatcher.ts";
 import type { Subtask, DispatchPlan, SplitConfig } from "./subagent-dispatcher.ts";
 import type { Task, ChangeScope } from "../models.ts";
 
@@ -21,7 +26,7 @@ function parseTaskYaml(filePath: string): { task: Task; scope: ChangeScope } {
 
   const extract = (key: string): string => {
     const m = content.match(new RegExp(`^${key}:\\s*(.+)$`, "m"));
-    return (m ? m[1].trim() : "");
+    return m ? m[1].trim() : "";
   };
 
   const extractList = (key: string): string[] => {
@@ -90,21 +95,30 @@ function main(): void {
   const complexity = calculateComplexity(task, scope);
 
   console.error(`Task: ${task.title}`);
-  console.error(`Files: ${scope.frontendPaths.length + scope.backendPaths.length + scope.sharedPaths.length + scope.docsPaths.length}`);
+  console.error(
+    `Files: ${scope.frontendPaths.length + scope.backendPaths.length + scope.sharedPaths.length + scope.docsPaths.length}`,
+  );
   console.error(`Complexity: ${(complexity * 100).toFixed(0)}%`);
 
   let subtasks: Subtask[];
-  let usedSplit = false;
+  let usedSplit: boolean;
 
   if (complexity > 0.3) {
-    const config: SplitConfig = complexity > 0.6
-      ? { maxSubtasks: 5, targetGranularity: "file", preferParallel: true }
-      : defaultSplitConfig();
+    const config: SplitConfig =
+      complexity > 0.6
+        ? { maxSubtasks: 5, targetGranularity: "file", preferParallel: true }
+        : defaultSplitConfig();
     subtasks = splitTask(task, scope, config);
     usedSplit = subtasks.length > 1;
-    console.error(`Split into ${subtasks.length} subtasks (strategy: ${usedSplit ? "multi" : "single"})`);
+    console.error(
+      `Split into ${subtasks.length} subtasks (strategy: ${usedSplit ? "multi" : "single"})`,
+    );
   } else {
-    subtasks = splitTask(task, scope, { maxSubtasks: 1, targetGranularity: "feature", preferParallel: false });
+    subtasks = splitTask(task, scope, {
+      maxSubtasks: 1,
+      targetGranularity: "feature",
+      preferParallel: false,
+    });
     console.error("Single subtask (low complexity)");
   }
 
@@ -132,22 +146,25 @@ function main(): void {
     `  estimatedDurationSeconds: ${plan.estimatedDuration}`,
     ``,
     `executionOrder:`,
-    ...plan.executionOrder.map((group, i) =>
-      `  - group: ${i + 1}\n    parallel:\n${group.map(id => `      - ${id}`).join("\n")}`
+    ...plan.executionOrder.map(
+      (group, i) =>
+        `  - group: ${i + 1}\n    parallel:\n${group.map((id) => `      - ${id}`).join("\n")}`,
     ),
     ``,
     `subtasks:`,
-    ...subtasks.map(st => [
-      `  - id: ${st.id}`,
-      `    title: ${st.title}`,
-      `    assignedTo: ${st.assignedTo}`,
-      `    status: ${st.status}`,
-      `    dependencies: [${st.dependencies.join(", ")}]`,
-      `    inputs:`,
-      ...Object.entries(st.inputs).map(([k, v]) =>
-        `      ${k}: ${typeof v === "string" ? v : JSON.stringify(v)}`
-      ),
-    ].join("\n")),
+    ...subtasks.map((st) =>
+      [
+        `  - id: ${st.id}`,
+        `    title: ${st.title}`,
+        `    assignedTo: ${st.assignedTo}`,
+        `    status: ${st.status}`,
+        `    dependencies: [${st.dependencies.join(", ")}]`,
+        `    inputs:`,
+        ...Object.entries(st.inputs).map(
+          ([k, v]) => `      ${k}: ${typeof v === "string" ? v : JSON.stringify(v)}`,
+        ),
+      ].join("\n"),
+    ),
   ].join("\n");
 
   fs.writeFileSync(manifestPath, manifest, "utf-8");
@@ -160,7 +177,7 @@ function main(): void {
     subtaskCount: subtasks.length,
     parallelGroups: plan.executionOrder.length,
     executionOrder: plan.executionOrder,
-    subtasks: subtasks.map(st => ({
+    subtasks: subtasks.map((st) => ({
       id: st.id,
       title: st.title,
       assignedTo: st.assignedTo,

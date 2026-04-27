@@ -70,7 +70,7 @@ export interface SplitConfig {
 export function splitTask(
   task: Task,
   scope: ChangeScope,
-  config: SplitConfig = defaultSplitConfig()
+  config: SplitConfig = defaultSplitConfig(),
 ): Subtask[] {
   const subtasks: Subtask[] = [];
 
@@ -79,14 +79,15 @@ export function splitTask(
     ...scope.frontendPaths,
     ...scope.backendPaths,
     ...scope.sharedPaths,
-    ...scope.docsPaths
+    ...scope.docsPaths,
   ];
-  const hasMultipleDomains = [
-    scope.frontendPaths.length > 0,
-    scope.backendPaths.length > 0,
-    scope.sharedPaths.length > 0,
-    scope.docsPaths.length > 0
-  ].filter(Boolean).length > 1;
+  const hasMultipleDomains =
+    [
+      scope.frontendPaths.length > 0,
+      scope.backendPaths.length > 0,
+      scope.sharedPaths.length > 0,
+      scope.docsPaths.length > 0,
+    ].filter(Boolean).length > 1;
 
   if (hasMultipleDomains) {
     // Frontend domain subtask
@@ -125,8 +126,8 @@ export function splitTask(
         inputs: {
           parentTask: task,
           paths,
-          groupName
-        }
+          groupName,
+        },
       };
 
       // Create simple dependency chain for sequential execution
@@ -160,9 +161,9 @@ export function splitTask(
         sharedPaths: scope.sharedPaths,
         docsPaths: scope.docsPaths,
         riskLevel: scope.riskLevel,
-        parallelSafe: scope.parallelSafe
-      }
-    }
+        parallelSafe: scope.parallelSafe,
+      },
+    },
   };
 
   return [singleSubtask];
@@ -171,12 +172,7 @@ export function splitTask(
 /**
  * Creates a subtask for a specific domain
  */
-function createDomainSubtask(
-  task: Task,
-  domainId: string,
-  paths: string[],
-  mode: string
-): Subtask {
+function createDomainSubtask(task: Task, domainId: string, paths: string[], mode: string): Subtask {
   return {
     id: toId("SUB"),
     parentTaskId: task.id,
@@ -188,8 +184,8 @@ function createDomainSubtask(
     inputs: {
       parentTask: task,
       domainId,
-      paths
-    }
+      paths,
+    },
   };
 }
 
@@ -211,9 +207,7 @@ export function createDispatchPlan(subtasks: Subtask[]): DispatchPlan {
 
   while (remaining.length > 0) {
     // Find all subtasks with no unmet dependencies
-    const ready = remaining.filter((st) =>
-      st.dependencies.every((depId) => executed.has(depId))
-    );
+    const ready = remaining.filter((st) => st.dependencies.every((depId) => executed.has(depId)));
 
     if (ready.length === 0) {
       // Circular dependency - force execute remaining
@@ -235,16 +229,14 @@ export function createDispatchPlan(subtasks: Subtask[]): DispatchPlan {
   return {
     subtasks,
     executionOrder,
-    estimatedDuration
+    estimatedDuration,
   };
 }
 
 /**
  * Aggregates subtask results into a parent task result
  */
-export function aggregateResults(
-  subtaskResults: SubtaskResult[]
-): {
+export function aggregateResults(subtaskResults: SubtaskResult[]): {
   success: boolean;
   outputs: Record<string, unknown>;
   errors: string[];
@@ -254,7 +246,7 @@ export function aggregateResults(
   const errors: string[] = [];
   const outputs: Record<string, unknown> = {
     subtaskCount: subtaskResults.length,
-    completedAt: nowIso()
+    completedAt: nowIso(),
   };
 
   for (const result of subtaskResults) {
@@ -274,7 +266,7 @@ export function aggregateResults(
     success,
     outputs,
     errors,
-    summary
+    summary,
   };
 }
 
@@ -290,7 +282,7 @@ function inferAgentType(taskMode: string, domainHint: string): SubagentType {
     plan: "planner",
     design: "architect",
     debug: "debugger",
-    verify: "verifier"
+    verify: "verifier",
   };
 
   if (modeMap[taskMode]) {
@@ -348,7 +340,7 @@ export function defaultSplitConfig(): SplitConfig {
   return {
     maxSubtasks: 5,
     targetGranularity: "module",
-    preferParallel: true
+    preferParallel: true,
   };
 }
 
@@ -371,7 +363,7 @@ export function calculateComplexity(task: Task, scope: ChangeScope): number {
     scope.frontendPaths.length > 0,
     scope.backendPaths.length > 0,
     scope.sharedPaths.length > 0,
-    scope.docsPaths.length > 0
+    scope.docsPaths.length > 0,
   ].filter(Boolean).length;
   complexity += Math.min(domainCount / 5, 0.3);
 
@@ -393,7 +385,7 @@ export function calculateComplexity(task: Task, scope: ChangeScope): number {
  */
 export function resolveAgentForSubtask(
   registry: AgentRegistry,
-  subtask: Subtask
+  subtask: Subtask,
 ): AgentDefinition | undefined {
   if (typeof subtask.assignedTo === "string") {
     const bySub = registry.bySubagentType.get(subtask.assignedTo as SubagentType);

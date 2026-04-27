@@ -3,6 +3,8 @@ id: KNOW-003
 type: workflow_note
 title: Novel Framework Patterns
 stability: stable
+reviewDate: "2026-06-26"
+expiresAt: null
 relatedPaths: [.ai-first/locks/rules.lock, .ai-first/logs/timeline.md, .claude/agents/state-updater-agent.md]
 sourceRefs: [多Agent小说创作框架源码分析.md]
 ---

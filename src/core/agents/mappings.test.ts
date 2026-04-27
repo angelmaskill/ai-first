@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import {
-  subagentToRole,
-  roleToSubagents,
-  AGENT_ROLE_TO_SUBAGENT,
-} from "./mappings.ts";
+import { subagentToRole, roleToSubagents, AGENT_ROLE_TO_SUBAGENT } from "./mappings.ts";
 import type { AgentRole, SubagentType } from "../models.ts";
 
 describe("subagentToRole", () => {
@@ -61,9 +57,19 @@ describe("subagentToRole", () => {
 
   it("covers all SubagentType values", () => {
     const allSubs: SubagentType[] = [
-      "executor", "planner", "architect", "debugger", "verifier",
-      "code-reviewer", "test-engineer", "designer", "writer",
-      "qa-tester", "scientist", "document-specialist", "git-master",
+      "executor",
+      "planner",
+      "architect",
+      "debugger",
+      "verifier",
+      "code-reviewer",
+      "test-engineer",
+      "designer",
+      "writer",
+      "qa-tester",
+      "scientist",
+      "document-specialist",
+      "git-master",
     ];
     for (const s of allSubs) {
       const role = subagentToRole(s);
@@ -101,8 +107,14 @@ describe("roleToSubagents", () => {
 
   it("covers all AgentRole values", () => {
     const allRoles: AgentRole[] = [
-      "intake", "planner", "architect", "builder", "reviewer",
-      "security_reviewer", "release", "team_lead",
+      "intake",
+      "planner",
+      "architect",
+      "builder",
+      "reviewer",
+      "security_reviewer",
+      "release",
+      "team_lead",
     ];
     for (const r of allRoles) {
       const subs = roleToSubagents(r);
@@ -114,9 +126,19 @@ describe("roleToSubagents", () => {
 describe("bidirectional consistency", () => {
   it("every SubagentType maps to a valid AgentRole", () => {
     const allSubs: SubagentType[] = [
-      "executor", "planner", "architect", "debugger", "verifier",
-      "code-reviewer", "test-engineer", "designer", "writer",
-      "qa-tester", "scientist", "document-specialist", "git-master",
+      "executor",
+      "planner",
+      "architect",
+      "debugger",
+      "verifier",
+      "code-reviewer",
+      "test-engineer",
+      "designer",
+      "writer",
+      "qa-tester",
+      "scientist",
+      "document-specialist",
+      "git-master",
     ];
     for (const s of allSubs) {
       const role = subagentToRole(s);
@@ -127,8 +149,14 @@ describe("bidirectional consistency", () => {
 
   it("every AgentRole has at least one subagent", () => {
     const allRoles: AgentRole[] = [
-      "intake", "planner", "architect", "builder", "reviewer",
-      "security_reviewer", "release", "team_lead",
+      "intake",
+      "planner",
+      "architect",
+      "builder",
+      "reviewer",
+      "security_reviewer",
+      "release",
+      "team_lead",
     ];
     for (const r of allRoles) {
       expect(AGENT_ROLE_TO_SUBAGENT[r].length).toBeGreaterThan(0);

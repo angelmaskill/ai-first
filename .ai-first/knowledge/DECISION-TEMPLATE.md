@@ -24,6 +24,8 @@ type: decision
 category: architecture | security | workflow | tooling | api-contract
 title: {decision title}
 stability: confirmed
+reviewDate: {ISO timestamp + 60 days}
+expiresAt: null
 relatedPaths:
   - path/to/affected/file
 createdAt: {ISO timestamp}

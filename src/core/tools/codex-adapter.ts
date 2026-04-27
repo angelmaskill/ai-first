@@ -1,4 +1,9 @@
-import type { ToolAdapter, ToolCapabilityProfile, ToolMessage, AdapterStatus } from "./tool-adapter-protocol.ts";
+import type {
+  ToolAdapter,
+  ToolCapabilityProfile,
+  ToolMessage,
+  AdapterStatus,
+} from "./tool-adapter-protocol.ts";
 import type { ProjectStage, AgentRole } from "../models.ts";
 
 const CODEX_PROFILE: ToolCapabilityProfile = {
@@ -16,13 +21,9 @@ const CODEX_PROFILE: ToolCapabilityProfile = {
   notes: ["Sub-agents and skill integration require custom orchestration layer"],
 };
 
-const CODEX_STAGES: ProjectStage[] = [
-  "scaffold", "build", "qa", "operate",
-];
+const CODEX_STAGES: ProjectStage[] = ["scaffold", "build", "qa", "operate"];
 
-const CODEX_ROLES: AgentRole[] = [
-  "builder", "reviewer",
-];
+const CODEX_ROLES: AgentRole[] = ["builder", "reviewer"];
 
 export class CodexAdapter implements ToolAdapter {
   readonly id: string;
@@ -60,7 +61,11 @@ export class CodexAdapter implements ToolAdapter {
       type: "response",
       source: this.id,
       target: message.source,
-      payload: { ok: true, echo: message.payload, note: "Codex CLI — no native sub-agent/skill dispatch" },
+      payload: {
+        ok: true,
+        echo: message.payload,
+        note: "Codex CLI — no native sub-agent/skill dispatch",
+      },
       timestamp: new Date().toISOString(),
       correlationId: message.correlationId,
     };
