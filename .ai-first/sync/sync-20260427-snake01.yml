@@ -1,0 +1,15 @@
+id: sync-20260427-snake01
+timestamp: "2026-04-27T09:30:00Z"
+taskId: task-20260426-snake01
+trigger: post-build-complete
+status: confirmed
+
+findings:
+  staleness: []
+  newFiles:
+    - /tmp/snake-game-project/knowledge/architecture.md
+
+summary: >
+  Seeded initial knowledge doc (architecture.md) for Snake game project.
+  Bug scan and security scan both passed clean. No stale docs detected —
+  this was the first knowledge sync for proj-snake01.

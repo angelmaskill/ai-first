@@ -5,6 +5,10 @@
 # Parallel groups: 1
 # Estimated duration: 5 min
 
+status: done
+completedAt: "2026-04-27T09:55:00Z"
+reviewRef: reviews/snake-qa-20260427-final.md
+
 plan:
   taskId: task-20260426-snake01
   subtaskCount: 1
