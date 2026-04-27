@@ -20,7 +20,7 @@ subtasks:
   - id: SUB_6889lo
     title: "Implement Snake game core modules"
     assignedTo: executor
-    status: pending
+    status: done
     dependencies: []
     inputs:
       parentTask: {"id":"task-20260426-snake01","projectId":"proj-snake01","title":"\"Implement Snake game core modules\"","description":">","stage":"build","mode":"execute","domainIds":[],"status":"in_progress","priority":"p0","createdAt":"\"2026-04-26T14:30:00Z\"","updatedAt":"\"2026-04-26T14:30:00Z\""}
