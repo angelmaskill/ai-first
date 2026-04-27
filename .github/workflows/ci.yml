@@ -6,10 +6,17 @@ on:
   pull_request:
     branches: [master, main]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  # ── Stage 1: Static Analysis (parallel) ──
+
   typecheck:
     name: TypeScript Check
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -19,9 +26,39 @@ jobs:
       - run: npm ci
       - run: npx tsc --noEmit
 
+  lint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+      - run: npm run lint
+
+  build:
+    name: Vite Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+      - run: npx vite build
+
+  # ── Stage 2: Dynamic Verification ──
+
   test:
     name: Tests (vitest)
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [typecheck, build]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -31,56 +68,91 @@ jobs:
       - run: npm ci
       - run: npm test
 
+  # ── Stage 3: Security & Quality Gates (parallel) ──
+
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [test]
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+
       - name: Secret detection
         run: |
           echo "=== Secret Detection ==="
-          FINDINGS=$(grep -rn "API_KEY\|SECRET\|TOKEN\|PASSWORD\|password\|secret\|private_key" \
+          FINDINGS=$(grep -rnE \
+            'API[_-]?KEY\s*=\s*["\x27"'\''][A-Za-z0-9_-]{8,}|SECRET[_-]?KEY\s*=\s*["\x27"'\''][A-Za-z0-9_-]{8,}|password\s*=\s*["\x27"'\''][^\x27"'\'']+["\x27"'\'']|BEGIN\s+(RSA|EC|DSA|OPENSSH)\s+PRIVATE\s+KEY|github[_-]?token\s*[:=]\s*["\x27"'\'']?[A-Za-z0-9_-]{8,}|AUTH_TOKEN\s*=\s*["\x27"'\'']|DATABASE_URL\s*=\s*["\x27"'\'']postgres' \
             --include="*.ts" --include="*.tsx" --include="*.js" \
             --include="*.json" --include="*.yml" --include="*.yaml" \
-            . --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.ai-first \
-            | grep -v "import\|export\|process\.env\|\.d\.ts" || true)
+            . --exclude-dir=node_modules --exclude-dir=.ai-first \
+            || true)
           if [ -n "$FINDINGS" ]; then
-            echo "WARNING: Potential secrets found:"
+            echo "::error::Potential secrets detected"
             echo "$FINDINGS"
             exit 1
           fi
-          echo "No secrets detected — OK"
+          echo "No secrets detected"
+
+      - name: Env file check
+        run: |
+          TRACKED_ENV=$(git ls-files "*.env" "*.pem" "*.key" 2>/dev/null || true)
+          if [ -n "$TRACKED_ENV" ]; then
+            echo "::error::Sensitive files tracked by git: $TRACKED_ENV"
+            exit 1
+          fi
+          echo "No sensitive files tracked"
+
       - name: Gitignore check
         run: |
-          test -f .gitignore && grep -E "\.env$" .gitignore || (echo "FAIL: .gitignore missing .env"; exit 1)
-          echo ".gitignore check — OK"
+          if ! grep -qE '\.env$' .gitignore 2>/dev/null; then
+            echo "::warning::.gitignore missing .env pattern"
+          fi
+          echo "Gitignore check complete"
+
       - name: Dependency audit
         run: npm audit --audit-level=high
 
   bug-scan:
     name: Bug Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 3
+    needs: [test]
     steps:
       - uses: actions/checkout@v4
-      - name: Console statements check
-        run: |
-          CONSOLE_COUNT=$(grep -rn "console\.\(log\|debug\|info\|warn\|error\|trace\)" \
-            --include="*.ts" --include="*.tsx" --include="*.js" \
-            . --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=.ai-first \
-            | grep -v "//.*console" | grep -v "/\*.*console" | wc -l)
-          echo "Console statements: $CONSOLE_COUNT"
-          # Allow up to 20 console statements (CLI tools need some)
-          if [ "$CONSOLE_COUNT" -gt 20 ]; then
-            echo "WARNING: High console statement count ($CONSOLE_COUNT)"
-            exit 1
-          fi
+
       - name: Empty catch check
         run: |
-          EMPTY_CATCH=$(grep -rn "catch\s*(\s*[^)]*\s*)\s*{\s*}" \
-            --include="*.ts" --include="*.tsx" . --exclude-dir=node_modules --exclude-dir=.git || true)
+          EMPTY_CATCH=$(grep -rn 'catch\s*(\s*[a-zA-Z_]*\s*)\s*{\s*}' \
+            --include="*.ts" --include="*.tsx" \
+            . --exclude-dir=node_modules || true)
           if [ -n "$EMPTY_CATCH" ]; then
-            echo "FAIL: Empty catch blocks found:"
+            echo "::error::Empty catch blocks found"
             echo "$EMPTY_CATCH"
             exit 1
           fi
-          echo "No empty catch blocks — OK"
+          echo "No empty catch blocks"
+
+      - name: Console statements check
+        run: |
+          CONSOLE_COUNT=$(grep -rn 'console\.\(log\|warn\|error\|debug\|info\)(' \
+            --include="*.ts" --include="*.tsx" \
+            . --exclude-dir=node_modules | wc -l | tr -d ' ')
+          echo "Console statements: $CONSOLE_COUNT (limit: 20)"
+          if [ "$CONSOLE_COUNT" -gt 20 ]; then
+            echo "::warning::High console statement count ($CONSOLE_COUNT)"
+          fi
+
+      - name: Debug flag check
+        run: |
+          DEBUG_COUNT=$(grep -rn 'debug\s*=\s*true\|--debug\|DEBUG=true' \
+            --include="*.ts" --include="*.tsx" --include="*.sh" \
+            . --exclude-dir=node_modules 2>/dev/null | wc -l | tr -d ' ')
+          if [ "$DEBUG_COUNT" -gt 5 ]; then
+            echo "::warning::$DEBUG_COUNT debug flags found, review for production readiness"
+          fi

@@ -65,11 +65,15 @@ check_console() {
     [[ -f "$file" ]] || continue
     case "$file" in
       *.ts|*.tsx|*.js|*.jsx)
-        local count=$(grep -c 'console\.\(log\|warn\|error\|debug\|info\)(' "$file" 2>/dev/null || echo 0)
-        if [ "$count" -gt 20 ]; then
+        local count
+        count=$(grep -c 'console\.\(log\|warn\|error\|debug\|info\)(' "$file" 2>/dev/null) || count=0
+        # Normalize: strip whitespace, ensure integer
+        count=$(echo "$count" | tr -d '[:space:]')
+        count=${count:-0}
+        if [ "$count" -gt 20 ] 2>/dev/null; then
           echo "  [STYLE] $file has $count console statements (limit: 20)"
           EXIT_CODE=1
-        elif [ "$count" -gt 0 ]; then
+        elif [ "$count" -gt 0 ] 2>/dev/null; then
           echo "  [STYLE] $file has $count console statements (under limit of 20)"
         fi
         ;;
