@@ -4,3 +4,23 @@ node_modules/
 .DS_Store
 *.log
 coverage/
+
+# oh-my-claudecode runtime state
+.omc/sessions/
+.omc/state/
+.omc/project-memory.json
+.omc/research/
+
+# Playwright MCP browser artifacts
+.playwright-mcp/
+
+# ai-first runtime state (symlinks, locks, sync events)
+.ai-first/state/current
+.ai-first/locks/
+.ai-first/sync/
+
+# Claude Code local plans
+.claude/plans/
+
+# Build artifacts
+*.tsbuildinfo
