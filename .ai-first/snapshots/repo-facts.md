@@ -1,6 +1,6 @@
 # Repository Facts
 **Scanned**: 2026-04-26T22:40:00Z
-**Root**: /Users/angelma/project/AI/ai-first
+**Root**: .
 
 ## Tech Stack
 - Languages: TypeScript

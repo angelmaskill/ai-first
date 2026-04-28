@@ -16,7 +16,7 @@ specialized agents through a 10-stage lifecycle.
 
 ### Starting Claude Code
 ```bash
-cd /Users/angelma/project/AI/ai-first
+cd /path/to/ai-first
 claude
 ```
 The orchestrator auto-loads via `.claude/CLAUDE.md`. No separate service to start.

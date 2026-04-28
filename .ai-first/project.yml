@@ -7,7 +7,7 @@ description: >-
 mode: brownfield
 teamMode: fullstack
 ownershipModel: mixed
-rootPath: /Users/angelma/project/AI/ai-first
+rootPath: .
 codeDomains:
   - id: domain-frontend
     name: Frontend

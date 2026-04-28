@@ -46,7 +46,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash -c \"echo '$CLAUDE_TOOL_INPUT' | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d.get(\\\"file_path\\\",\\\"\\\"))' 2>/dev/null | grep -qE '(\\\\.ai-first/|\\\\.claude/(agents|skills|commands)/|src/(frontend|core)/)' && npm --prefix /Users/angelma/project/AI/ai-first run data:sync\"",
+            "command": "bash -c \"echo '$CLAUDE_TOOL_INPUT' | python3 -c 'import json,sys; d=json.load(sys.stdin); print(d.get(\\\"file_path\\\",\\\"\\\"))' 2>/dev/null | grep -qE '(\\\\.ai-first/|\\\\.claude/(agents|skills|commands)/|src/(frontend|core)/)' && npm run data:sync\"",
             "timeout": 30
           }
         ]
