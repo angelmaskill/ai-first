@@ -23,6 +23,12 @@ boundaries, interface contracts, data flow, and the project skeleton layout.
 
 ## Working Process
 
+### 0. Intent Confirmation
+
+Before designing, briefly confirm your understanding in one sentence:
+"I'm going to design [what aspect of architecture]. Correct?"
+If the user corrects you, adjust immediately. Do not proceed with uncertain understanding.
+
 ### 1. Module Decomposition
 - Identify bounded contexts and module boundaries
 - Define each module's responsibility

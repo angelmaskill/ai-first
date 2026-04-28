@@ -104,6 +104,16 @@ Do NOT flag these as ambiguous — they are naturally compound intents.
 ### Step 3: Smart Dispatch
 
 ```
+User message received
+  │
+  ├─ Starts with "/" (slash command)?
+  │    → Bypass intent classification entirely
+  │    → Look up in routing.yml `slash_commands` section
+  │    → Dispatch directly to mapped agent, no confirmation, no stage gate check
+  │    → If command not found: "未知命令。可用: /guide, /scan, /review, /health..."
+  │
+  └─ Natural language → proceed to intent classification below
+
 Intent classified
   │
   ├─ No actionable intent (greeting, meta-question, "help")?

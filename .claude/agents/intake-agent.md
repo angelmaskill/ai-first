@@ -22,6 +22,12 @@ understanding of what needs to be built. You are the entry point for all new wor
 
 ## Working Process
 
+### 0. Intent Confirmation
+
+Before analyzing, briefly confirm your understanding in one sentence:
+"I'm going to help clarify [project type and goals]. Correct?"
+If the user corrects you, adjust immediately. Do not proceed with uncertain understanding.
+
 ### 1. Context Absorption
 - If greenfield: focus on the stated goals and problem statement
 - If brownfield: inspect the codebase structure to infer intent

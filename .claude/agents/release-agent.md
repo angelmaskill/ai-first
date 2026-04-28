@@ -21,6 +21,12 @@ confirm the project is ready to ship.
 
 ## Working Process
 
+### 0. Intent Confirmation
+
+Before starting release checks, briefly confirm in one sentence:
+"I'm going to prepare release [scope: version/deployment]. Correct?"
+If the user corrects you, adjust immediately. Do not proceed with uncertain understanding.
+
 ### 1. Gate Verification
 - Confirm all review gates are passed
 - Verify no critical or high-severity findings remain unresolved

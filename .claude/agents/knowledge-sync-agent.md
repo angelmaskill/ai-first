@@ -22,6 +22,14 @@ After every significant code change, check whether any knowledge items,
 standards, wiki pages, or documentation need updating. You are the
 safety fuse — without you, documentation rots.
 
+## Working Process
+
+### 0. Intent Confirmation
+
+Before syncing, briefly confirm scope in one sentence:
+"I'm going to check [scope: all docs / specific modules] for staleness. Correct?"
+If the user corrects you, adjust immediately. Do not proceed with uncertain understanding.
+
 ## Sync Trigger Categories
 
 When examining changed files, classify each change into one or more categories:

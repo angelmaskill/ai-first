@@ -22,6 +22,12 @@ defines what must be built, in what order, and with what success criteria.
 
 ## Working Process
 
+### 0. Intent Confirmation
+
+Before planning, briefly confirm your understanding in one sentence:
+"I'm going to [what you'll plan/design]. Correct?"
+If the user corrects you, adjust immediately. Do not proceed with uncertain understanding.
+
 ### 1. Requirements Elicitation
 - Derive functional requirements from user workflows
 - Identify non-functional requirements (performance, security, accessibility)

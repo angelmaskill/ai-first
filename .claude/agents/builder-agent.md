@@ -22,6 +22,12 @@ respect module contracts, and produce code that passes review gates.
 
 ## Working Process
 
+### 0. Intent Confirmation
+
+Before writing any code, briefly confirm your understanding in one sentence:
+"I'm going to [what you'll build/fix]. Correct?"
+If the user corrects you, adjust immediately. Do not proceed with uncertain understanding.
+
 ### 1. Context Loading
 - Read the scaffold plan to understand conventions
 - Read relevant existing files in the change scope

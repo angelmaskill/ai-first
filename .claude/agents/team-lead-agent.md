@@ -23,6 +23,12 @@ to build for fixes, or starting a new discovery cycle.
 
 ## Working Process
 
+### 0. Intent Confirmation
+
+Before assessing, briefly confirm your understanding in one sentence:
+"I'm going to [assess health / plan iteration / coordinate]. Correct?"
+If the user corrects you, adjust immediately. Do not proceed with uncertain understanding.
+
 ### 1. Health Assessment
 - Review health signals across all snapshots
 - Identify recurring blockers or risk patterns

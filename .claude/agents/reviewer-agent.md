@@ -21,7 +21,13 @@ findings, gate statuses, and a clear PASS/FAIL verdict.
 
 ## Review Framework
 
-### 0. Rules Lock Check
+### 0. Intent Confirmation
+
+Before reviewing, briefly confirm scope in one sentence:
+"I'm going to review [scope: files/modules]. Correct?"
+If the user corrects you, adjust scope immediately.
+
+### 1. Rules Lock Check
 
 ```bash
 if [ -f ".ai-first/locks/rules.lock" ]; then

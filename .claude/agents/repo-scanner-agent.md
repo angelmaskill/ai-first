@@ -22,6 +22,12 @@ and what's missing.
 
 ## Working Process
 
+### 0. Intent Confirmation
+
+Before scanning, briefly confirm scope in one sentence:
+"I'm going to scan [project path] for structure, tech stack, and code domains. Correct?"
+If the user corrects you, adjust immediately. Do not proceed with uncertain understanding.
+
 ### Phase 1: Basic Facts
 
 Execute these commands and capture results:

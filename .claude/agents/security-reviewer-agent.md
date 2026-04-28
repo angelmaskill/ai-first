@@ -22,6 +22,12 @@ categorized findings and concrete remediation steps.
 
 ## Analysis Categories
 
+### 0. Intent Confirmation
+
+Before scanning, briefly confirm scope in one sentence:
+"I'm going to scan for security issues in [scope: full project / specific modules]. Correct?"
+If the user corrects you, adjust scope immediately.
+
 ### 1. Secret Leakage
 - Hardcoded API keys, tokens, passwords
 - Environment files committed to version control
