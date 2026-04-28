@@ -6,10 +6,21 @@
 version: "1.0"
 last_updated: 2026-04-26
 
-# Confidence threshold for auto-dispatch.
-# Above this: auto-dispatch with brief confirmation ("Dispatching X, proceed?")
-# Below this: show top N candidates, let user pick.
+# Auto-dispatch configuration.
+# High confidence (>= auto_dispatch_threshold): auto-dispatch, no confirmation.
+# Low confidence but not ambiguous: auto-dispatch with best match.
+# Ambiguous (confidence gap < ambiguity_threshold): ask user to choose.
 auto_dispatch_threshold: 0.85
+ambiguity_threshold: 0.5
+
+# Stage auto-advance configuration.
+# When all exit checklist items are satisfied, automatically advance to next stage.
+stage_auto_advance:
+  enabled: true
+  require_all_tasks_done: true
+  require_all_syncs_confirmed: true
+  require_all_gates_passed: true
+  notify_user: true
 
 routes:
   planning:
@@ -27,7 +38,8 @@ routes:
     description: "Planning, design, and requirements work"
     primary_agent: planner-agent
     fallback_agent: architect-agent
-    stage_gate: [discovery, spec, architecture, evolve]
+    confirmation: auto
+    stage_gate: [discovery, spec, architecture, build, qa, evolve]
 
   implementing:
     keywords:
@@ -47,11 +59,37 @@ routes:
       - delete
     description: "Code implementation and changes"
     primary_agent: builder-agent
+    confirmation: auto  # no confirmation needed, auto-dispatch
     complexity:
       threshold: 0.6
       action: "split_via_dispatcher"
       tool: "npx tsx src/core/harness/subagent-dispatcher.ts"
     stage_gate: [scaffold, build]
+    fast_path:  # bypass stage_gate when sub-intent matches
+      hotfix:
+        keywords: [fix, bug, hotfix, error, crash, patch, 紧急, 故障, 挂了, 报错, 修复]
+        behavior: warn_any_stage  # allow from any stage with warning
+        message: "紧急修复模式。当前在 {stage} 阶段，允许执行修复。"
+      iteration:
+        keywords: [add, feature, 功能, 需求, 迭代, enhancement]
+        allowed_stages: [operate, evolve, qa]
+        behavior: auto_mini_cycle  # temporary build cycle, return to original stage after
+      refactor:
+        keywords: [refactor, 重构, cleanup, clean, tech-debt, 技术债]
+        allowed_stages: [operate, evolve]
+        behavior: warn  # warn but allow
+    auto_chain:
+      - parallel:
+          - skill: bug-scan
+          - skill: security-scan
+        fail_fast: true
+        max_retries: 3
+      - agent: knowledge-sync-agent
+      - parallel:
+          - agent: reviewer-agent
+          - agent: security-reviewer-agent
+        max_retries: 3
+      - agent: state-updater-agent
 
   reviewing:
     keywords:
@@ -64,9 +102,10 @@ routes:
       - inspect
     description: "Code and quality review"
     primary_agent: reviewer-agent
+    confirmation: auto
     parallel_agents:
       - security-reviewer-agent
-    stage_gate: [qa, release]
+    stage_gate: [build, qa, release, operate]
 
   scanning:
     keywords:
@@ -78,6 +117,7 @@ routes:
       - detect
     description: "Project scanning and analysis"
     primary_agent: repo-scanner-agent
+    confirmation: auto
     post_actions:
       - stage-assessor-agent
       - team-lead-agent
@@ -97,6 +137,7 @@ routes:
       - OWASP
     description: "Security analysis and review"
     primary_agent: security-reviewer-agent
+    confirmation: auto
     stage_gate: [build, qa, release, operate]
 
   knowledge-sync:
@@ -110,6 +151,7 @@ routes:
       - rot
     description: "Knowledge synchronization and documentation"
     primary_agent: knowledge-sync-agent
+    confirmation: auto
     stage_gate: [all]
 
   state-mutation:
@@ -124,6 +166,8 @@ routes:
       - unlock
     description: "Project state changes"
     primary_agent: state-updater-agent
+    confirmation: required_for_direct  # user-initiated state changes need confirmation
+    internal: auto  # system-initiated (auto_chain, auto_advance) skip confirmation
     exclusive: true  # Only this agent can mutate state
     stage_gate: [all]
 
@@ -138,6 +182,7 @@ routes:
       - mock
     description: "Test generation and coverage improvement"
     primary_agent: smoke-case-agent
+    confirmation: auto
     post_skills: [test-generator]
     stage_gate: [build, qa]
 
@@ -151,6 +196,7 @@ routes:
       - essential test
     description: "Smoke test case organization and critical path testing"
     primary_agent: smoke-case-agent
+    confirmation: auto
     stage_gate: [release, operate]
 
   guidance:
@@ -164,6 +210,7 @@ routes:
       - next
     description: "Health checks and guidance"
     primary_agent: team-lead-agent
+    confirmation: auto
     stage_gate: [all]
 
   release:
@@ -176,6 +223,7 @@ routes:
       - changelog
     description: "Release preparation and execution"
     primary_agent: release-agent
+    confirmation: auto
     stage_gate: [release]
 
 # Slash commands bypass routing — these are deterministic by definition
