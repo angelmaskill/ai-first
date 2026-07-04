@@ -21,10 +21,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "25"
           cache: "npm"
       - run: npm ci
-      - run: npx tsc --noEmit
+      - run: npm run typecheck
 
   lint:
     name: ESLint
@@ -34,7 +34,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "25"
           cache: "npm"
       - run: npm ci
       - run: npm run lint
@@ -47,10 +47,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "25"
           cache: "npm"
       - run: npm ci
-      - run: npx vite build
+      - run: npm run frontend:build
 
   # ── Stage 2: Dynamic Verification ──
 
@@ -63,7 +63,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "25"
           cache: "npm"
       - run: npm ci
       - run: npm test
@@ -79,7 +79,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "25"
           cache: "npm"
       - run: npm ci
 

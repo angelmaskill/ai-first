@@ -4,6 +4,9 @@
   "private": true,
   "description": "AI-first vibe coding scaffold control plane",
   "type": "module",
+  "engines": {
+    "node": ">=25"
+  },
   "scripts": {
     "build": "npx tsc --noEmit",
     "dispatch": "npx tsx src/core/harness/subagent-dispatcher.ts",

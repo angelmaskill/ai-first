@@ -247,9 +247,7 @@ export function createDispatchPlan(
   let remaining = [...subtasks];
 
   while (remaining.length > 0) {
-    const ready = remaining.filter((st) =>
-      st.dependencies.every((depId) => executed.has(depId)),
-    );
+    const ready = remaining.filter((st) => st.dependencies.every((depId) => executed.has(depId)));
 
     if (ready.length === 0) {
       waves.push(remaining.map((st) => st.id));
@@ -308,8 +306,7 @@ export function createRetryPlan(
   const retryable = failed.filter((r) => {
     const st = subtasks.find((s) => s.id === r.subtaskId);
     if (!st) return false;
-    const attemptCount =
-      (st.inputs._retryAttempt as number | undefined) ?? 0;
+    const attemptCount = (st.inputs._retryAttempt as number | undefined) ?? 0;
     return attemptCount < config.maxRetries;
   });
 

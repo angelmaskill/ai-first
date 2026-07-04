@@ -9,11 +9,11 @@ risks:
   - id: risk-001
     name: Single-platform lock-in
     severity: medium
-    summary: Project uses Claude Code native agent/skill dispatch. Multi-platform adapter protocol defined but only Claude Code adapter fully operational.
+    summary: Project uses Claude Code native agent/skill dispatch. Codex CLI availability and adapter health probing are validated, but full Codex task execution is not yet wired.
   - id: risk-002
-    name: CI maturity
+    name: CI drift
     severity: low
-    summary: CI workflow exists (.github/workflows/ci.yml) but is a placeholder — needs real build/test/lint steps.
+    summary: CI workflow exists with typecheck, lint, build, test, security, and bug-scan jobs; keep Node version and script entrypoints aligned with package.json and README.
 missingArtifacts: []
 healthSignals:
   - name: Docs Completeness
@@ -23,7 +23,7 @@ healthSignals:
   - name: Test Completeness
     status: good
     score: 95
-    summary: "265 tests across 20 files, all passing. Frontend (143), backend (94), snake game (78)."
+    summary: "267 tests across 20 files, all passing. Frontend (143), backend/core coverage expanded with Codex CLI health probing."
   - name: Agent Coverage
     status: good
     summary: "14 agents defined covering all 10 lifecycle stages"
@@ -40,15 +40,15 @@ healthSignals:
 activeTasks: []
 suggestedNextActions:
   - id: act-20260427-1
-    title: Strengthen CI pipeline
-    description: Expand .github/workflows/ci.yml with real build, test, typecheck, and scan steps
+    title: Keep CI/runtime/docs aligned
+    description: Maintain Node 25 in CI, run project-level build scripts, and keep setup docs matched to the Claude Code command surface
     actionType: implement
     priority: p1
     recommendedOwner: builder-agent
     requiresConfirmation: false
   - id: act-20260427-2
     title: Multi-platform adapter verification
-    description: End-to-end test the Codex adapter against a real Codex CLI session
+    description: Extend the Codex adapter from CLI health probing to guarded non-interactive task execution through codex exec
     actionType: implement
     priority: p2
     recommendedOwner: builder-agent

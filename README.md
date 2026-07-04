@@ -227,14 +227,17 @@ cd ai-first
 npm install
 ```
 
-### Bootstrap a project
+### Bootstrap a project in Claude Code
 
-```bash
+AI-first currently runs through Claude Code-native agents and slash commands.
+Open the target project in Claude Code, then use:
+
+```text
 # Start a greenfield project
-npm start init /path/to/new-project
+/init /path/to/new-project
 
 # Or adopt an existing project
-npm start adopt /path/to/existing-project
+/adopt /path/to/existing-project
 ```
 
 ### Just Talk — No Commands Needed
@@ -652,14 +655,17 @@ cd ai-first
 npm install
 ```
 
-### 启动一个项目
+### 在 Claude Code 中启动一个项目
 
-```bash
+AI-first 当前通过 Claude Code 原生 agents 和 slash commands 运行。
+在 Claude Code 中打开目标项目后使用：
+
+```text
 # 初始化全新项目
-npm start init /path/to/new-project
+/init /path/to/new-project
 
 # 接入已有项目
-npm start adopt /path/to/existing-project
+/adopt /path/to/existing-project
 ```
 
 ### 直接对话 — 无需命令

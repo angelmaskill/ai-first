@@ -401,9 +401,7 @@ describe("createDispatchPlan with DispatchOptions", () => {
 
 describe("createRetryPlan", () => {
   it("returns retry plan for failed subtasks within limit", () => {
-    const subtasks = [
-      { id: "s1", dependencies: [], inputs: {}, status: "failed" },
-    ] as any;
+    const subtasks = [{ id: "s1", dependencies: [], inputs: {}, status: "failed" }] as any;
 
     const failed = [{ subtaskId: "s1", success: false, error: "timeout", completedAt: "" }] as any;
 
@@ -422,7 +420,11 @@ describe("createRetryPlan", () => {
 
     const failed = [{ subtaskId: "s1", success: false, error: "timeout", completedAt: "" }] as any;
 
-    const plan = createRetryPlan(failed, subtasks, { maxRetries: 2, backoffMs: 1000, backoffMultiplier: 2 });
+    const plan = createRetryPlan(failed, subtasks, {
+      maxRetries: 2,
+      backoffMs: 1000,
+      backoffMultiplier: 2,
+    });
     expect(plan).toBeNull();
   });
 

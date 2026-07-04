@@ -9,7 +9,7 @@ Ready to plan next iteration based on learnings.
 
 ### Cycle Summary
 - **Iteration**: v0.1.0 complete (10 stages traversed)
-- **Tests**: 221+ passing (18+ files)
+- **Tests**: 267 tests tracked across 20 files
 - **Standards**: 11 (7 stable + 4 draft)
 - **All scans CLEAN**: bug, security, optimization
 - **Key additions this cycle**:
@@ -24,6 +24,6 @@ standards/ and stable knowledge/ now modifiable. Draft standards can be stabiliz
 
 ### Next Iteration Candidates
 - Add frontend code paths
-- E2E validate adapters
+- Extend Codex adapter from CLI health probing to guarded task execution
 - Stabilize draft standards
-- Expand CI pipeline
+- Keep CI/runtime/docs aligned

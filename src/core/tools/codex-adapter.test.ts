@@ -17,7 +17,10 @@ describe("CodexAdapter", () => {
   let adapter: CodexAdapter;
 
   beforeEach(() => {
-    adapter = new CodexAdapter("test-codex");
+    adapter = new CodexAdapter("test-codex", {
+      cliPath: process.execPath,
+      versionArgs: ["--version"],
+    });
   });
 
   describe("construction", () => {
@@ -113,13 +116,28 @@ describe("CodexAdapter", () => {
       const resp = await adapter.query("other", { x: 1 });
       expect(resp.payload.x).toBe(1);
     });
+
+    it("queries the configured CLI version", async () => {
+      const resp = await adapter.query("cli-version");
+      expect(resp.type).toBe("response");
+      expect(resp.payload.data).toMatch(/^v?\d+\./);
+    });
   });
 
   describe("healthCheck", () => {
-    it("returns healthy", async () => {
+    it("returns healthy when the configured CLI responds", async () => {
       const status = await adapter.healthCheck();
       expect(status).toBe("healthy");
       expect(adapter.status).toBe("healthy");
+    });
+
+    it("returns unhealthy when the configured CLI is unavailable", async () => {
+      const missing = new CodexAdapter("missing-codex", {
+        cliPath: "/definitely/missing/codex",
+      });
+      const status = await missing.healthCheck();
+      expect(status).toBe("unhealthy");
+      expect(missing.status).toBe("unhealthy");
     });
   });
 });

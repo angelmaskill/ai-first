@@ -33,7 +33,9 @@ function mockAdapter(responses: Map<string, ToolMessage> = new Map()): ToolAdapt
   };
 }
 
-function makeRegistry(agents: Array<{ id: string; role: string; subagentType: string }> = []): AgentRegistry {
+function makeRegistry(
+  agents: Array<{ id: string; role: string; subagentType: string }> = [],
+): AgentRegistry {
   const byRole = new Map();
   const bySubagentType = new Map();
   for (const a of agents) {
@@ -81,7 +83,9 @@ describe("ExecutionEngine", () => {
 
   describe("execute", () => {
     it("executes a single-subtask plan successfully", async () => {
-      const registry = makeRegistry([{ id: "builder-agent", role: "builder", subagentType: "executor" }]);
+      const registry = makeRegistry([
+        { id: "builder-agent", role: "builder", subagentType: "executor" },
+      ]);
       const adapter = mockAdapter();
       const subtask = makeSubtask();
       const plan: DispatchPlan = {
@@ -141,7 +145,9 @@ describe("ExecutionEngine", () => {
     });
 
     it("retries failed subtasks", async () => {
-      const registry = makeRegistry([{ id: "builder-agent", role: "builder", subagentType: "executor" }]);
+      const registry = makeRegistry([
+        { id: "builder-agent", role: "builder", subagentType: "executor" },
+      ]);
       let callCount = 0;
       const adapter = mockAdapter();
       (adapter.send as any).mockImplementation((msg: ToolMessage) => {
@@ -180,7 +186,9 @@ describe("ExecutionEngine", () => {
     });
 
     it("reports failure after exhausting retries", async () => {
-      const registry = makeRegistry([{ id: "builder-agent", role: "builder", subagentType: "executor" }]);
+      const registry = makeRegistry([
+        { id: "builder-agent", role: "builder", subagentType: "executor" },
+      ]);
       const adapter = mockAdapter();
       (adapter.send as any).mockResolvedValue({
         type: "error",
@@ -220,7 +228,9 @@ describe("ExecutionEngine", () => {
     });
 
     it("reports progress via callback", async () => {
-      const registry = makeRegistry([{ id: "builder-agent", role: "builder", subagentType: "executor" }]);
+      const registry = makeRegistry([
+        { id: "builder-agent", role: "builder", subagentType: "executor" },
+      ]);
       const adapter = mockAdapter();
       const s1 = makeSubtask({ id: "s1" });
       const s2 = makeSubtask({ id: "s2", dependencies: ["s1"] });
@@ -250,7 +260,9 @@ describe("ExecutionEngine", () => {
 
     it("handles timeout by rejecting the subtask", async () => {
       const engine = new ExecutionEngine({ maxRetries: 0, retryDelayMs: 10, subtaskTimeoutMs: 50 });
-      const registry = makeRegistry([{ id: "builder-agent", role: "builder", subagentType: "executor" }]);
+      const registry = makeRegistry([
+        { id: "builder-agent", role: "builder", subagentType: "executor" },
+      ]);
       const adapter = mockAdapter();
       (adapter.send as any).mockImplementation(() => new Promise((r) => setTimeout(r, 200)));
 

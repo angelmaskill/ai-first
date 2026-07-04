@@ -2,262 +2,287 @@
 import type { ProjectData } from "../../hooks/useProjectData.js";
 
 const data: ProjectData = {
-  "name": "AI-First",
-  "currentStage": "evolve",
-  "mode": "brownfield",
-  "status": "active",
-  "healthSignals": [
+  name: "AI-First",
+  currentStage: "evolve",
+  mode: "brownfield",
+  status: "active",
+  healthSignals: [
     {
-      "name": "Security",
-      "status": "good",
-      "score": 100,
-      "summary": "Security scan CLEAN (security-iter2-20260427.md)"
+      name: "Security",
+      status: "good",
+      score: 100,
+      summary: "Security scan CLEAN (security-iter2-20260427.md)",
     },
     {
-      "name": "Docs Completeness",
-      "status": "good",
-      "score": 100,
-      "summary": "5 knowledge items, 12 standards"
+      name: "Docs Completeness",
+      status: "good",
+      score: 100,
+      summary: "5 knowledge items, 12 standards",
     },
     {
-      "name": "Test Completeness",
-      "status": "good",
-      "score": 100,
-      "summary": "20 test files, 35 source files (ratio: 57%)"
+      name: "Test Completeness",
+      status: "good",
+      score: 100,
+      summary: "20 test files, 35 source files (ratio: 57%)",
     },
     {
-      "name": "Agent Coverage",
-      "status": "good",
-      "score": 100,
-      "summary": "15 agents defined (expected 14)"
+      name: "Agent Coverage",
+      status: "good",
+      score: 100,
+      summary: "15 agents defined (expected 14)",
     },
     {
-      "name": "Command Coverage",
-      "status": "warning",
-      "score": 61,
-      "summary": "14 commands for 23 slash commands"
+      name: "Command Coverage",
+      status: "warning",
+      score: 61,
+      summary: "14 commands for 23 slash commands",
     },
     {
-      "name": "Skill Coverage",
-      "status": "good",
-      "score": 100,
-      "summary": "7 skills registered"
-    }
+      name: "Skill Coverage",
+      status: "good",
+      score: 100,
+      summary: "7 skills registered",
+    },
   ],
-  "risks": [
+  risks: [
     {
-      "id": "risk-001",
-      "name": "Single-platform lock-in",
-      "severity": "medium",
-      "summary": "Project uses Claude Code native agent/skill dispatch. Multi-platform adapter protocol defined but only Claude Code adapter fully operational."
+      id: "risk-001",
+      name: "Single-platform lock-in",
+      severity: "medium",
+      summary:
+        "Project uses Claude Code native agent/skill dispatch. Codex CLI availability and adapter health probing are validated, but full Codex task execution is not yet wired.",
     },
     {
-      "id": "risk-002",
-      "name": "CI maturity",
-      "severity": "low",
-      "summary": "CI workflow exists (.github/workflows/ci.yml) but is a placeholder — needs real build/test/lint steps."
-    }
+      id: "risk-002",
+      name: "CI drift",
+      severity: "low",
+      summary:
+        "CI workflow exists with typecheck, lint, build, test, security, and bug-scan jobs; keep Node version and script entrypoints aligned with package.json and README.",
+    },
   ],
-  "suggestedActions": [
+  suggestedActions: [
     {
-      "id": "act-20260427-1",
-      "title": "Strengthen CI pipeline",
-      "description": "Expand .github/workflows/ci.yml with real build, test, typecheck, and scan steps",
-      "actionType": "implement",
-      "priority": "p1"
+      id: "act-20260427-1",
+      title: "Keep CI/runtime/docs aligned",
+      description:
+        "Maintain Node 25 in CI, run project-level build scripts, and keep setup docs matched to the Claude Code command surface",
+      actionType: "implement",
+      priority: "p1",
     },
     {
-      "id": "act-20260427-2",
-      "title": "Multi-platform adapter verification",
-      "description": "End-to-end test the Codex adapter against a real Codex CLI session",
-      "actionType": "implement",
-      "priority": "p2"
-    }
+      id: "act-20260427-2",
+      title: "Multi-platform adapter verification",
+      description:
+        "Extend the Codex adapter from CLI health probing to guarded non-interactive task execution through codex exec",
+      actionType: "implement",
+      priority: "p2",
+    },
   ],
-  "syncEvents": [
+  syncEvents: [
     {
-      "id": "sync-20260427-snake01",
-      "status": "confirmed",
-      "summary": ">",
-      "createdAt": ""
+      id: "sync-20260427-snake01",
+      status: "confirmed",
+      summary: ">",
+      createdAt: "",
     },
     {
-      "id": "sync-20260427-iter2",
-      "status": "confirmed",
-      "summary": ">",
-      "createdAt": ""
+      id: "sync-20260427-iter2",
+      status: "confirmed",
+      summary: ">",
+      createdAt: "",
     },
     {
-      "id": "sync-20260426-3",
-      "status": "confirmed",
-      "summary": "Three novel framework patterns (bible rules locking, append-only timeline, dedicated state-updater agent) are active but not documented as knowledge items. Consider creating KNOW-003-novel-patterns.md.",
-      "createdAt": "2026-04-26T22:55:00Z"
+      id: "sync-20260426-3",
+      status: "confirmed",
+      summary:
+        "Three novel framework patterns (bible rules locking, append-only timeline, dedicated state-updater agent) are active but not documented as knowledge items. Consider creating KNOW-003-novel-patterns.md.",
+      createdAt: "2026-04-26T22:55:00Z",
     },
     {
-      "id": "sync-20260426-2",
-      "status": "confirmed",
-      "summary": "Only 1 standard (API consistency) defined, but 14 agents have extensive MUST/MUST NOT conventions. Consider extracting cross-agent conventions into additional standards.",
-      "createdAt": "2026-04-26T22:55:00Z"
+      id: "sync-20260426-2",
+      status: "confirmed",
+      summary:
+        "Only 1 standard (API consistency) defined, but 14 agents have extensive MUST/MUST NOT conventions. Consider extracting cross-agent conventions into additional standards.",
+      createdAt: "2026-04-26T22:55:00Z",
     },
     {
-      "id": "sync-20260426-1",
-      "status": "confirmed",
-      "summary": "KNOW-001 project overview references 8 agents and 6 skills; actual state is 14 agents and 13 commands. Update agent catalog and slash command list.",
-      "createdAt": "2026-04-26T22:55:00Z"
-    }
+      id: "sync-20260426-1",
+      status: "confirmed",
+      summary:
+        "KNOW-001 project overview references 8 agents and 6 skills; actual state is 14 agents and 13 commands. Update agent catalog and slash command list.",
+      createdAt: "2026-04-26T22:55:00Z",
+    },
   ],
-  "recentTimeline": [
+  recentTimeline: [
     {
-      "timestamp": "2026-04-26T08:52:00Z",
-      "tag": "STRUCTURE",
-      "message": "Created routing.yml — 9 intent categories, 14 slash commands, deterministic agent lookup table"
+      timestamp: "2026-04-26T08:52:00Z",
+      tag: "STRUCTURE",
+      message:
+        "Created routing.yml — 9 intent categories, 14 slash commands, deterministic agent lookup table",
     },
     {
-      "timestamp": "2026-04-26T08:53:00Z",
-      "tag": "STATE",
-      "message": "Updated CLAUDE.md with Routing Protocol section and intent confirmation gate workflow"
+      timestamp: "2026-04-26T08:53:00Z",
+      tag: "STATE",
+      message:
+        "Updated CLAUDE.md with Routing Protocol section and intent confirmation gate workflow",
     },
     {
-      "timestamp": "2026-04-26T08:54:00Z",
-      "tag": "STRUCTURE",
-      "message": "Created STANDARD-006: Deterministic Agent Routing Protocol"
+      timestamp: "2026-04-26T08:54:00Z",
+      tag: "STRUCTURE",
+      message: "Created STANDARD-006: Deterministic Agent Routing Protocol",
     },
     {
-      "timestamp": "2026-04-26T09:00:00Z",
-      "tag": "STRUCTURE",
-      "message": "Enhanced bug-scanner skill with test→prod leak detection (Phase 1.6: localhost URLs, staging domains, test credentials, debug flags, hardcoded dev ports)"
+      timestamp: "2026-04-26T09:00:00Z",
+      tag: "STRUCTURE",
+      message:
+        "Enhanced bug-scanner skill with test→prod leak detection (Phase 1.6: localhost URLs, staging domains, test credentials, debug flags, hardcoded dev ports)",
     },
     {
-      "timestamp": "2026-04-26T09:02:00Z",
-      "tag": "STRUCTURE",
-      "message": "Created test-generator skill — AI-assisted test generation with coverage analysis, skeleton generation, and gap detection"
+      timestamp: "2026-04-26T09:02:00Z",
+      tag: "STRUCTURE",
+      message:
+        "Created test-generator skill — AI-assisted test generation with coverage analysis, skeleton generation, and gap detection",
     },
     {
-      "timestamp": "2026-04-26T09:04:00Z",
-      "tag": "STRUCTURE",
-      "message": "Created smoke-case-agent — critical path identification, P0/P1/P2 smoke test organization, CI/CD integration"
+      timestamp: "2026-04-26T09:04:00Z",
+      tag: "STRUCTURE",
+      message:
+        "Created smoke-case-agent — critical path identification, P0/P1/P2 smoke test organization, CI/CD integration",
     },
     {
-      "timestamp": "2026-04-26T09:05:00Z",
-      "tag": "STRUCTURE",
-      "message": "Created STANDARD-007: Test Quality and Coverage Standards (unit/integration/e2e/smoke pyramid, test:source ratios, test→prod boundary rules)"
+      timestamp: "2026-04-26T09:05:00Z",
+      tag: "STRUCTURE",
+      message:
+        "Created STANDARD-007: Test Quality and Coverage Standards (unit/integration/e2e/smoke pyramid, test:source ratios, test→prod boundary rules)",
     },
     {
-      "timestamp": "2026-04-26T15:53:05Z",
-      "tag": "STAGE_TRANSITION",
-      "message": "stage-02-discovery → stage-03-spec (spec) — mode: skip"
+      timestamp: "2026-04-26T15:53:05Z",
+      tag: "STAGE_TRANSITION",
+      message: "stage-02-discovery → stage-03-spec (spec) — mode: skip",
     },
     {
-      "timestamp": "2026-04-26T15:53:17Z",
-      "tag": "STAGE_TRANSITION",
-      "message": "stage-03-spec → stage-04-architecture (architecture) — mode: skip"
+      timestamp: "2026-04-26T15:53:17Z",
+      tag: "STAGE_TRANSITION",
+      message: "stage-03-spec → stage-04-architecture (architecture) — mode: skip",
     },
     {
-      "timestamp": "2026-04-26T15:53:26Z",
-      "tag": "STAGE_TRANSITION",
-      "message": "stage-04-architecture → stage-05-scaffold (scaffold) — mode: skip"
+      timestamp: "2026-04-26T15:53:26Z",
+      tag: "STAGE_TRANSITION",
+      message: "stage-04-architecture → stage-05-scaffold (scaffold) — mode: skip",
     },
     {
-      "timestamp": "2026-04-26T15:53:35Z",
-      "tag": "STAGE_TRANSITION",
-      "message": "stage-05-scaffold → stage-06-build (build) — mode: skip"
+      timestamp: "2026-04-26T15:53:35Z",
+      tag: "STAGE_TRANSITION",
+      message: "stage-05-scaffold → stage-06-build (build) — mode: skip",
     },
     {
-      "timestamp": "2026-04-26T15:53:47Z",
-      "tag": "STAGE_TRANSITION",
-      "message": "stage-06-build → stage-07-qa (qa) — mode: skip"
+      timestamp: "2026-04-26T15:53:47Z",
+      tag: "STAGE_TRANSITION",
+      message: "stage-06-build → stage-07-qa (qa) — mode: skip",
     },
     {
-      "timestamp": "2026-04-26T16:09:01Z",
-      "tag": "QA_COMPLETE",
-      "message": "9-gate review passed. Security: CLEAN, Bug-Scan: CLEAN, Optimization: CLEAN. Tests: 94 passing (7 files). TS strict flags enabled."
+      timestamp: "2026-04-26T16:09:01Z",
+      tag: "QA_COMPLETE",
+      message:
+        "9-gate review passed. Security: CLEAN, Bug-Scan: CLEAN, Optimization: CLEAN. Tests: 94 passing (7 files). TS strict flags enabled.",
     },
     {
-      "timestamp": "2026-04-27T03:30:00Z",
-      "tag": "CRITICAL_GAPS",
-      "message": "Fixed 3 critical gaps: (1) Knowledge loop — sync events confirmed, reviewDate/expiresAt on all items, knowledge-sync-agent enhanced with expiry check + sync processing + wiki trigger. (2) Dev loop — pre-commit hook enhanced (6 checks: secrets, env, catch, console, typecheck, test), ESLint + Prettier installed, npm check script. (3) Standards — 4 draft standards created (STANDARD-010 through STANDARD-013 for frontend/backend)."
+      timestamp: "2026-04-27T03:30:00Z",
+      tag: "CRITICAL_GAPS",
+      message:
+        "Fixed 3 critical gaps: (1) Knowledge loop — sync events confirmed, reviewDate/expiresAt on all items, knowledge-sync-agent enhanced with expiry check + sync processing + wiki trigger. (2) Dev loop — pre-commit hook enhanced (6 checks: secrets, env, catch, console, typecheck, test), ESLint + Prettier installed, npm check script. (3) Standards — 4 draft standards created (STANDARD-010 through STANDARD-013 for frontend/backend).",
     },
     {
-      "timestamp": "2026-04-27T03:30:00Z",
-      "tag": "SYNC_RESOLVED",
-      "message": "All 3 sync events confirmed. sync-1: KNOW-001 counts fixed. sync-2: Frontend/backend standards created. sync-3: KNOW-003 confirmed."
+      timestamp: "2026-04-27T03:30:00Z",
+      tag: "SYNC_RESOLVED",
+      message:
+        "All 3 sync events confirmed. sync-1: KNOW-001 counts fixed. sync-2: Frontend/backend standards created. sync-3: KNOW-003 confirmed.",
     },
     {
-      "timestamp": "2026-04-27T03:30:00Z",
-      "tag": "WIKI_GENERATED",
-      "message": "9 wiki pages: index, overview, architecture, standards, dev-guide, changelog, novel-patterns, api-reference, data-model."
+      timestamp: "2026-04-27T03:30:00Z",
+      tag: "WIKI_GENERATED",
+      message:
+        "9 wiki pages: index, overview, architecture, standards, dev-guide, changelog, novel-patterns, api-reference, data-model.",
     },
     {
-      "timestamp": "2026-04-27T03:30:00Z",
-      "tag": "STAGE_TRANSITION",
-      "message": "stage-07-qa → stage-08-release (release) — mode: advance. All exit conditions met: 3/3 sync confirmed, reviews passed, artifacts present."
+      timestamp: "2026-04-27T03:30:00Z",
+      tag: "STAGE_TRANSITION",
+      message:
+        "stage-07-qa → stage-08-release (release) — mode: advance. All exit conditions met: 3/3 sync confirmed, reviews passed, artifacts present.",
     },
     {
-      "timestamp": "2026-04-27T03:35:00Z",
-      "tag": "RELEASE_UPDATED",
-      "message": "Release notes refreshed — 15 agents, 14 commands, 7 skills, 94 tests, CI active, ESLint+Prettier, wiki generated."
+      timestamp: "2026-04-27T03:35:00Z",
+      tag: "RELEASE_UPDATED",
+      message:
+        "Release notes refreshed — 15 agents, 14 commands, 7 skills, 94 tests, CI active, ESLint+Prettier, wiki generated.",
     },
     {
-      "timestamp": "2026-04-27T03:35:00Z",
-      "tag": "STAGE_TRANSITION",
-      "message": "stage-08-release → stage-09-operate (operate) — mode: advance. Release verified: all scans CLEAN, 94 tests passing, 0 vulnerabilities."
+      timestamp: "2026-04-27T03:35:00Z",
+      tag: "STAGE_TRANSITION",
+      message:
+        "stage-08-release → stage-09-operate (operate) — mode: advance. Release verified: all scans CLEAN, 94 tests passing, 0 vulnerabilities.",
     },
     {
-      "timestamp": "2026-04-27T03:35:00Z",
-      "tag": "STAGE_TRANSITION",
-      "message": "stage-09-operate → stage-10-evolve (evolve) — mode: advance. Full cycle complete. Rules unlocked. standards/ and stable knowledge/ now modifiable."
+      timestamp: "2026-04-27T03:35:00Z",
+      tag: "STAGE_TRANSITION",
+      message:
+        "stage-09-operate → stage-10-evolve (evolve) — mode: advance. Full cycle complete. Rules unlocked. standards/ and stable knowledge/ now modifiable.",
     },
     {
-      "timestamp": "2026-04-27T03:35:00Z",
-      "tag": "FULL_CYCLE",
-      "message": "v0.1.0 complete. 10 stages traversed. 15 agents, 14 commands, 7 skills, 11 standards, 94 tests, 9 wiki pages, 3 sync events resolved, knowledge expiry active, dev loop closed."
+      timestamp: "2026-04-27T03:35:00Z",
+      tag: "FULL_CYCLE",
+      message:
+        "v0.1.0 complete. 10 stages traversed. 15 agents, 14 commands, 7 skills, 11 standards, 94 tests, 9 wiki pages, 3 sync events resolved, knowledge expiry active, dev loop closed.",
     },
     {
-      "timestamp": "2026-04-27T03:40:00Z",
-      "tag": "ITERATION_2",
-      "message": "Iteration 2 started — evolve → discovery. Focus: land frontend code, close compatibility gap (45%→target 80%), validate draft standards."
+      timestamp: "2026-04-27T03:40:00Z",
+      tag: "ITERATION_2",
+      message:
+        "Iteration 2 started — evolve → discovery. Focus: land frontend code, close compatibility gap (45%→target 80%), validate draft standards.",
     },
     {
-      "timestamp": "2026-04-27T03:40:00Z",
-      "tag": "STAGE_TRANSITION",
-      "message": "stage-10-evolve → stage-02-discovery (discovery) — mode: advance. P0: frontend code landing."
+      timestamp: "2026-04-27T03:40:00Z",
+      tag: "STAGE_TRANSITION",
+      message:
+        "stage-10-evolve → stage-02-discovery (discovery) — mode: advance. P0: frontend code landing.",
     },
     {
-      "timestamp": "2026-04-27T13:55:00Z",
-      "tag": "STAGE_TRANSITION",
-      "message": "stage-06-build → stage-07-qa (qa) — mode: advance. Iteration 2. Frontend P0 complete: 143 tests, i18n, responsive. Security scan CLEAN."
-    }
+      timestamp: "2026-04-27T13:55:00Z",
+      tag: "STAGE_TRANSITION",
+      message:
+        "stage-06-build → stage-07-qa (qa) — mode: advance. Iteration 2. Frontend P0 complete: 143 tests, i18n, responsive. Security scan CLEAN.",
+    },
   ],
-  "healthTrend": [
+  healthTrend: [
     {
-      "label": "4/21",
-      "value": 20
+      label: "6/28",
+      value: 20,
     },
     {
-      "label": "4/22",
-      "value": 20
+      label: "6/29",
+      value: 20,
     },
     {
-      "label": "4/23",
-      "value": 20
+      label: "6/30",
+      value: 20,
     },
     {
-      "label": "4/24",
-      "value": 20
+      label: "7/1",
+      value: 20,
     },
     {
-      "label": "4/25",
-      "value": 20
+      label: "7/2",
+      value: 20,
     },
     {
-      "label": "4/26",
-      "value": 100
+      label: "7/3",
+      value: 20,
     },
     {
-      "label": "4/27",
-      "value": 100
-    }
-  ]
+      label: "7/4",
+      value: 20,
+    },
+  ],
 };
 
 export default data;

@@ -130,10 +130,7 @@ export function classifyPriority(path: CriticalPath): SmokeTestPriority {
   return "P2";
 }
 
-export function generateSmokeCases(
-  paths: CriticalPath[],
-  _stage?: ProjectStage,
-): SmokeTestCase[] {
+export function generateSmokeCases(paths: CriticalPath[], _stage?: ProjectStage): SmokeTestCase[] {
   const cases: SmokeTestCase[] = [];
   let counter = 1;
 
@@ -269,7 +266,8 @@ function inferBodyContains(cp: CriticalPath): string[] | undefined {
   if (lower.includes("upload")) return ["url"];
   if (lower.includes("graphql") || lower.includes("query")) return ["data"];
   if (lower.includes("webhook")) return ["received"];
-  if (lower.includes("stream") || lower.includes("subscribe") || lower.includes("event")) return ["event"];
+  if (lower.includes("stream") || lower.includes("subscribe") || lower.includes("event"))
+    return ["event"];
   if (lower.includes("cors") || lower.includes("csrf")) return undefined;
   return undefined;
 }
@@ -317,7 +315,11 @@ export function generateReport(plan: SmokeTestPlan): string {
     ``,
   ];
 
-  for (const [label, group] of [["P0", p0], ["P1", p1], ["P2", p2]] as const) {
+  for (const [label, group] of [
+    ["P0", p0],
+    ["P1", p1],
+    ["P2", p2],
+  ] as const) {
     if (group.length === 0) continue;
     lines.push(`## ${label} Tests (${group.length})`, "");
     for (const c of group) {
@@ -351,7 +353,10 @@ export function generateReport(plan: SmokeTestPlan): string {
   return lines.join("\n");
 }
 
-export function generateSmokeScript(plan: SmokeTestPlan, baseUrl = "http://localhost:3000"): string {
+export function generateSmokeScript(
+  plan: SmokeTestPlan,
+  baseUrl = "http://localhost:3000",
+): string {
   const lines: string[] = [
     "#!/usr/bin/env bash",
     "set -euo pipefail",
@@ -384,11 +389,10 @@ export function generateSmokeScript(plan: SmokeTestPlan, baseUrl = "http://local
     "",
   ];
 
-  let p0Failed = false;
   for (const c of plan.cases) {
     if (c.priority === "P0" && !c.endpoint) continue;
 
-    if (c.priority === "P0" && !p0Failed) {
+    if (c.priority === "P0") {
       lines.push("# P0 tests (stop on first failure)", "");
     } else if (c.priority === "P1") {
       lines.push("# P1 tests (continue on failure)", "");

@@ -113,10 +113,7 @@ export function resolveSlashCommand(
   return manifest.slashCommands.get(command);
 }
 
-export function matchIntent(
-  manifest: RoutingManifest,
-  userInput: string,
-): RouteMatch[] {
+export function matchIntent(manifest: RoutingManifest, userInput: string): RouteMatch[] {
   const lower = userInput.toLowerCase();
   const results: RouteMatch[] = [];
 
@@ -143,7 +140,7 @@ export function matchIntent(
         parallelAgents: config.parallel_agents ?? [],
         fallbackAgent: config.fallback_agent,
         chain: config.chain ?? [],
-        stageGate: ((config.stage_gate ?? []) as ProjectStage[]),
+        stageGate: (config.stage_gate ?? []) as ProjectStage[],
         exclusive: config.exclusive ?? false,
         complexity: config.complexity,
       });
@@ -189,11 +186,7 @@ export function resolveDispatch(
   }
 
   // Complexity-based splitting for implementing intent
-  if (
-    top.complexity &&
-    complexity !== undefined &&
-    complexity > top.complexity.threshold
-  ) {
+  if (top.complexity && complexity !== undefined && complexity > top.complexity.threshold) {
     decision.splitRequired = true;
   }
 
@@ -235,7 +228,7 @@ function parseSimpleYaml(content: string): Record<string, unknown> {
     }
 
     // Route/slash command name (2-space indent)
-    const routeMatch = line.match(/^  ([\w\-\/]+):\s*$/);
+    const routeMatch = line.match(/^ {2}([\w/-]+):\s*$/);
     if (routeMatch && section) {
       flushCollect();
       currentRoute = routeMatch[1];
@@ -245,21 +238,21 @@ function parseSimpleYaml(content: string): Record<string, unknown> {
     }
 
     // List item (6-space indent with - prefix)
-    const listMatch = line.match(/^      -\s+(.+)/);
+    const listMatch = line.match(/^ {6}-\s+(.+)/);
     if (listMatch && collectingKey && section && currentRoute) {
       collectingArray.push(listMatch[1].trim());
       continue;
     }
 
     // List item (4-space indent with - prefix, for slash commands)
-    const listMatch4 = line.match(/^    -\s+(.+)/);
+    const listMatch4 = line.match(/^ {4}-\s+(.+)/);
     if (listMatch4 && collectingKey && section && currentRoute) {
       collectingArray.push(listMatch4[1].trim());
       continue;
     }
 
     // Property under a route/command (4-space indent)
-    const propMatch = line.match(/^    (\w[\w_]*):\s*(.*)/);
+    const propMatch = line.match(/^ {4}(\w[\w_]*):\s*(.*)/);
     if (propMatch) {
       flushCollect();
       const pKey = propMatch[1];
@@ -293,7 +286,7 @@ function parseSimpleYaml(content: string): Record<string, unknown> {
     }
 
     // Sub-object key (6-space indent, e.g. under complexity:)
-    const subMatch = line.match(/^      (\w[\w_]*):\s*(.*)/);
+    const subMatch = line.match(/^ {6}(\w[\w_]*):\s*(.*)/);
     if (subMatch && section && currentRoute) {
       flushCollect();
       const sKey = subMatch[1];

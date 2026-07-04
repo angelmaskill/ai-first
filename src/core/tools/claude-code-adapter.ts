@@ -22,15 +22,34 @@ const CLAUDE_CODE_PROFILE: ToolCapabilityProfile = {
 };
 
 const ALL_STAGES: ProjectStage[] = [
-  "idea", "discovery", "spec", "architecture", "scaffold",
-  "build", "qa", "release", "operate", "evolve",
+  "idea",
+  "discovery",
+  "spec",
+  "architecture",
+  "scaffold",
+  "build",
+  "qa",
+  "release",
+  "operate",
+  "evolve",
 ];
 
 const ALL_ROLES: AgentRole[] = [
-  "intake", "planner", "architect", "builder", "reviewer",
-  "security_reviewer", "release", "team_lead",
-  "repo_scanner", "stage_assessor", "knowledge_sync",
-  "state_updater", "skill_recommend", "smoke_case", "marketplace_skill",
+  "intake",
+  "planner",
+  "architect",
+  "builder",
+  "reviewer",
+  "security_reviewer",
+  "release",
+  "team_lead",
+  "repo_scanner",
+  "stage_assessor",
+  "knowledge_sync",
+  "state_updater",
+  "skill_recommend",
+  "smoke_case",
+  "marketplace_skill",
 ];
 
 export type AgentInvocation = {

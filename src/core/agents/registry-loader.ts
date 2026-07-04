@@ -92,10 +92,21 @@ export function agentNameToRole(name: string): AgentRole | null {
 
   // Validate against known roles
   const validRoles: AgentRole[] = [
-    "intake", "planner", "architect", "builder", "reviewer",
-    "security_reviewer", "release", "team_lead",
-    "repo_scanner", "stage_assessor", "knowledge_sync",
-    "state_updater", "skill_recommend", "smoke_case", "marketplace_skill",
+    "intake",
+    "planner",
+    "architect",
+    "builder",
+    "reviewer",
+    "security_reviewer",
+    "release",
+    "team_lead",
+    "repo_scanner",
+    "stage_assessor",
+    "knowledge_sync",
+    "state_updater",
+    "skill_recommend",
+    "smoke_case",
+    "marketplace_skill",
   ];
 
   return validRoles.includes(role) ? role : null;
@@ -154,8 +165,16 @@ export function loadAgentDefinition(filePath: string): {
   } else {
     // Default: all 10 stages
     stages = [
-      "idea", "discovery", "spec", "architecture", "scaffold",
-      "build", "qa", "release", "operate", "evolve",
+      "idea",
+      "discovery",
+      "spec",
+      "architecture",
+      "scaffold",
+      "build",
+      "qa",
+      "release",
+      "operate",
+      "evolve",
     ];
   }
 
@@ -205,7 +224,11 @@ export function loadAgentRegistry(agentsDir: string): AgentRegistry {
   const errors: AgentValidationError[] = [];
 
   if (!fs.existsSync(agentsDir)) {
-    errors.push({ agentPath: agentsDir, field: "directory", message: "Agents directory not found" });
+    errors.push({
+      agentPath: agentsDir,
+      field: "directory",
+      message: "Agents directory not found",
+    });
     return {
       agents: [],
       byRole: new Map(),

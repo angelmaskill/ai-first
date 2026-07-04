@@ -12,26 +12,16 @@ import * as os from "node:os";
 
 describe("parseFrontmatter", () => {
   it("extracts simple key-value pairs", () => {
-    const content = [
-      "---",
-      'name: builder-agent',
-      'model: sonnet',
-      "---",
-      "# Body",
-    ].join("\n");
+    const content = ["---", "name: builder-agent", "model: sonnet", "---", "# Body"].join("\n");
     const fm = parseFrontmatter(content);
     expect(fm.name).toBe("builder-agent");
     expect(fm.model).toBe("sonnet");
   });
 
   it("parses array values", () => {
-    const content = [
-      "---",
-      "name: test-agent",
-      "tools: [Read, Write, Bash]",
-      "---",
-      "# Body",
-    ].join("\n");
+    const content = ["---", "name: test-agent", "tools: [Read, Write, Bash]", "---", "# Body"].join(
+      "\n",
+    );
     const fm = parseFrontmatter(content);
     expect(Array.isArray(fm.tools)).toBe(true);
     expect(fm.tools).toEqual(["Read", "Write", "Bash"]);
@@ -142,10 +132,7 @@ describe("loadAgentDefinition", () => {
   });
 
   it("defaults model to sonnet when missing", () => {
-    const fp = writeAgent(
-      "builder-agent",
-      "name: builder-agent\ndescription: Test\ntools: [Read]",
-    );
+    const fp = writeAgent("builder-agent", "name: builder-agent\ndescription: Test\ntools: [Read]");
     const { definition } = loadAgentDefinition(fp);
     expect(definition).not.toBeNull();
     expect(definition!.model).toBe("sonnet");
