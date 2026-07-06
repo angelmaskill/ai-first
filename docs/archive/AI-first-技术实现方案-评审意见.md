@@ -2,10 +2,10 @@
 
 | 项 | 内容 |
 | --- | --- |
-| 评审对象 | `docs/AI-first-技术实现方案.md` |
+| 评审对象 | `docs/archive/AI-first-技术实现方案.md` |
 | 评审日期 | 2026-07-05 |
 | 评审范围 | 架构合理性、与业务方案一致性、Codex 友好性、实现可行性、风险和测试策略 |
-| 参考材料 | `docs/AI-first-多岗位AI项目脚手架剩余工作总清单.md`、`docs/AI-first-Codex友好性审查.md`、`src/core/` 现有代码、`package.json` |
+| 参考材料 | `docs/archive/AI-first-多岗位AI项目脚手架剩余工作总清单.md`、`docs/archive/AI-first-Codex友好性审查.md`、`src/core/` 现有代码、`package.json` |
 
 ## 1. 总体结论
 
@@ -330,10 +330,10 @@ async executePrompt(prompt: string, options?: { cwd?: string }): Promise<CodexRu
 
 | 项 | 内容 |
 | --- | --- |
-| 评审对象 | `docs/AI-first-技术实现方案.md` 完善版 |
+| 评审对象 | `docs/archive/AI-first-技术实现方案.md` 完善版 |
 | 评审日期 | 2026-07-05 |
 | 评审重点 | 第一轮 P0/P1 是否闭环、文档内部一致性、Codex 友好性、第一批实现可执行性 |
-| 参考材料 | 本评审第一轮意见、`docs/AI-first-多岗位AI项目脚手架剩余工作总清单.md`、`src/core/tools/codex-adapter.ts`、`src/core/models.ts`、`package.json` |
+| 参考材料 | 本评审第一轮意见、`docs/archive/AI-first-多岗位AI项目脚手架剩余工作总清单.md`、`src/core/tools/codex-adapter.ts`、`src/core/models.ts`、`package.json` |
 
 ### 8.1 总体结论
 
@@ -553,7 +553,7 @@ export type GuideOutput = {
 
 ### 8.4 与业务方案的一致性
 
-技术方案内部已经通过 ADR-001 说明 F3 口径变更，这是正确的。但业务方案 `docs/AI-first-多岗位AI项目脚手架剩余工作总清单.md` 当前仍保留较多旧表述，例如：
+技术方案内部已经通过 ADR-001 说明 F3 口径变更，这是正确的。但业务方案 `docs/archive/AI-first-多岗位AI项目脚手架剩余工作总清单.md` 当前仍保留较多旧表述，例如：
 
 - “Codex 输出能稳定落入结构化协议”；
 - “输出 schema 或解析器测试”；
@@ -585,10 +585,10 @@ export type GuideOutput = {
 
 | 项 | 内容 |
 | --- | --- |
-| 评审对象 | `docs/AI-first-技术实现方案.md` 再完善版 |
+| 评审对象 | `docs/archive/AI-first-技术实现方案.md` 再完善版 |
 | 评审日期 | 2026-07-05 |
 | 评审重点 | 第二轮问题是否闭环、是否可进入实现、剩余接口风险、跨文档口径一致性 |
-| 参考材料 | 本评审前两轮意见、`docs/AI-first-多岗位AI项目脚手架剩余工作总清单.md`、当前 `src/core/` 代码和 `package.json` |
+| 参考材料 | 本评审前两轮意见、`docs/archive/AI-first-多岗位AI项目脚手架剩余工作总清单.md`、当前 `src/core/` 代码和 `package.json` |
 
 ### 9.1 总体结论
 
@@ -819,10 +819,10 @@ taintedPaths?: string[];
 
 | 项 | 内容 |
 | --- | --- |
-| 评审对象 | `docs/AI-first-技术实现方案.md` 收尾版 |
+| 评审对象 | `docs/archive/AI-first-技术实现方案.md` 收尾版 |
 | 评审日期 | 2026-07-05 |
 | 评审重点 | 第三轮 6 个收尾项是否闭环、类型/流程示例是否一致、是否可以停止文档评审进入实现 |
-| 参考材料 | 本评审前三轮意见、`docs/AI-first-多岗位AI项目脚手架剩余工作总清单.md`、当前 `src/core/` 代码和 `package.json` |
+| 参考材料 | 本评审前三轮意见、`docs/archive/AI-first-多岗位AI项目脚手架剩余工作总清单.md`、当前 `src/core/` 代码和 `package.json` |
 
 ### 10.1 总体结论
 
@@ -1029,7 +1029,7 @@ fixtures/codex-output/sample-001/
 
 | 项 | 内容 |
 | --- | --- |
-| 评审对象 | `docs/AI-first-技术实现方案.md` 第 11 节“存量代码盘点与去留决策” |
+| 评审对象 | `docs/archive/AI-first-技术实现方案.md` 第 11 节“存量代码盘点与去留决策” |
 | 评审日期 | 2026-07-05 |
 | 评审重点 | 是否准确回答“项目里代码/脚本有什么作用、是否必要”、调用链判断是否属实、去留决策是否利于第一批实现 |
 | 参考材料 | `package.json`、`.claude/commands/*.md`、`src/core/`、`src/frontend/`、`scripts/` |
@@ -1231,7 +1231,7 @@ README 当前仍有较强的“15 agents / 9 gates / auto-orchestration / dashbo
 
 | 项 | 内容 |
 | --- | --- |
-| 评审对象 | `docs/AI-first-技术实现方案.md` 第 11 节完善版 |
+| 评审对象 | `docs/archive/AI-first-技术实现方案.md` 第 11 节完善版 |
 | 评审日期 | 2026-07-05 |
 | 评审重点 | 上一轮专项评审问题是否闭环、存量代码去留决策是否足够可执行 |
 | 参考材料 | `package.json`、`.claude/commands/task.md`、`.claude/commands/complete.md`、`.claude/commands/scan.md`、`src/core/`、`src/frontend/`、`scripts/` |

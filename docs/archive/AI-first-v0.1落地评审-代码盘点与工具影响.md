@@ -1,7 +1,7 @@
 # AI-first v0.1 落地评审意见 — 代码盘点与工具影响
 
 > 评审日期：2026-07-06
-> 评审对象：技术方案 `docs/AI-first-技术实现方案.md` 落地后的全量代码
+> 评审对象：技术方案 `docs/archive/AI-first-技术实现方案.md` 落地后的全量代码
 > 评审视角：现有代码的作用是什么？是否必要保留？会不会妨碍 Codex / Claude Code 编程？
 > 评审方法：grep 实证调用链 + 行数盘点 + hook/settings 核查 + 对照方案 §10.1 / §11
 > 评审结论：**TS 控制面完全无害；真正妨碍编程的是 Claude 原生编排层（CLAUDE.md / AGENTS.md 人设）和两个 hook；另一个必须修复的问题是 `/advance` 的 `skip` / bypass 旁路会破坏阶段门。**

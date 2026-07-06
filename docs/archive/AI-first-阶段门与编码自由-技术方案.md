@@ -1,7 +1,7 @@
 # AI-first 阶段门与编码自由 — 技术方案
 
-> 需求来源：`docs/AI-first-v0.1落地评审-代码盘点与工具影响.md` §6（P0 约束 + 强化 A/B/C）
-> 上游方案：`docs/AI-first-技术实现方案.md`（v0.1 主链路，已落地）
+> 需求来源：`docs/archive/AI-first-v0.1落地评审-代码盘点与工具影响.md` §6（P0 约束 + 强化 A/B/C）
+> 上游方案：`docs/archive/AI-first-技术实现方案.md`（v0.1 主链路，已落地）
 > 本方案：在 v0.1 基础上**补一道客观阶段门 + 解除编码人设限制**，闭环"开发没做完不能提测"。
 > 业务目标：**代码不能影响 Codex 编程能力的发挥；但要把控好研发阶段，不允许开发没做完就推进到提测。**
 
@@ -777,6 +777,6 @@ grep -rn "mode 'skip' 已废弃\|skip.*deprecated\|已废弃" src/core/ .claude/
 
 ## 附录 — 与上游方案的衔接
 
-- **`docs/AI-first-技术实现方案.md`**：本方案是其增量。复用 §2.1 三层架构、§3.2 `ExecutionReport`、§4.3 `collectExecutionReport` 产出的客观证据、§4.3.3 scope 违规分级。不重复定义。
-- **`docs/AI-first-v0.1落地评审-代码盘点与工具影响.md`**：本方案是其 §6.2 P0 约束的实现设计。每条 P0 在本方案 §13 有覆盖映射。
+- **`docs/archive/AI-first-技术实现方案.md`**：本方案是其增量。复用 §2.1 三层架构、§3.2 `ExecutionReport`、§4.3 `collectExecutionReport` 产出的客观证据、§4.3.3 scope 违规分级。不重复定义。
+- **`docs/archive/AI-first-v0.1落地评审-代码盘点与工具影响.md`**：本方案是其 §6.2 P0 约束的实现设计。每条 P0 在本方案 §13 有覆盖映射。
 - **后续**：本方案落地后，评审文档 §4 的 #3（删 Tier 4 孤岛）/ #4（收紧 hook）/ #5（dashboard）作为独立体验优化处理，不依赖本方案。

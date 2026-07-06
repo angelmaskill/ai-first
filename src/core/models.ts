@@ -593,7 +593,7 @@ export type StandardFrontmatter = {
 };
 
 // ──────────────────────────────────────────────────────────────────────────
-// 阶段门与编码自由（docs/AI-first-阶段门与编码自由-技术方案.md）
+// 阶段门与编码自由（docs/archive/AI-first-阶段门与编码自由-技术方案.md）
 // GateCheck / AdvanceDecision: canAdvance() 的输入输出
 // BreakGlassRecord: 显式绕过门的审计记录（永久，写入 .ai-first/logs/break-glass/）
 // ──────────────────────────────────────────────────────────────────────────

@@ -1,4 +1,4 @@
-// 阶段门与编码自由（docs/AI-first-阶段门与编码自由-技术方案.md §5）
+// 阶段门与编码自由（docs/archive/AI-first-阶段门与编码自由-技术方案.md §5）
 //
 // canAdvance() 是纯函数（core compute，§2.1）：读 .ai-first/ 文件，不 spawn、不写。
 // 消费文件态证据（task yml + ExecutionReport + artifacts + sync events），
