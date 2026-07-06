@@ -1,3 +1,5 @@
+// ⚠ EXPERIMENTAL / UNWIRED (§11.3): no /smoke command consumes this yet.
+// Either wire it to a /smoke entry point or delete it (with its tests).
 import type { ProjectStage } from "../models.ts";
 import { nowIso } from "../../utils/time.ts";
 

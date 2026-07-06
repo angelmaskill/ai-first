@@ -9,6 +9,7 @@ import {
   splitTask,
   resolveAgentForSubtask,
   createRetryPlan,
+  getScopeDomainPathGroups,
 } from "./subagent-dispatcher.ts";
 
 describe("calculateComplexity", () => {
@@ -45,6 +46,21 @@ describe("calculateComplexity", () => {
       docsPaths: [],
     } as any;
     expect(calculateComplexity(task, scope)).toBe(0.1);
+  });
+
+  it("counts algorithm and data paths in complexity", () => {
+    const task = { id: "t1", title: "test", mode: "implement" } as any;
+    const scope = {
+      frontendPaths: [],
+      backendPaths: [],
+      algorithmPaths: Array(10).fill("algorithms/model.py"),
+      dataPaths: Array(10).fill("data/pipeline.py"),
+      sharedPaths: [],
+      docsPaths: [],
+    } as any;
+    const result = calculateComplexity(task, scope);
+    // fileCount factor: 20/50 = 0.4 capped at 0.4; domain factor: 2/5 = 0.4 capped at 0.3.
+    expect(result).toBeCloseTo(0.7);
   });
 
   it("caps at 1.0", () => {
@@ -191,6 +207,57 @@ describe("splitTask", () => {
     const titles = subtasks.map((s) => s.title);
     expect(titles.some((t) => t.includes("frontend"))).toBe(true);
     expect(titles.some((t) => t.includes("backend"))).toBe(true);
+  });
+
+  it("splits algorithm and data scopes as first-class domains", () => {
+    const scope = {
+      id: "sc-algo",
+      projectId: "p1",
+      taskId: "t-split",
+      summary: "algorithm feature",
+      frontendPaths: ["src/App.tsx"],
+      backendPaths: [],
+      algorithmPaths: ["algorithms/ranker.py"],
+      dataPaths: ["data/features.sql"],
+      sharedPaths: [],
+      docsPaths: [],
+      riskLevel: "medium",
+      parallelSafe: true,
+      lockMode: "none",
+      createdAt: "",
+      updatedAt: "",
+    } as any;
+
+    const subtasks = splitTask(baseTask, scope);
+    const titles = subtasks.map((s) => s.title);
+    expect(titles.some((t) => t.includes("algorithm"))).toBe(true);
+    expect(titles.some((t) => t.includes("data"))).toBe(true);
+  });
+
+  it("supports custom domainPaths without requiring new hard-coded fields", () => {
+    const scope = {
+      id: "sc-custom",
+      projectId: "p1",
+      taskId: "t-split",
+      summary: "mobile feature",
+      frontendPaths: [],
+      backendPaths: [],
+      sharedPaths: [],
+      docsPaths: [],
+      domainPaths: {
+        mobile: ["apps/mobile/App.tsx"],
+        workers: ["workers/sync.ts"],
+      },
+      riskLevel: "medium",
+      parallelSafe: true,
+      lockMode: "none",
+      createdAt: "",
+      updatedAt: "",
+    } as any;
+
+    const groups = getScopeDomainPathGroups(scope);
+    expect(groups.map((group) => group.id)).toEqual(["mobile", "workers"]);
+    expect(splitTask(baseTask, scope)).toHaveLength(2);
   });
 
   it("respects maxSubtasks config", () => {

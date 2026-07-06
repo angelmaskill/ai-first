@@ -1,0 +1,18 @@
+id: domain-docs
+name: Documentation
+kind: docs
+paths:
+  - README.md
+  - docs
+  - examples/legacy-fullstack/README.md
+techStack:
+  - react
+  - typescript
+  - vitest
+  - vite
+testCommands:
+  - npm run test
+buildCommands:
+  - npm run build
+standards: []
+commonRisks: []

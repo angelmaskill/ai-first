@@ -1,0 +1,4 @@
+id: KNOW-1
+name: 认证数据模型
+relatedPaths: [src/backend/auth.ts]
+tags: [auth, security]

@@ -17,6 +17,7 @@ import {
   createDispatchPlan,
   calculateComplexity,
   defaultSplitConfig,
+  getScopeDomainPathGroups,
 } from "./subagent-dispatcher.ts";
 import type { Subtask, DispatchPlan, SplitConfig } from "./subagent-dispatcher.ts";
 import type { Task, ChangeScope } from "../models.ts";
@@ -53,6 +54,7 @@ function parseTaskYaml(filePath: string): { task: Task; scope: ChangeScope } {
     stage: (extract("stage") as Task["stage"]) || "build",
     mode: (extract("mode") as Task["mode"]) || "execute",
     domainIds: [],
+    acceptanceCriteria: [],
     status: (extract("status") as Task["status"]) || "todo",
     priority: (extract("priority") as Task["priority"]) || "p1",
     createdAt: extract("createdAt") || new Date().toISOString(),
@@ -66,6 +68,9 @@ function parseTaskYaml(filePath: string): { task: Task; scope: ChangeScope } {
     summary: task.title,
     frontendPaths: extractList("frontendPaths"),
     backendPaths: extractList("backendPaths"),
+    algorithmPaths: extractList("algorithmPaths"),
+    dataPaths: extractList("dataPaths"),
+    infraPaths: extractList("infraPaths"),
     sharedPaths: extractList("sharedPaths"),
     docsPaths: extractList("docsPaths"),
     riskLevel: (extract("riskLevel") as ChangeScope["riskLevel"]) || "medium",
@@ -93,11 +98,13 @@ function main(): void {
 
   const { task, scope } = parseTaskYaml(taskPath);
   const complexity = calculateComplexity(task, scope);
+  const fileCount = getScopeDomainPathGroups(scope).reduce(
+    (count, group) => count + group.paths.length,
+    0,
+  );
 
   console.error(`Task: ${task.title}`);
-  console.error(
-    `Files: ${scope.frontendPaths.length + scope.backendPaths.length + scope.sharedPaths.length + scope.docsPaths.length}`,
-  );
+  console.error(`Files: ${fileCount}`);
   console.error(`Complexity: ${(complexity * 100).toFixed(0)}%`);
 
   let subtasks: Subtask[];

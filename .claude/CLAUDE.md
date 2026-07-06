@@ -276,6 +276,31 @@ everything through plain language.
 | `/test-gen [file]` | Generate tests for changed or specified files |
 | `/standards` | List project standards |
 
+## Deterministic TS Core (Z0 / §2.5 dispatch收编)
+
+The Claude-native layer in `.claude/` is augmented by a deterministic TypeScript
+control plane in `src/core/`. The six §2.5 dispatch types map to npm scripts
+that produce objective, file-backed results — call them whenever you need a
+deterministic verdict instead of an LLM judgement:
+
+| §2.5 dispatch type | Deterministic core entry |
+|---|---|
+| 查询 / 位置感（"现在啥情况"） | `npm run guide` → `guide-core.ts buildGuide()` |
+| 阶段判定（confidence/候选） | `assessStage()` in `stage/stage-core.ts` (no LLM, rule-based) |
+| 实现 / 任务执行 | `npm run task:create` → `task-core.ts`; then `npm run task:exec -- --task <id> --runtime codex` |
+| 范围/边界（scope 推断 + 冲突） | `task/scope-core.ts inferChangeScope()` + `detectScopeConflict()` (warn-only) |
+| Codex 闭环（执行 + 验收 + 报告） | `task-exec-cli.ts` runs the full §4.5 sequence: baseline → prompt → Codex → changeSet → acceptance → `collectExecutionReport()` |
+| 信息对齐 / doc-rot | `npm run sync` → `sync-core.ts analyzeImpact(report.filesChanged)` |
+| 规范命中 | `standards/standards-core.ts checkStandards(scope)` |
+
+**Rules:**
+- 这些 core 模块是纯函数或仅读 `.ai-first/` 文件，可在自然语言编排中直接引用其结论。
+- 对用户隐藏内部概念：不要说"运行了 assessStage"，而要说"当前阶段 X，置信度 Y%"。
+- `task:exec` 的 `ExecutionReport` 是任务状态的客观来源——status 三态
+  (done/review_pending/blocked) 由 git changeSet + 验收 + scope 违规分级决定，
+  **不依赖 Codex 自报**（"丰饶上下文 in，宽容产出 out"，§0）。
+- 真实 Codex 执行需 `--runtime codex`（不带 `--dry-run`）；CI 与调试用 `--dry-run`。
+
 ## Project State Conventions
 
 ```
@@ -295,7 +320,7 @@ everything through plain language.
   reviews/                           # review reports
   knowledge/                         # domain knowledge docs (KnowledgeItem)
   standards/                         # project standards (StandardItem)
-    frontend/ backend/ fullstack/ security/ workflow/
+    frontend/ backend/ algorithm/ data/ fullstack/ security/ workflow/
   wiki/                              # generated wiki pages
   sync/                              # sync event YAML files
   reports/                           # scan & sync reports

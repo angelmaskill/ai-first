@@ -1,3 +1,6 @@
+// ⚠ EXPERIMENTAL / UNWIRED (§11.3): tests exist but no live consumer. Reuse
+// candidates (manifest → action resolution) may migrate into task:exec; the
+// rest will be deleted alongside its tests.
 import type { ProjectStage } from "../models.ts";
 
 export type RouteConfig = {

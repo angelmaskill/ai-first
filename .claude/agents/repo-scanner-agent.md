@@ -74,7 +74,17 @@ test -f .prettierrc -o -f .prettierrc.js -o -f prettier.config.js && echo "Prett
 
 ### Phase 3: Code Domain Detection
 
-Scan directory structure to detect domains:
+Prefer the shared scanner when this repository has the TypeScript runtime
+available:
+
+```bash
+npm run scan:domains -- "{project root}"
+```
+
+This emits `RepoFacts` JSON with first-class domains for frontend, backend,
+algorithm/ML, data, infrastructure, documentation, and shared packages.
+
+If the shared scanner is unavailable, scan directory structure manually:
 
 ```bash
 echo "=== Frontend hints ==="
@@ -82,6 +92,16 @@ find . -maxdepth 3 -type d \( -name "components" -o -name "pages" -o -name "hook
 
 echo "=== Backend hints ==="
 find . -maxdepth 3 -type d \( -name "routes" -o -name "controllers" -o -name "services" -o -name "models" -o -name "backend" -o -name "api" -o -name "server" \) ! -path "*/node_modules/*" ! -path "*/.git/*" 2>/dev/null
+
+echo "=== Algorithm / ML hints ==="
+find . -maxdepth 4 -type d \( -name "algorithm" -o -name "algorithms" -o -name "algo" -o -name "ml" -o -name "models" -o -name "notebooks" \) ! -path "*/node_modules/*" ! -path "*/.git/*" 2>/dev/null
+
+echo "=== Data hints ==="
+find . -maxdepth 4 -type d \( -name "data" -o -name "data-pipeline" -o -name "datasets" -o -name "etl" -o -name "features" -o -name "pipelines" -o -name "analytics" \) ! -path "*/node_modules/*" ! -path "*/.git/*" 2>/dev/null
+
+echo "=== Infrastructure hints ==="
+find . -maxdepth 3 -type d \( -name "infra" -o -name "infrastructure" -o -name "deploy" -o -name "deployment" -o -name "k8s" -o -name "terraform" -o -name ".github" \) ! -path "*/node_modules/*" ! -path "*/.git/*" 2>/dev/null
+find . -maxdepth 3 -type f \( -name "Dockerfile" -o -name "docker-compose*.yml" -o -name "docker-compose*.yaml" \) ! -path "*/node_modules/*" 2>/dev/null
 
 echo "=== Docs hints ==="
 find . -maxdepth 2 -type d -name "docs" ! -path "*/node_modules/*" 2>/dev/null

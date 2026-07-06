@@ -244,6 +244,9 @@ Open the target project in Claude Code, then use:
 
 AI-first understands natural language. Describe what you want — it figures out the rest.
 
+For a scenario-by-scenario operator guide, see
+[AI-first 使用指南](docs/AI-first-使用指南.md).
+
 ```text
 You: 添加暗黑模式
 AI:  暗黑模式已实现。
@@ -425,6 +428,25 @@ npm run data:sync       # Regenerate frontend data from filesystem
 ### Pre-commit Hook
 
 Automatically runs: ESLint → Prettier → typecheck → tests → frontend build → data sync. All 6 must pass.
+
+## 🧭 Implementation status (honest, per technical plan §11.4)
+
+This project ships both a Claude-native orchestration layer (`.claude/` Markdown) and a deterministic TypeScript control plane (`src/core/*.ts`). To avoid overstating what's wired, here is the capability breakdown:
+
+| Capability | Status | Where |
+|---|---|---|
+| 10-stage lifecycle, auto-orchestration, 9 quality gates | **已可用 (Claude native)** | `.claude/` Markdown |
+| `npm run adopt` / `scan:domains` / `guide` / `task:create` / `task:exec` / `sync` | **已可用 (TS core, v0.1 main line)** | `src/core/{adoption,scanners,guide,task,exec,sync}/` |
+| Codex closed loop (`task:exec` → report → status) — dry-run verified | **已可用** (real Codex = manual go/no-go) | `src/core/tools/codex-adapter.ts`, `exec/` |
+| Stage assessor (rule-based, no LLM) + scope inference + report collector | **已可用** (fixture-tested) | `stage/`, `task/scope-core.ts`, `exec/report-collector-core.ts` |
+| Pilot walkthrough (dry-run main line) | **已可用** | `scripts/pilot-walkthrough.sh` |
+| Frontend dashboard | **展示示例** (not required for v0.1; K3 degraded) | `src/frontend/` |
+| `harness/executor.ts` + `routing-resolver.ts` | **实验性 / 未启用** (reuse candidates for `task:exec`) | `src/core/harness/` |
+| `agents/smoke-case-generator.ts` | **实验性 / 未启用** (no `/smoke` consumer yet) | `src/core/agents/` |
+| `agents/registry-loader.ts` | **实验性 / 未启用** (`dispatch-cli` uses hardcoded map) | `src/core/agents/` |
+| Multi-platform adapters (Codex/Gemini/Qoder), GitHub App, team mode | **规划中** | see Roadmap |
+
+> "实验性 / 未启用" means the code exists with tests but no live entry point consumes it yet. It does **not** count toward running capabilities.
 
 ## 🗺 Roadmap
 
@@ -671,6 +693,9 @@ AI-first 当前通过 Claude Code 原生 agents 和 slash commands 运行。
 ### 直接对话 — 无需命令
 
 AI-first 理解自然语言。描述你想要什么——剩下的它自己搞定。
+
+按场景选择自然语言或命令的详细说明，见
+[AI-first 使用指南](docs/AI-first-使用指南.md)。
 
 ```text
 你: 添加暗黑模式

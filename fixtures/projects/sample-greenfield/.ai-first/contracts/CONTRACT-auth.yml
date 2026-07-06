@@ -1,0 +1,9 @@
+id: CONTRACT-auth
+name: Auth API
+description: POST /auth/login contract — username + password → token
+domainIds: [domain-backend]
+kind: api
+relatedPaths: [src/backend/auth.ts]
+consumers: [domain-frontend]
+producers: [domain-backend]
+stability: stable

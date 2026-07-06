@@ -1,0 +1,20 @@
+id: proj-sample-greenfield
+name: Sample Greenfield
+slug: sample-greenfield
+description: >-
+  Minimal fixture project for onboarding and integration testing of the
+  ai-first deterministic control plane.
+mode: brownfield
+teamMode: fullstack
+ownershipModel: mixed
+rootPath: .
+codeDomains:
+  - id: domain-backend
+    name: Backend
+    kind: backend
+    paths: [src/backend/]
+currentStage: build
+status: active
+createdAt: "2026-07-05T00:00:00Z"
+updatedAt: "2026-07-05T00:00:00Z"
+tags: [ai-first, fixture, sample]

@@ -1,3 +1,6 @@
+// ⚠ EXPERIMENTAL / UNWIRED (§11.3): dispatch-cli currently uses a hardcoded
+// agent map and does not call this loader. Either make dispatch-cli consume it
+// or delete it (with its tests). May contain reusable agent-definition loading.
 import * as fs from "node:fs";
 import * as path from "node:path";
 import type {

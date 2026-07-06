@@ -10,6 +10,14 @@ Create a structured task with ownership and change boundaries.
 
 ## Steps
 
+0. **Deterministic core (G2 收编)** — create the task + inferred scope via the TS core so the YAML schema is authoritative (Claude AND Codex share one task format):
+   ```bash
+   npm run task:create -- "<title>" --domain <domain-id> [--runtime codex] \
+     [--accept-test npm-test] [--accept-exists <path>] [--accept-manual]
+   # or: ai-first task:create "<title>" --domain <domain-id> ...
+   ```
+   This runs `task-core.createTask()` + `scope-core.inferChangeScope()` and writes `.ai-first/tasks/<id>.yml` + `.ai-first/change-scopes/<id>.yml` with `acceptanceCriteria` populated. Manual authoring (step 1+) remains valid but the TS path is the source of truth for the schema.
+
 1. Parse arguments:
    - `title`: task description (required)
    - `--owner`: who implements (default: ask)

@@ -1,0 +1,18 @@
+{
+  "id": "task-20260705-001",
+  "projectId": "proj-sample",
+  "title": "实现登录接口",
+  "description": "在 src/backend/auth.ts 实现登录端点",
+  "stage": "build",
+  "mode": "execute",
+  "domainIds": ["domain-backend"],
+  "status": "in_progress",
+  "priority": "p1",
+  "changeScopeId": "scope-task-001",
+  "acceptanceCriteria": [
+    { "id": "ac-1", "description": "测试通过", "check": { "kind": "test", "commandId": "npm-test" }, "required": true }
+  ],
+  "runtime": "codex",
+  "createdAt": "2026-07-05T06:00:00.000Z",
+  "updatedAt": "2026-07-05T06:00:00.000Z"
+}

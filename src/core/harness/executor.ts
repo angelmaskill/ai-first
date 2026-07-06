@@ -1,3 +1,7 @@
+// ⚠ EXPERIMENTAL / UNWIRED (§11.3): this module has tests but no live entry
+// point consumes it. Do not advertise it as a running capability. Reuse
+// candidates (adapter execution orchestration) will be migrated into the
+// task:exec path; the rest will be deleted alongside its tests.
 import type { DispatchPlan, Subtask, SubtaskResult } from "./subagent-dispatcher.ts";
 import type { AgentRegistry } from "../agents/types.ts";
 import type { ToolAdapter } from "../tools/tool-adapter-protocol.ts";

@@ -14,6 +14,15 @@ This is MANDATORY after every builder-agent completes work.
 
 ## Steps
 
+### 0. Deterministic core (G2 收编)
+
+For a Codex-executed task, the post-build chain is already built into `task:exec` — the report collector runs the acceptance plan, classifies scope violations, and writes an `ExecutionReport` with the 3-state `status`:
+```bash
+npm run task:exec -- --task <task-id> [--runtime codex] [--dry-run] [--allow-dirty]
+# or: ai-first task:exec --task <task-id> ...
+```
+Use this as the objective verdict for done/review_pending/blocked. The manual chain below (steps 1+) applies when a Claude builder-agent did the work (no Codex run to collect from) — then run `npm run sync` afterwards to flag doc rot.
+
 ### 1. Identify Task
 
 If task-id provided, read that task YAML. Otherwise find the most recent `in_progress` task:

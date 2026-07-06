@@ -1,0 +1,13 @@
+id: scope-task-sample-001
+projectId: proj-sample-greenfield
+taskId: task-sample-001
+summary: 实现登录端点
+frontendPaths: []
+backendPaths: [src/backend/]
+sharedPaths: []
+docsPaths: []
+riskLevel: low
+parallelSafe: true
+lockMode: none
+createdAt: "2026-07-05T00:00:00Z"
+updatedAt: "2026-07-05T00:00:00Z"

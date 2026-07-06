@@ -11,6 +11,17 @@ to ensure project documentation stays aligned with code changes.
 
 ## Steps
 
+### 0. Deterministic core (G2 收编)
+
+Run the TS sync engine — it reads `.ai-first/standards/`, `.ai-first/knowledge/`, `.ai-first/contracts/` and matches their `relatedPaths` against the change set, then writes `SyncEvent` yml files for human confirmation:
+```bash
+npm run sync                                  # scan working tree (tracked + untracked)
+npm run sync -- --from-report .ai-first/reports/report-*.yml   # reuse task:exec's filesChanged
+npm run sync -- --files src/a.ts,src/b.ts
+# or: ai-first sync ...
+```
+This is the "safety fuse" against doc rot (J1: never re-scans git for a task that already produced a report). Manual review of the generated events (step 1+) confirms or dismisses each.
+
 1. Identify recently changed files:
    ```bash
    git diff --name-only HEAD~5 2>/dev/null || git log --oneline -10

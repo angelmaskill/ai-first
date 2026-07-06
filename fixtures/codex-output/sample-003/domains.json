@@ -1,0 +1,5 @@
+[
+  { "id": "domain-frontend", "name": "Frontend", "kind": "frontend", "paths": ["src/frontend/"] },
+  { "id": "domain-backend", "name": "Backend", "kind": "backend", "paths": ["src/backend/"] },
+  { "id": "domain-algo", "name": "Algorithm", "kind": "algorithm", "paths": ["algorithms/"] }
+]

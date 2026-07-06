@@ -12,7 +12,18 @@ export type ProjectStage =
 
 export type ProjectMode = "greenfield" | "brownfield";
 export type TeamMode = "fullstack" | "frontend_backend_split" | "hybrid";
-export type CodeDomainKind = "frontend" | "backend" | "shared" | "infra" | "docs" | "other";
+export type CodeDomainKind =
+  | "frontend"
+  | "backend"
+  | "algorithm"
+  | "ml"
+  | "data"
+  | "service"
+  | "app"
+  | "shared"
+  | "infra"
+  | "docs"
+  | "other";
 
 export type CodeDomain = {
   id: string;
@@ -20,6 +31,10 @@ export type CodeDomain = {
   kind: CodeDomainKind;
   paths: string[];
   description?: string;
+  // §5.6 B1: detected tech stack + commands (read from manifest files)
+  techStack?: string[];
+  testCommands?: string[];
+  buildCommands?: string[];
 };
 
 export type Project = {
@@ -89,6 +104,9 @@ export type StageAssessment = {
   alternativeStages: ProjectStage[];
   blockers: string[];
   missingArtifacts: string[];
+  // §5.1 / P2-1: low-confidence semantic stages ask for human confirmation
+  needsConfirmation: boolean;
+  uncertaintyReason?: string;
   assessedAt: string;
 };
 
@@ -108,6 +126,12 @@ export type GuidanceCard = {
   reviewStatus: "not_started" | "pending" | "in_progress" | "passed" | "failed";
 };
 
+export type OwnerRef = {
+  type: "user" | "agent" | "team";
+  id: string;
+  name: string;
+};
+
 export type Task = {
   id: string;
   projectId: string;
@@ -116,19 +140,15 @@ export type Task = {
   stage: ProjectStage;
   mode: "generate" | "reuse" | "skip" | "execute";
   domainIds: string[];
-  owner?: {
-    type: "user" | "agent" | "team";
-    id: string;
-    name: string;
-  };
-  reviewer?: {
-    type: "user" | "agent" | "team";
-    id: string;
-    name: string;
-  };
+  owner?: OwnerRef;
+  reviewer?: OwnerRef;
   status: "todo" | "in_progress" | "blocked" | "review_pending" | "done" | "canceled";
   priority: "p0" | "p1" | "p2" | "p3";
   changeScopeId?: string;
+  // §3.2 / E1: objective acceptance criteria (tool-side checked, not Codex self-report)
+  acceptanceCriteria: AcceptanceCriterion[];
+  // §3.2: suggested execution runtime (claude-code | codex)
+  runtime?: RuntimeToolId;
   createdAt: string;
   updatedAt: string;
 };
@@ -140,8 +160,12 @@ export type ChangeScope = {
   summary: string;
   frontendPaths: string[];
   backendPaths: string[];
+  algorithmPaths?: string[];
+  dataPaths?: string[];
+  infraPaths?: string[];
   sharedPaths: string[];
   docsPaths: string[];
+  domainPaths?: Record<string, string[]>;
   excludedPaths?: string[];
   riskLevel: "low" | "medium" | "high";
   parallelSafe: boolean;
@@ -156,9 +180,27 @@ export type DomainMap = {
   description?: string;
   frontendPaths: string[];
   backendPaths: string[];
+  algorithmPaths?: string[];
+  dataPaths?: string[];
+  infraPaths?: string[];
   sharedPaths: string[];
   relatedDocs: string[];
   owners: string[];
+};
+
+// §5.6 B3 — cross-domain contract (API/schema/event) definition. Stored in
+// .ai-first/contracts/<id>.yml and consumed by sync-core to flag breakage when
+// a contract's owning paths change.
+export type Contract = {
+  id: string;
+  name: string;
+  description?: string;
+  domainIds: string[];
+  kind: "api" | "schema" | "event" | "protocol";
+  relatedPaths: string[];
+  consumers?: string[];
+  producers?: string[];
+  stability?: "stable" | "draft" | "deprecated";
 };
 
 export type ReviewFinding = {
@@ -243,12 +285,35 @@ export type StandardItem = {
   projectId: string;
   name: string;
   description: string;
-  category: "frontend" | "backend" | "fullstack" | "security" | "workflow";
+  category: "frontend" | "backend" | "algorithm" | "data" | "fullstack" | "security" | "workflow";
   content: string;
   examples: string[];
   status: "proposed" | "accepted" | "deprecated";
   createdAt: string;
   updatedAt: string;
+};
+
+export type RuntimeToolId = "claude-code" | "codex";
+
+export type RuntimeExecutionMode = "native" | "exec" | "dry-run";
+
+export type RuntimeRoleBinding = {
+  role: AgentRole;
+  command?: string;
+  agent?: string;
+  promptTemplate?: string;
+  timeoutMs?: number;
+};
+
+export type RuntimeProfile = {
+  id: RuntimeToolId;
+  label: string;
+  executionMode: RuntimeExecutionMode;
+  configPath?: string;
+  supportedStages: ProjectStage[];
+  supportedRoles: AgentRole[];
+  roleBindings: RuntimeRoleBinding[];
+  notes?: string[];
 };
 
 export type SkillIO = {
@@ -373,8 +438,156 @@ export type RepoFacts = {
   packageJson: boolean;
   frontendHints: string[];
   backendHints: string[];
+  algorithmHints: string[];
+  dataHints: string[];
+  infraHints: string[];
   docsHints: string[];
   testHints: string[];
   configHints: string[];
   codeDomains: CodeDomain[];
+};
+
+// ──────────────────────────────────────────────────────────────────────────
+// §3.2 Acceptance criteria + safe command registry (P0-2)
+// Tool-side objective checks; never rely on Codex self-report.
+// ──────────────────────────────────────────────────────────────────────────
+
+export type AcceptanceCheck =
+  | { kind: "test"; commandId: string }
+  | { kind: "typecheck"; commandId: string }
+  | { kind: "lint"; commandId: string }
+  | { kind: "file_exists"; path: string }
+  | { kind: "file_contains"; path: string; pattern: string }
+  | { kind: "manual" };
+
+export type AcceptanceCriterion = {
+  id: string;
+  description: string;
+  check: AcceptanceCheck;
+  required: boolean;
+};
+
+export type AllowedCommand = {
+  id: string;
+  command: string[];
+  cwd?: string;
+  timeoutMs: number;
+  maxOutputBytes: number;
+  env?: Record<string, string>;
+};
+
+// ──────────────────────────────────────────────────────────────────────────
+// §3.2 Codex execution report (F3 — tool-side collected, "lenient out")
+// ──────────────────────────────────────────────────────────────────────────
+
+export type AcceptanceResult = {
+  criterionId: string;
+  passed: boolean;
+  detail: string;
+};
+
+export type ExecutionOutcomeReason =
+  | "acceptance_passed"
+  | "acceptance_failed"
+  | "non_zero_exit"
+  | "timeout"
+  | "scope_violation"
+  | "dirty_worktree_blocked";
+
+export type ScopeViolation = {
+  path: string;
+  severity: "risk" | "review" | "block";
+  reason: string;
+};
+
+export type ExecutionReport = {
+  id: string;
+  taskId: string;
+  runtime: RuntimeToolId;
+  startedAt: string;
+  finishedAt: string;
+  status: "done" | "review_pending" | "blocked";
+  outcomeReason: ExecutionOutcomeReason;
+  baselineRef?: string;
+  preExistingChanges?: string[];
+  preExistingUntracked?: string[];
+  taintedPaths?: string[];
+  filesChanged: string[];
+  scopeViolations: ScopeViolation[];
+  acceptanceResults: AcceptanceResult[];
+  codexStdout?: string;
+  codexStderr?: string;
+  codexExitCode?: number;
+  naturalLanguageSummary?: string;
+  risks: string[];
+  blockers: string[];
+  followUps: string[];
+  knowledgeSyncNeeded: boolean;
+};
+
+// §3.2 Codex subprocess result (executePrompt return value)
+export type CodexRunResult = {
+  executionMode: "dry-run" | "exec";
+  command: string[];
+  stdout: string;
+  stderr: string;
+  exitCode: number;
+  timedOut: boolean;
+  startedAt: string;
+  finishedAt: string;
+  durationMs: number;
+};
+
+// §3.2 git baseline / change set (covers untracked + attribution)
+export type GitBaseline = {
+  headSha: string;
+  preExistingChanges: string[];
+  preExistingUntracked: string[];
+  clean: boolean;
+};
+
+export type GitChangeSet = {
+  trackedChanges: string[];
+  untrackedChanges: string[];
+  taintedPaths: string[];
+};
+
+// ──────────────────────────────────────────────────────────────────────────
+// §3.3 StageRule (D2 stage assessor rule expression)
+// ──────────────────────────────────────────────────────────────────────────
+
+export type SignalPredicate = {
+  kind:
+    | "artifact_exists"
+    | "task_status"
+    | "report_status"
+    | "standards_coverage"
+    | "file_pattern"
+    | "stage_explicit";
+  params: Record<string, unknown>;
+  weight: number;
+  humanHint: string;
+};
+
+export type StageRule = {
+  stage: ProjectStage;
+  enterWhen: SignalPredicate[];
+  blockers: SignalPredicate[];
+  requiredArtifacts: string[];
+};
+
+// ──────────────────────────────────────────────────────────────────────────
+// §3.4 StandardFrontmatter (C1 — file-state, maps to StandardItem)
+// ──────────────────────────────────────────────────────────────────────────
+
+export type StandardSeverity = "must" | "should" | "may";
+export type StandardStability = "draft" | "stable" | "deprecated";
+
+export type StandardFrontmatter = {
+  id: string;
+  domain: StandardItem["category"];
+  title: string;
+  stability: StandardStability;
+  severity: StandardSeverity;
+  relatedPaths: string[];
 };

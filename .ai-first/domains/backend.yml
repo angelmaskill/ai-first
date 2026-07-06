@@ -1,0 +1,19 @@
+id: domain-backend
+name: Backend
+kind: backend
+paths:
+  - examples/legacy-fullstack/backend
+techStack:
+  - react
+  - typescript
+  - vitest
+  - vite
+testCommands:
+  - npm run test
+buildCommands:
+  - npm run build
+standards:
+  - STANDARD-012
+commonRisks:
+  - 错误码不统一
+  - 缺少输入校验

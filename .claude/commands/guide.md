@@ -10,6 +10,13 @@ Display the current project stage, health signals, and recommended next actions.
 
 ## Steps
 
+0. **Deterministic core (G2 收编)** — get the objective verdict first, then layer your natural-language explanation on top of it:
+   ```bash
+   npm run guide -- "$(pwd)"
+   # or via the unified CLI: ai-first guide "$(pwd)"
+   ```
+   This runs `guide-core.ts buildGuide()` → returns `{ stage, needsConfirmation, confidence, blocker, nextSteps, recommendedRuntime, recommendedCommand }`. Use its output as the source of truth for stage/confidence/next-step — do NOT re-derive them by hand. Steps 1–4 below remain valid for richer context, but `npm run guide` is the authoritative path shared by Claude AND Codex.
+
 1. Read current state:
    ```
    readlink .ai-first/state/current

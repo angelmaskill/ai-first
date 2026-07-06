@@ -63,6 +63,11 @@ export interface RetryConfig {
   backoffMultiplier: number;
 }
 
+export type ScopeDomainPathGroup = {
+  id: string;
+  paths: string[];
+};
+
 /**
  * Options controlling dispatch execution behavior
  */
@@ -110,37 +115,13 @@ export function splitTask(
 ): Subtask[] {
   const subtasks: Subtask[] = [];
 
-  // Strategy 1: Split by code domain (if full-stack project)
-  const allPaths = [
-    ...scope.frontendPaths,
-    ...scope.backendPaths,
-    ...scope.sharedPaths,
-    ...scope.docsPaths,
-  ];
-  const hasMultipleDomains =
-    [
-      scope.frontendPaths.length > 0,
-      scope.backendPaths.length > 0,
-      scope.sharedPaths.length > 0,
-      scope.docsPaths.length > 0,
-    ].filter(Boolean).length > 1;
+  const domainGroups = getScopeDomainPathGroups(scope);
+  const allPaths = domainGroups.flatMap((group) => group.paths);
+  const hasMultipleDomains = domainGroups.length > 1;
 
   if (hasMultipleDomains) {
-    // Frontend domain subtask
-    if (scope.frontendPaths.length > 0) {
-      subtasks.push(createDomainSubtask(task, "frontend", scope.frontendPaths, task.mode));
-    }
-    // Backend domain subtask
-    if (scope.backendPaths.length > 0) {
-      subtasks.push(createDomainSubtask(task, "backend", scope.backendPaths, task.mode));
-    }
-    // Shared domain subtask
-    if (scope.sharedPaths.length > 0) {
-      subtasks.push(createDomainSubtask(task, "shared", scope.sharedPaths, task.mode));
-    }
-    // Docs domain subtask
-    if (scope.docsPaths.length > 0) {
-      subtasks.push(createDomainSubtask(task, "docs", scope.docsPaths, task.mode));
+    for (const group of domainGroups) {
+      subtasks.push(createDomainSubtask(task, group.id, group.paths, task.mode));
     }
     return subtasks.slice(0, config.maxSubtasks);
   }
@@ -194,8 +175,12 @@ export function splitTask(
         summary: scope.summary,
         frontendPaths: scope.frontendPaths,
         backendPaths: scope.backendPaths,
+        algorithmPaths: scope.algorithmPaths ?? [],
+        dataPaths: scope.dataPaths ?? [],
+        infraPaths: scope.infraPaths ?? [],
         sharedPaths: scope.sharedPaths,
         docsPaths: scope.docsPaths,
+        domainPaths: scope.domainPaths ?? {},
         riskLevel: scope.riskLevel,
         parallelSafe: scope.parallelSafe,
       },
@@ -223,6 +208,26 @@ function createDomainSubtask(task: Task, domainId: string, paths: string[], mode
       paths,
     },
   };
+}
+
+export function getScopeDomainPathGroups(scope: ChangeScope): ScopeDomainPathGroup[] {
+  const groups: ScopeDomainPathGroup[] = [
+    { id: "frontend", paths: scope.frontendPaths },
+    { id: "backend", paths: scope.backendPaths },
+    { id: "algorithm", paths: scope.algorithmPaths ?? [] },
+    { id: "data", paths: scope.dataPaths ?? [] },
+    { id: "infra", paths: scope.infraPaths ?? [] },
+    { id: "shared", paths: scope.sharedPaths },
+    { id: "docs", paths: scope.docsPaths },
+  ];
+
+  const knownIds = new Set(groups.map((group) => group.id));
+  for (const [id, paths] of Object.entries(scope.domainPaths ?? {})) {
+    if (knownIds.has(id)) continue;
+    groups.push({ id, paths });
+  }
+
+  return groups.filter((group) => group.paths.length > 0);
 }
 
 /**
@@ -400,6 +405,14 @@ function inferAgentType(taskMode: string, domainHint: string): SubagentType {
   if (domainLower.includes("security")) {
     return "code-reviewer";
   }
+  if (
+    domainLower.includes("algorithm") ||
+    domainLower.includes("ml") ||
+    domainLower.includes("model") ||
+    domainLower.includes("data")
+  ) {
+    return "scientist";
+  }
 
   return "executor"; // Default
 }
@@ -448,20 +461,12 @@ export function calculateComplexity(task: Task, scope: ChangeScope): number {
   let complexity = 0;
 
   // File count factor (0-0.4)
-  const fileCount =
-    scope.frontendPaths.length +
-    scope.backendPaths.length +
-    scope.sharedPaths.length +
-    scope.docsPaths.length;
+  const domainGroups = getScopeDomainPathGroups(scope);
+  const fileCount = domainGroups.reduce((count, group) => count + group.paths.length, 0);
   complexity += Math.min(fileCount / 50, 0.4);
 
   // Domain count factor (0-0.3)
-  const domainCount = [
-    scope.frontendPaths.length > 0,
-    scope.backendPaths.length > 0,
-    scope.sharedPaths.length > 0,
-    scope.docsPaths.length > 0,
-  ].filter(Boolean).length;
+  const domainCount = domainGroups.length;
   complexity += Math.min(domainCount / 5, 0.3);
 
   // Description length factor (0-0.2)

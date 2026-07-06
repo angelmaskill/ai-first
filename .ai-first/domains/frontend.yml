@@ -1,0 +1,21 @@
+id: domain-frontend
+name: Frontend
+kind: frontend
+paths:
+  - examples/legacy-fullstack/frontend
+  - src/frontend
+techStack:
+  - react
+  - typescript
+  - vitest
+  - vite
+testCommands:
+  - npm run test
+buildCommands:
+  - npm run build
+standards:
+  - STANDARD-010
+  - STANDARD-011
+commonRisks:
+  - 未做 a11y / i18n
+  - 状态管理不一致

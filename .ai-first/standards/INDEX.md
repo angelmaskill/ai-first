@@ -8,6 +8,8 @@
 |--------|-------------|
 | `frontend/` | UI component conventions, state management, styling |
 | `backend/` | API design, data access, service patterns |
+| `algorithm/` | Algorithm reproducibility, evaluation, inference contracts |
+| `data/` | Dataset schemas, data quality, pipeline safety |
 | `fullstack/` | Cross-cutting concerns: API contracts, error handling |
 | `security/` | Auth, secrets management, OWASP compliance |
 | `workflow/` | Branch strategy, review process, release checklist |
@@ -27,3 +29,7 @@
 | STANDARD-011 | frontend | Frontend API Consumption | stable |
 | STANDARD-012 | backend | Backend API Design | stable |
 | STANDARD-013 | backend | Backend Data Access | stable |
+| STANDARD-014 | algorithm | Algorithm Reproducibility | draft |
+| STANDARD-015 | algorithm | Algorithm Inference Contract | draft |
+| STANDARD-016 | data | Data Schema Versioning | draft |
+| STANDARD-017 | data | Data Quality | draft |

@@ -1,0 +1,28 @@
+id: task-sample-001
+projectId: proj-sample-greenfield
+title: 实现登录端点
+description: >-
+  在 src/backend/auth.ts 实现 POST /auth/login，校验用户名密码后签发 token。
+stage: build
+mode: execute
+domainIds: [domain-backend]
+status: in_progress
+priority: p1
+changeScopeId: scope-task-sample-001
+acceptanceCriteria:
+  - id: ac-1
+    description: 测试通过
+    check:
+      kind: test
+      commandId: npm-test
+    required: true
+  - id: ac-2
+    description: 登录端点存在
+    check:
+      kind: file_contains
+      path: src/backend/auth.ts
+      pattern: "/auth/login"
+    required: true
+runtime: codex
+createdAt: "2026-07-05T00:00:00Z"
+updatedAt: "2026-07-05T00:00:00Z"

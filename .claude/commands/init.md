@@ -20,7 +20,7 @@ Initialize a greenfield project with the AI-first control layer.
      locks,
      reviews,
      knowledge,
-     standards/{frontend,backend,fullstack,security,workflow},
+     standards/{frontend,backend,algorithm,data,fullstack,security,workflow},
      wiki,
      sync,
      reports,

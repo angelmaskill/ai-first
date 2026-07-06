@@ -1,0 +1,10 @@
+{
+  "status": "done",
+  "outcomeReason": "acceptance_passed",
+  "filesChanged": ["src/backend/auth.ts"],
+  "scopeViolations": [],
+  "taintedPaths": [],
+  "baselineRef": "abc123def456",
+  "knowledgeSyncNeeded": true,
+  "naturalLanguageSummary": "实现完成：新增登录接口，跑了 npm test 全绿，无遗留问题。"
+}

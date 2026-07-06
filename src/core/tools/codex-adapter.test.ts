@@ -84,11 +84,21 @@ describe("CodexAdapter", () => {
       expect(resp.payload.error).toContain("Codex adapter not healthy");
     });
 
-    it("returns response with note about missing sub-agent dispatch when healthy", async () => {
+    it("returns a dry-run execution contract when healthy", async () => {
       await adapter.connect();
-      const resp = await adapter.send(makeMsg());
+      const resp = await adapter.send(
+        makeMsg({
+          payload: {
+            action: "execute_subtask",
+            subtask: { id: "st-1", title: "Test subtask", inputs: { paths: ["src/a.ts"] } },
+            agent: { id: "builder-agent", role: "builder" },
+          },
+        }),
+      );
       expect(resp.type).toBe("response");
-      expect(resp.payload.note).toContain("no native sub-agent");
+      expect(resp.payload.executionMode).toBe("dry-run");
+      expect(resp.payload.prompt).toContain("Test subtask");
+      expect(resp.payload.command).toContain("<prompt>");
     });
 
     it("preserves correlationId", async () => {
@@ -110,6 +120,7 @@ describe("CodexAdapter", () => {
       expect(data.toolName).toBe("OpenAI Codex CLI");
       expect(data.supportedStages).toHaveLength(4);
       expect(data.supportedRoles).toHaveLength(2);
+      expect(data.executionMode).toBe("dry-run");
     });
 
     it("passes through unknown params", async () => {
@@ -140,6 +151,60 @@ describe("CodexAdapter", () => {
       expect(missing.status).toBe("unhealthy");
     });
   });
+
+  describe("exec mode", () => {
+    it("runs the configured CLI command for execute_subtask", async () => {
+      const script = [
+        'const prompt = process.argv.at(-1) ?? "";',
+        'console.log(JSON.stringify({ received: prompt.includes("Codex real task") }));',
+      ].join("");
+      const execAdapter = new CodexAdapter("exec-codex", {
+        cliPath: process.execPath,
+        versionArgs: ["--version"],
+        execArgs: ["-e", script],
+        executionMode: "exec",
+      });
+
+      await execAdapter.connect();
+      const resp = await execAdapter.send(
+        makeMsg({
+          payload: {
+            action: "execute_subtask",
+            subtask: { id: "st-1", title: "Codex real task", inputs: { paths: ["src/a.ts"] } },
+            agent: { id: "builder-agent", role: "builder" },
+          },
+        }),
+      );
+
+      expect(resp.type).toBe("response");
+      expect(resp.payload.executionMode).toBe("exec");
+      expect(resp.payload.stdout).toContain('"received":true');
+    });
+
+    it("returns an error response when the CLI exits unsuccessfully", async () => {
+      const execAdapter = new CodexAdapter("failing-codex", {
+        cliPath: process.execPath,
+        versionArgs: ["--version"],
+        execArgs: ["-e", 'console.error("nope"); process.exit(7);'],
+        executionMode: "exec",
+      });
+
+      await execAdapter.connect();
+      const resp = await execAdapter.send(
+        makeMsg({
+          payload: {
+            action: "execute_subtask",
+            subtask: { id: "st-1", title: "Failing task" },
+            agent: { id: "builder-agent", role: "builder" },
+          },
+        }),
+      );
+
+      expect(resp.type).toBe("error");
+      expect(resp.payload.exitCode).toBe(7);
+      expect(resp.payload.stderr).toContain("nope");
+    });
+  });
 });
 
 describe("createCodexAdapter", () => {
@@ -147,5 +212,68 @@ describe("createCodexAdapter", () => {
     const a = createCodexAdapter();
     expect(a).toBeInstanceOf(CodexAdapter);
     expect(a.id).toMatch(/^codex-/);
+  });
+});
+
+describe("CodexAdapter.executePrompt (§4.6)", () => {
+  it("dry-run returns a synthetic result without spawning a process", async () => {
+    const adapter = new CodexAdapter("dry-prompt", {
+      cliPath: "/never/invoked",
+      executionMode: "dry-run",
+    });
+    const result = await adapter.executePrompt("do something useful");
+    expect(result.executionMode).toBe("dry-run");
+    expect(result.exitCode).toBe(0);
+    expect(result.timedOut).toBe(false);
+    expect(result.stdout).toBe("<dry-run>");
+    expect(result.command.join(" ")).toContain("do something useful");
+    expect(result.startedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect(result.finishedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+  });
+
+  it("exec mode returns real stdout/stderr and exit 0 on success", async () => {
+    const script = "console.log(JSON.stringify({ ok: true }));";
+    const adapter = new CodexAdapter("exec-prompt", {
+      cliPath: process.execPath,
+      versionArgs: ["--version"],
+      execArgs: ["-e", script],
+      executionMode: "exec",
+    });
+    const result = await adapter.executePrompt("the prompt payload");
+    expect(result.executionMode).toBe("exec");
+    expect(result.exitCode).toBe(0);
+    expect(result.timedOut).toBe(false);
+    expect(result.stdout).toContain('"ok":true');
+    expect(result.command[0]).toBe(process.execPath);
+    expect(result.command.at(-1)).toBe("the prompt payload");
+    expect(result.durationMs).toBeGreaterThanOrEqual(0);
+  });
+
+  it("captures non-zero exit without throwing", async () => {
+    const adapter = new CodexAdapter("failing-prompt", {
+      cliPath: process.execPath,
+      versionArgs: ["--version"],
+      execArgs: ["-e", 'console.error("boom"); process.exit(7);'],
+      executionMode: "exec",
+    });
+    const result = await adapter.executePrompt("anything");
+    expect(result.exitCode).toBe(7);
+    expect(result.timedOut).toBe(false);
+    expect(result.stderr).toContain("boom");
+  });
+
+  it("reports timedOut=true and exit 124 when the child exceeds timeoutMs", async () => {
+    const adapter = new CodexAdapter("slow-prompt", {
+      cliPath: process.execPath,
+      versionArgs: ["--version"],
+      execArgs: ["-e", "setTimeout(() => process.exit(0), 5000);"],
+      executionMode: "exec",
+      timeoutMs: 300,
+    });
+    const result = await adapter.executePrompt("slow");
+    expect(result.timedOut).toBe(true);
+    expect(result.exitCode).toBe(124);
+    // caller still gets a result object, not a thrown error
+    expect(result.executionMode).toBe("exec");
   });
 });

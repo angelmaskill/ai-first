@@ -11,14 +11,19 @@ Show all registered project standards.
 
 1. Scan `.ai-first/standards/` for standard definitions:
    ```bash
-   ls .ai-first/standards/*.yml 2>/dev/null
+   find .ai-first/standards -mindepth 2 -maxdepth 2 -type f -name "STANDARD-*.*" | sort
    ```
 
-2. Check built-in standards:
-   - `api-contract-consistency` — API contracts must be verified end-to-end
-   - `ai-first-review-gate` — All changes must pass 7-gate review before merge
+2. Check domain directories:
+   - `frontend/` — UI component, state, style, accessibility, frontend testing
+   - `backend/` — API design, error handling, auth, data access, migrations
+   - `algorithm/` — reproducibility, metrics, inference contract, model artifacts
+   - `data/` — data source, schema versioning, quality, privacy, leakage checks
+   - `fullstack/` — cross-domain contracts and compatibility
+   - `security/` — secrets, auth, dependency, OWASP-related rules
+   - `workflow/` — review, testing, sync, delivery process
 
-3. For each standard: show category, last review date, compliance status
+3. For each standard: show domain, title, stability, severity, and related paths.
 
 4. Suggest standards that may need updating based on recent changes
 
@@ -27,10 +32,10 @@ Show all registered project standards.
 ```
 ## Project Standards
 
-| Standard | Category | Last Review | Status |
-|----------|----------|-------------|--------|
-| api-contract-consistency | fullstack | never | pending |
-| ai-first-review-gate | workflow | 2026-04-26 | active |
+| Standard | Domain | Stability | Severity |
+|----------|--------|-----------|----------|
+| STANDARD-012 Backend API Design | backend | stable | recommended |
+| STANDARD-014 Algorithm Reproducibility | algorithm | draft | mandatory |
 
 No standards need updating based on recent changes.
 ```

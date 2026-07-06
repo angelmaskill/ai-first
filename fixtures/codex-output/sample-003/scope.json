@@ -1,0 +1,15 @@
+{
+  "id": "scope-task-003",
+  "projectId": "proj-sample",
+  "taskId": "task-20260705-001",
+  "summary": "实现登录接口",
+  "frontendPaths": [],
+  "backendPaths": ["src/backend/"],
+  "sharedPaths": [],
+  "docsPaths": [],
+  "riskLevel": "low",
+  "parallelSafe": true,
+  "lockMode": "none",
+  "createdAt": "2026-07-05T06:00:00.000Z",
+  "updatedAt": "2026-07-05T06:00:00.000Z"
+}
