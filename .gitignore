@@ -22,5 +22,12 @@ coverage/
 # Claude Code local plans
 .claude/plans/
 
+# AI coding tool working directories (runtime artifacts, not source)
+.agents/
+.codex/
+
+# Stray state-rename leftovers
+.ai-first/state/**/*.new
+
 # Build artifacts
 *.tsbuildinfo
