@@ -29,6 +29,7 @@ export type AdvanceStateResult = {
   projectYmlPath: string;
   timelinePath: string;
   rulesLockPath?: string;
+  rulesLockAction: "locked" | "unlocked" | "unchanged";
 };
 
 const STAGE_ORDER: ProjectStage[] = [
@@ -65,13 +66,24 @@ export function advanceState(
   const timelinePath = appendTimeline(aiFirst, from, to, options);
 
   let rulesLockPath: string | undefined;
+  let rulesLockAction: AdvanceStateResult["rulesLockAction"] = "unchanged";
   if (EXECUTION_STAGES.has(to)) {
     rulesLockPath = lockRules(aiFirst, to, options.timestamp);
+    rulesLockAction = "locked";
   } else if (to === "evolve" || to === "idea" || to === "discovery") {
     rulesLockPath = unlockRules(aiFirst);
+    rulesLockAction = rulesLockPath ? "unlocked" : "unchanged";
   }
 
-  return { nextStage: to, nextStateDir, symlinkPath, projectYmlPath, timelinePath, rulesLockPath };
+  return {
+    nextStage: to,
+    nextStateDir,
+    symlinkPath,
+    projectYmlPath,
+    timelinePath,
+    rulesLockPath,
+    rulesLockAction,
+  };
 }
 
 /** 校验推进顺序合法（与 stage-gate-core.isLegalTransition 一致，但本模块不反向依赖 stage-gate）。 */

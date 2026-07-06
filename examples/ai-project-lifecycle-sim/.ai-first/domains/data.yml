@@ -1,0 +1,13 @@
+id: domain-data
+name: Data
+kind: data
+paths:
+  - data
+techStack: []
+testCommands:
+  - npm run test
+buildCommands: []
+standards: []
+commonRisks:
+  - 数据集版本缺失
+  - 管道无回滚

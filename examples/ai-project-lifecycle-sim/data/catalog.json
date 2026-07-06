@@ -1,0 +1,6 @@
+[
+  { "id": "course-ai", "title": "AI Foundations", "tags": ["ai", "ml"], "popularity": 7 },
+  { "id": "course-web", "title": "Frontend Systems", "tags": ["web", "ui"], "popularity": 5 },
+  { "id": "course-data", "title": "Data Quality", "tags": ["data", "ml"], "popularity": 6 },
+  { "id": "course-api", "title": "Backend APIs", "tags": ["api", "backend"], "popularity": 4 }
+]

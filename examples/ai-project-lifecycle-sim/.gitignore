@@ -1,0 +1,10 @@
+.DS_Store
+node_modules/
+*.log
+
+# Volatile AI-first runtime evidence generated while rerunning the fixture.
+.ai-first/logs/
+.ai-first/locks/
+.ai-first/reports/
+.ai-first/sync/
+.ai-first/state/current

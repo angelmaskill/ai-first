@@ -1,0 +1,14 @@
+id: domain-backend
+name: Backend
+kind: backend
+paths:
+  - backend
+techStack: []
+testCommands:
+  - npm run test
+buildCommands: []
+standards:
+  - STANDARD-012
+commonRisks:
+  - 错误码不统一
+  - 缺少输入校验

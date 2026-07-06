@@ -33,7 +33,8 @@
     "data:sync": "npx tsx scripts/generate-frontend-data.ts",
     "dev": "npm run data:sync && npx vite",
     "frontend:dev": "npm run data:sync && npx vite",
-    "frontend:build": "npm run data:sync && npx vite build"
+    "frontend:build": "npm run data:sync && npx vite build",
+    "validate:example-lifecycle": "node scripts/validate-example-lifecycle.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

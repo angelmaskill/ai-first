@@ -1,0 +1,21 @@
+id: codex
+label: OpenAI Codex CLI
+executionMode: exec
+configPath: .codex
+supportedStages: [scaffold, build, qa, operate, evolve]
+supportedRoles: [builder, reviewer, security_reviewer]
+roleBindings:
+  - role: builder
+    command: codex exec --skip-git-repo-check --color never
+    promptTemplate: execute-subtask
+    timeoutMs: 600000
+  - role: reviewer
+    command: codex exec review --skip-git-repo-check
+    promptTemplate: review-subtask
+    timeoutMs: 600000
+  - role: security_reviewer
+    command: codex exec --skip-git-repo-check --color never
+    promptTemplate: security-review-subtask
+    timeoutMs: 600000
+notes:
+  - Codex runs non-interactively; .ai-first provides task scope and output contract.

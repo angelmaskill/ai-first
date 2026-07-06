@@ -101,13 +101,15 @@ function deriveNextSteps(assessment: StageAssessment, tasks: Task[]): NextStepSu
       risk: "长任务容易上下文漂移",
       command: `npm run task:exec -- --task .ai-first/tasks/${inProgress[0].id}.yml`,
     });
-  } else if (assessment.currentStage === "build" || assessment.currentStage === "qa") {
+  } else if (assessment.currentStage === "build") {
     steps.push({
       title: "创建并执行一个实现任务",
       reason: `${assessment.currentStage} 阶段需要可执行的增量任务`,
       risk: "无明确任务会让 Codex/Claude 无的放矢",
       command: 'npm run task:create -- "任务标题" --domain <domain-id>',
     });
+  } else {
+    steps.push(...stageSpecificNextSteps(assessment));
   }
 
   // 4. Low-confidence semantic stage → confirm stage.
@@ -127,6 +129,66 @@ function deriveNextSteps(assessment: StageAssessment, tasks: Task[]): NextStepSu
     });
   }
   return steps;
+}
+
+function stageSpecificNextSteps(assessment: StageAssessment): NextStepSuggestion[] {
+  switch (assessment.currentStage) {
+    case "qa":
+      return [
+        {
+          title: "完成 QA review 与同步检查",
+          reason: "QA 阶段重点是验证实现证据、处理 sync、确认 release readiness",
+          risk: "未 review 或 pending sync 会阻塞 qa → release",
+          command: "npm run stage:gate -- qa release",
+        },
+        {
+          title: "补齐发布交接材料",
+          reason: "release 阶段需要 release-notes.md 与 delivery-handoff.md",
+          risk: "交接材料缺失会让发布准备不可审计",
+        },
+      ];
+    case "release":
+      return [
+        {
+          title: "完成发布交接并进入运维",
+          reason: "release 阶段应确认 release notes、delivery handoff 与阻塞清零",
+          risk: "未完成交接会让上线后的责任边界不清",
+          command: "npm run stage:gate -- release operate",
+        },
+      ];
+    case "operate":
+      return [
+        {
+          title: "整理运行反馈并进入 evolve",
+          reason: "operate 阶段关注维护、事件和真实使用反馈",
+          risk: "反馈不沉淀会影响下一轮迭代判断",
+          command: "npm run stage:gate -- operate evolve",
+        },
+      ];
+    case "evolve":
+      return [
+        {
+          title: "规划下一轮最值得做的研发任务",
+          reason: "evolve 阶段需要把反馈转成下一轮 discovery/spec 输入",
+          risk: "直接开工容易绕过目标对齐",
+          command: "npm run stage:gate -- evolve discovery",
+        },
+      ];
+    case "idea":
+    case "discovery":
+    case "spec":
+    case "architecture":
+    case "scaffold":
+      return [
+        {
+          title: `推进 ${assessment.currentStage} 阶段关键产物`,
+          reason: assessment.reasons[0] ?? "当前阶段需要先补齐目标、需求、架构或脚手架证据",
+          risk: "阶段产物不足会让后续实现任务缺少边界",
+        },
+      ];
+    default:
+      return [];
+  }
 }
 
 function pickBlocker(assessment: StageAssessment, activeTasks: Task[]): string | null {

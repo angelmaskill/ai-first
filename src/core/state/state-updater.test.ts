@@ -60,6 +60,7 @@ describe("advanceState", () => {
     expect(timeline).toContain("mode: normal");
     // rules.lock 创建（qa 是 execution 阶段）
     expect(result.rulesLockPath).toBeDefined();
+    expect(result.rulesLockAction).toBe("locked");
     expect(fs.existsSync(result.rulesLockPath!)).toBe(true);
   });
 
@@ -70,11 +71,23 @@ describe("advanceState", () => {
     fs.mkdirSync(locksDir, { recursive: true });
     fs.writeFileSync(path.join(locksDir, "rules.lock"), "locked\n", "utf-8");
 
-    advanceState(tmp, "evolve", "discovery", {
+    const result = advanceState(tmp, "evolve", "discovery", {
       mode: "normal",
       timestamp: "2026-07-06T10:00:00.000Z",
     });
     expect(fs.existsSync(path.join(locksDir, "rules.lock"))).toBe(false);
+    expect(result.rulesLockPath).toBe(path.join(locksDir, "rules.lock"));
+    expect(result.rulesLockAction).toBe("unlocked");
+  });
+
+  it("推进 operate→evolve：没有 rules.lock 时不误报解锁", () => {
+    setupProject(tmp, "evolve");
+    const result = advanceState(tmp, "operate", "evolve", {
+      mode: "normal",
+      timestamp: "2026-07-06T10:00:00.000Z",
+    });
+    expect(result.rulesLockPath).toBeUndefined();
+    expect(result.rulesLockAction).toBe("unchanged");
   });
 
   it("break-glass 模式：timeline 留 operator + reason", () => {

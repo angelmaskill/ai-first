@@ -1,0 +1,19 @@
+id: scope-task-20260706-k6zxdi
+projectId: proj_lb0lxy
+taskId: task-20260706-k6zxdi
+summary: 增强推荐解释链路
+frontendPaths:
+  - frontend
+backendPaths:
+  - backend
+algorithmPaths:
+  - algorithm
+dataPaths: []
+infraPaths: []
+sharedPaths: []
+docsPaths: []
+riskLevel: high
+parallelSafe: true
+lockMode: soft
+createdAt: 2026-07-06T07:51:14.355Z
+updatedAt: 2026-07-06T07:51:14.355Z

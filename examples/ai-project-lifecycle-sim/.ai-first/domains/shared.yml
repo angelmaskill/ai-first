@@ -1,0 +1,11 @@
+id: domain-shared
+name: Shared
+kind: shared
+paths:
+  - shared
+techStack: []
+testCommands:
+  - npm run test
+buildCommands: []
+standards: []
+commonRisks: []

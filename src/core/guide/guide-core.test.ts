@@ -81,6 +81,30 @@ describe("guide-core buildGuide", () => {
     expect(out.stage).toBe("release");
     expect(out.recommendedRuntime).toBe("human");
   });
+
+  it("qa suggests review and release readiness instead of a generic implementation task", () => {
+    fs.writeFileSync(
+      path.join(tmp, ".ai-first", "project.yml"),
+      serializeYaml({ id: "p", name: "p", slug: "p", currentStage: "qa" }),
+    );
+    const out = buildGuide(tmp);
+    const titles = out.nextSteps.map((s) => s.title).join("\n");
+    expect(titles).toContain("QA review");
+    expect(titles).toContain("发布交接材料");
+    expect(titles).not.toContain("创建并执行一个实现任务");
+    expect(out.recommendedRuntime).toBe("codex");
+  });
+
+  it("evolve points back to planning the next iteration", () => {
+    fs.writeFileSync(
+      path.join(tmp, ".ai-first", "project.yml"),
+      serializeYaml({ id: "p", name: "p", slug: "p", currentStage: "evolve" }),
+    );
+    const out = buildGuide(tmp);
+    expect(out.nextSteps[0].title).toContain("下一轮");
+    expect(out.nextSteps[0].command).toContain("evolve discovery");
+    expect(out.recommendedRuntime).toBe("claude-code");
+  });
 });
 
 describe("guide-cli formatGuide", () => {

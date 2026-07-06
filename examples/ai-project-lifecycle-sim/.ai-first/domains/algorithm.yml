@@ -1,0 +1,13 @@
+id: domain-algorithm
+name: Algorithm
+kind: algorithm
+paths:
+  - algorithm
+techStack: []
+testCommands:
+  - npm run test
+buildCommands: []
+standards: []
+commonRisks:
+  - 复现性差
+  - 评估指标未固化

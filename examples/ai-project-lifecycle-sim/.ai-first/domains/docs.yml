@@ -1,0 +1,12 @@
+id: domain-docs
+name: Documentation
+kind: docs
+paths:
+  - README.md
+  - docs
+techStack: []
+testCommands:
+  - npm run test
+buildCommands: []
+standards: []
+commonRisks: []

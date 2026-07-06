@@ -41,8 +41,10 @@ function main(): void {
   process.stdout.write(`   symlink:  ${result.symlinkPath}\n`);
   process.stdout.write(`   project:  ${result.projectYmlPath}\n`);
   process.stdout.write(`   timeline: ${result.timelinePath}\n`);
-  if (result.rulesLockPath) {
+  if (result.rulesLockAction === "locked" && result.rulesLockPath) {
     process.stdout.write(`   rules:    ${result.rulesLockPath}（已锁）\n`);
+  } else if (result.rulesLockAction === "unlocked" && result.rulesLockPath) {
+    process.stdout.write(`   rules:    ${result.rulesLockPath}（已解锁）\n`);
   }
   process.exit(0);
 }

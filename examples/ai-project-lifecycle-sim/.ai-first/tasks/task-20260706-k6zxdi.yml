@@ -1,0 +1,48 @@
+id: task-20260706-k6zxdi
+projectId: proj_lb0lxy
+title: 增强推荐解释链路
+description: 覆盖前端展示、后端响应和算法解释输出
+stage: build
+mode: execute
+domainIds:
+  - domain-frontend
+  - domain-backend
+  - domain-algorithm
+status: done
+priority: p1
+changeScopeId: scope-task-20260706-k6zxdi
+acceptanceCriteria:
+  - id: ac-1
+    description: 测试通过
+    check:
+      kind: test
+      commandId: npm-test
+    required: true
+  - id: ac-2
+    description: 类型检查通过
+    check:
+      kind: typecheck
+      commandId: npm-typecheck
+    required: true
+  - id: ac-3
+    description: lint 通过
+    check:
+      kind: lint
+      commandId: npm-lint
+    required: true
+  - id: ac-4
+    description: "产物存在: backend/src/recommendations.mjs"
+    check:
+      kind: file_exists
+      path: backend/src/recommendations.mjs
+    required: true
+  - id: ac-5
+    description: 代码包含必要实现
+    check:
+      kind: file_contains
+      path: algorithm/src/ranker.mjs
+      pattern: explainScore
+    required: true
+runtime: codex
+createdAt: 2026-07-06T07:51:14.354Z
+updatedAt: 2026-07-06T07:51:30.838Z

@@ -1,0 +1,19 @@
+id: claude-code
+label: Claude Code
+executionMode: native
+configPath: .claude
+supportedStages: [idea, discovery, spec, architecture, scaffold, build, qa, release, operate, evolve]
+supportedRoles: [intake, planner, architect, builder, reviewer, security_reviewer, release, team_lead, repo_scanner, stage_assessor, knowledge_sync, state_updater, skill_recommend, smoke_case, marketplace_skill]
+roleBindings:
+  - role: builder
+    agent: builder-agent
+  - role: reviewer
+    agent: reviewer-agent
+  - role: security_reviewer
+    agent: security-reviewer-agent
+  - role: knowledge_sync
+    agent: knowledge-sync-agent
+  - role: state_updater
+    agent: state-updater-agent
+notes:
+  - Uses Claude Code native agents, slash commands, and skills under .claude/.

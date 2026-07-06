@@ -1,0 +1,17 @@
+id: scope-task-20260706-yhspt6
+projectId: proj_lb0lxy
+taskId: task-20260706-yhspt6
+summary: 验证 Claude Code dry-run 路由
+frontendPaths: []
+backendPaths:
+  - backend
+algorithmPaths: []
+dataPaths: []
+infraPaths: []
+sharedPaths: []
+docsPaths: []
+riskLevel: low
+parallelSafe: true
+lockMode: none
+createdAt: 2026-07-06T08:12:45.163Z
+updatedAt: 2026-07-06T08:12:45.163Z

@@ -1,0 +1,39 @@
+id: proj_lb0lxy
+name: ai-project-lifecycle-sim
+slug: ai-project-lifecycle-sim
+description: >-
+  Brownfield project adopted into the AI-first control layer.
+mode: brownfield
+teamMode: fullstack
+ownershipModel: mixed
+rootPath: .
+codeDomains:
+  - id: domain-frontend
+    name: Frontend
+    kind: frontend
+    paths: [frontend]
+  - id: domain-backend
+    name: Backend
+    kind: backend
+    paths: [backend]
+  - id: domain-algorithm
+    name: Algorithm
+    kind: algorithm
+    paths: [algorithm]
+  - id: domain-data
+    name: Data
+    kind: data
+    paths: [data]
+  - id: domain-docs
+    name: Documentation
+    kind: docs
+    paths: [README.md, docs]
+  - id: domain-shared
+    name: Shared
+    kind: shared
+    paths: [shared]
+currentStage: evolve
+status: active
+createdAt: "2026-07-06T07:50:38.114Z"
+updatedAt: 2026-07-06T08:04:48.053Z
+tags: [ai-first, brownfield]
