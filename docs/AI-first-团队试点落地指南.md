@@ -1,5 +1,9 @@
 # AI-first 团队试点落地指南
 
+> 🗺️ **阅读路径**：[README](../README.md) → 📗 **团队试点落地指南**（你在这）→ 📘 [使用指南](AI-first-使用指南.md) → 📙 [研发阶段表达与操作手册](AI-first-研发阶段表达与操作手册.md)
+>
+> 本文角色：**团队试点的命令级入口**——已有项目接入从这里开始，含 step-by-step 启动清单和验收标准。
+
 本文用于把已验证的 AI-first 脚手架推进到研发团队试点使用。目标不是增加管理负担，而是让研发人员在 Codex / Claude Code 编程时始终清楚：
 
 - 我现在处于什么位置。
@@ -14,6 +18,12 @@
 - 研发表达与操作手册：`docs/AI-first-研发阶段表达与操作手册.md`
 - 模拟验证报告：`examples/ai-project-lifecycle-sim/VALIDATION.md`
 - 模拟项目：`examples/ai-project-lifecycle-sim/`
+
+## 适用范围
+
+本指南面向**已有项目接入**（brownfield）：研发拿一个真实存在的代码库，用 `npm run adopt` 接入 AI-first。这是团队试点推荐路径，全部命令都是 npm 命令，不依赖特定 IDE。
+
+**新项目（greenfield）**目前只能通过 Claude Code 的 `/init` 启动，**没有 npm 命令入口**（`npm run init` 不存在，见研发手册 16.4）。用 Codex 的团队暂不支持纯命令行初始化新项目——如需试点 greenfield，先用 Claude Code `/init` 建好 `.ai-first/` 控制层，再切到任意 runtime 推进。
 
 ## 1. 当前结论
 
@@ -97,6 +107,8 @@ npm run sync -- --files <changed-file>
 npm run stage:gate -- build qa
 npm run stage:advance -- build qa
 ```
+
+> 以上命令也可用统一 CLI 触发（`npm run ai-first -- <subcommand>`），完全等价；团队日常推荐散装命令，详见研发手册 16.3。
 
 研发可直接使用的自然语言：
 
