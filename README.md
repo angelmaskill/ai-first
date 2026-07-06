@@ -208,8 +208,8 @@ ai-first/
 ├── scripts/
 │   ├── generate-frontend-data.ts  #    Live filesystem → TS data pipeline
 │   └── pre-commit.sh              #    6-check pre-commit hook
-├── docs/                          #    8 design documents (bilingual)
-└── examples/                      #    Demo project (snake-game)
+├── docs/                          #    Team-facing docs (3) + docs/archive/ dev history
+└── examples/                      #    ai-project-lifecycle-sim (validation fixture)
 ```
 
 ## 🚀 Quick Start
@@ -222,7 +222,7 @@ ai-first/
 ### Install
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ai-first.git
+git clone <your-fork-or-mirror-url>   # 替换为内部 mirror 或 fork 地址
 cd ai-first
 npm install
 ```
@@ -246,6 +246,10 @@ AI-first understands natural language. Describe what you want — it figures out
 
 For a scenario-by-scenario operator guide, see
 [AI-first 使用指南](docs/AI-first-使用指南.md).
+
+**团队试点先读** [AI-first 团队试点落地指南](docs/AI-first-团队试点落地指南.md) —— 已有项目接入的命令级 step-by-step 与验收标准。
+
+> **greenfield 限制**：`/init` 只在 Claude Code 内可用，`npm run init` 不存在。用 Codex 的团队暂不支持纯命令行初始化新项目（详见研发手册 16.4）。
 
 ```text
 You: 添加暗黑模式
@@ -672,7 +676,7 @@ ai-first/
 ### 安装
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/ai-first.git
+git clone <your-fork-or-mirror-url>   # 替换为内部 mirror 或 fork 地址
 cd ai-first
 npm install
 ```
