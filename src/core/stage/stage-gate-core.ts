@@ -263,7 +263,7 @@ function checkExitArtifacts(
       };
     }
     const failed = reviewTexts.filter(
-      (t) => /Verdict.*FAILED/i.test(t) || /status:\s*failed/i.test(t),
+      (t) => /^\s*Verdict:\s*FAILED\s*$/im.test(t) || /^\s*status:\s*failed\s*$/im.test(t),
     );
     if (failed.length > 0) {
       return {
@@ -330,19 +330,22 @@ function indexArtifactFiles(projectRoot: string): Set<string> {
 function indexReviewTexts(projectRoot: string): string[] {
   const dir = path.join(projectRoot, ".ai-first", "reviews");
   if (!fs.existsSync(dir)) return [];
-  const out: string[] = [];
+  const candidates: Array<{ full: string; mtimeMs: number }> = [];
   for (const entry of fs.readdirSync(dir)) {
     const full = path.join(dir, entry);
     try {
       const stat = fs.statSync(full);
       if (stat.isFile() && (entry.endsWith(".md") || entry.endsWith(".yml"))) {
-        out.push(fs.readFileSync(full, "utf-8"));
+        candidates.push({ full, mtimeMs: stat.mtimeMs });
       }
     } catch {
       /* skip unreadable */
     }
   }
-  return out;
+  return candidates
+    .sort((a, b) => b.mtimeMs - a.mtimeMs)
+    .slice(0, 50)
+    .map((candidate) => fs.readFileSync(candidate.full, "utf-8"));
 }
 
 function readPendingSyncs(projectRoot: string): SyncEvent[] {

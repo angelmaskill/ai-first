@@ -3,7 +3,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
 import { serializeYaml } from "../io/yaml.ts";
-import { advanceState, isValidAdvance } from "./state-updater.ts";
+import { advanceState, isValidAdvance, updateCurrentSymlink } from "./state-updater.ts";
 
 function setupProject(tmp: string, currentStage: "build" | "qa" | "evolve" | "idea") {
   fs.mkdirSync(path.join(tmp, ".ai-first", "state", "current"), { recursive: true });
@@ -99,6 +99,36 @@ describe("advanceState", () => {
         timestamp: "2026-07-06T10:00:00.000Z",
       }),
     ).toThrow(/非法推进/);
+  });
+
+  it("symlink 创建失败时早失败，不写 current 文件回退", () => {
+    setupProject(tmp, "build");
+    const aiFirst = path.join(tmp, ".ai-first");
+    const currentPath = path.join(tmp, ".ai-first", "state", "current");
+    fs.writeFileSync(path.join(currentPath, "situation.md"), "old current\n", "utf-8");
+    expect(() =>
+      updateCurrentSymlink(aiFirst, "qa", () => {
+        throw new Error("symlink denied");
+      }),
+    ).toThrow(/无法创建 .*current symlink/);
+    expect(fs.existsSync(path.join(currentPath, "situation.md"))).toBe(true);
+    expect(fs.readFileSync(path.join(currentPath, "situation.md"), "utf-8")).toBe("old current\n");
+  });
+
+  it("缺少 project.yml 时早失败，不改 current", () => {
+    setupProject(tmp, "build");
+    const projectYml = path.join(tmp, ".ai-first", "project.yml");
+    const currentPath = path.join(tmp, ".ai-first", "state", "current");
+    fs.writeFileSync(path.join(currentPath, "situation.md"), "old current\n", "utf-8");
+    fs.rmSync(projectYml, { force: true });
+
+    expect(() =>
+      advanceState(tmp, "build", "qa", {
+        mode: "normal",
+        timestamp: "2026-07-06T10:00:00.000Z",
+      }),
+    ).toThrow(/缺少 .*project\.yml/);
+    expect(fs.readFileSync(path.join(currentPath, "situation.md"), "utf-8")).toBe("old current\n");
   });
 
   it("创建下一阶段 state 目录", () => {

@@ -9,7 +9,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import type { ProjectStage } from "../models.ts";
-import { parseYaml, serializeYaml } from "../io/yaml.ts";
+import { serializeYaml } from "../io/yaml.ts";
 
 export type AdvanceStateOptions = {
   /** 触发模式，写进 timeline 留痕。normal = /advance 通过门后；break-glass = 绕过门。 */
@@ -58,8 +58,9 @@ export function advanceState(
   }
 
   const aiFirst = path.join(projectRoot, ".ai-first");
+  assertProjectYmlExists(aiFirst);
   const nextStateDir = ensureNextStateDir(aiFirst, to);
-  const symlinkPath = updateSymlink(aiFirst, to);
+  const symlinkPath = updateCurrentSymlink(aiFirst, to);
   const projectYmlPath = updateProjectYml(aiFirst, to);
   const timelinePath = appendTimeline(aiFirst, from, to, options);
 
@@ -95,27 +96,45 @@ function ensureNextStateDir(aiFirst: string, to: ProjectStage): string {
   return fullPath;
 }
 
-function updateSymlink(aiFirst: string, to: ProjectStage): string {
+export function updateCurrentSymlink(
+  aiFirst: string,
+  to: ProjectStage,
+  createSymlink: (target: string, path: string) => void = fs.symlinkSync,
+): string {
   const stateDir = path.join(aiFirst, "state");
   const currentPath = path.join(stateDir, "current");
   const stageNum = String(STAGE_ORDER.indexOf(to) + 1).padStart(2, "0");
   const target = `stage-${stageNum}-${to}`;
-  // 先删旧（symlink、文件、或旧目录都处理）
+  let backupPath: string | undefined;
   if (fs.existsSync(currentPath) || isBrokenSymlink(currentPath)) {
-    fs.rmSync(currentPath, { force: true, recursive: true });
+    backupPath = `${currentPath}.bak-${process.pid}-${Date.now()}`;
+    fs.renameSync(currentPath, backupPath);
   }
   try {
-    fs.symlinkSync(target, currentPath);
-  } catch {
-    // 文件系统不支持 symlink 时退化为文件
-    fs.writeFileSync(currentPath, `${target}\n`, "utf-8");
+    createSymlink(target, currentPath);
+  } catch (error) {
+    const restored = restoreCurrentBackup(backupPath, currentPath);
+    const restoreDetail = backupPath
+      ? restored
+        ? "已恢复旧 current。"
+        : `旧 current 恢复失败，需要人工检查 .ai-first/state/current；备份仍在：${backupPath}。`
+      : "此前不存在 current。";
+    throw new Error(
+      `无法创建 .ai-first/state/current symlink → ${target}。请检查文件系统 symlink 权限；不写文件回退。${restoreDetail}`,
+      { cause: error },
+    );
+  }
+  if (backupPath) {
+    fs.rmSync(backupPath, { force: true, recursive: true });
   }
   return currentPath;
 }
 
 function updateProjectYml(aiFirst: string, to: ProjectStage): string {
   const filePath = path.join(aiFirst, "project.yml");
-  if (!fs.existsSync(filePath)) return filePath;
+  if (!fs.existsSync(filePath)) {
+    throw new Error("无法推进阶段：缺少 .ai-first/project.yml，请先初始化或修复项目状态。");
+  }
   const text = fs.readFileSync(filePath, "utf-8");
   const next = /^currentStage:\s*.+$/m.test(text)
     ? text.replace(/^currentStage:\s*.+$/m, `currentStage: ${to}`)
@@ -174,6 +193,26 @@ function unlockRules(aiFirst: string): string | undefined {
   return undefined;
 }
 
+function assertProjectYmlExists(aiFirst: string): void {
+  const filePath = path.join(aiFirst, "project.yml");
+  if (!fs.existsSync(filePath)) {
+    throw new Error("无法推进阶段：缺少 .ai-first/project.yml，请先初始化或修复项目状态。");
+  }
+}
+
+function restoreCurrentBackup(backupPath: string | undefined, currentPath: string): boolean {
+  if (!backupPath) return false;
+  try {
+    if (fs.existsSync(currentPath) || isBrokenSymlink(currentPath)) {
+      fs.rmSync(currentPath, { force: true, recursive: true });
+    }
+    fs.renameSync(backupPath, currentPath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function isBrokenSymlink(p: string): boolean {
   try {
     return fs.lstatSync(p).isSymbolicLink() && !fs.existsSync(p);
@@ -181,6 +220,3 @@ function isBrokenSymlink(p: string): boolean {
     return false;
   }
 }
-
-// 保持 parseYaml 引用（未来 project.yml 解析可能改用 io/yaml）。
-void parseYaml;

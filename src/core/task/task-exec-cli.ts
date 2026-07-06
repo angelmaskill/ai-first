@@ -48,12 +48,27 @@ function parseArgs(argv: string[]): ExecArgs {
       return argv[i] ?? "";
     };
     if (a === "--task") taskRef = next();
-    else if (a === "--runtime") runtime = next() as RuntimeToolId;
+    else if (a === "--runtime") runtime = parseRuntime(next());
     else if (a === "--allow-dirty") allowDirty = true;
     else if (a === "--dry-run") dryRun = true;
     else if (!a.startsWith("--") && !taskRef) taskRef = a;
   }
   return { taskRef, runtime, allowDirty, dryRun };
+}
+
+function parseRuntime(value: string): RuntimeToolId {
+  if (value === "codex" || value === "claude-code") return value;
+  process.stderr.write(`错误：未知 runtime=${value || "(empty)"}。可选值：codex, claude-code。\n`);
+  process.exit(2);
+}
+
+function assertSupportedRuntime(runtime: RuntimeToolId): void {
+  // TODO(M-4): remove this guard when task:exec routes claude-code to ClaudeCodeAdapter.
+  if (runtime === "codex") return;
+  process.stderr.write(
+    `错误：task:exec 当前仅接通 runtime=codex；${runtime} 尚未接入执行适配器。\n`,
+  );
+  process.exit(2);
 }
 
 async function main(): Promise<void> {
@@ -64,6 +79,7 @@ async function main(): Promise<void> {
     );
     process.exit(2);
   }
+  assertSupportedRuntime(args.runtime);
 
   const projectRoot = process.cwd();
   const project = readProjectYml(projectRoot);
@@ -138,6 +154,7 @@ async function main(): Promise<void> {
     task,
     scope,
     codexResult,
+    runtime: args.runtime,
     baseline,
     changeSet,
     acceptanceResults,

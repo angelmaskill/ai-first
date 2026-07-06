@@ -17,13 +17,13 @@ const data: ProjectData = {
       name: "Docs Completeness",
       status: "good",
       score: 100,
-      summary: "5 knowledge items, 12 standards",
+      summary: "5 knowledge items, 16 standards",
     },
     {
       name: "Test Completeness",
       status: "good",
       score: 100,
-      summary: "20 test files, 35 source files (ratio: 57%)",
+      summary: "41 test files, 67 source files (ratio: 61%)",
     },
     {
       name: "Agent Coverage",
@@ -255,14 +255,6 @@ const data: ProjectData = {
   ],
   healthTrend: [
     {
-      label: "6/28",
-      value: 20,
-    },
-    {
-      label: "6/29",
-      value: 20,
-    },
-    {
       label: "6/30",
       value: 20,
     },
@@ -280,6 +272,14 @@ const data: ProjectData = {
     },
     {
       label: "7/4",
+      value: 20,
+    },
+    {
+      label: "7/5",
+      value: 20,
+    },
+    {
+      label: "7/6",
       value: 20,
     },
   ],

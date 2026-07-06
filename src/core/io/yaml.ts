@@ -283,7 +283,7 @@ function parseMapping(
         result[key] = null;
       }
     } else if (valueToken === ">-" || valueToken === ">") {
-      result[key] = parseFoldedScalar(lines, cursor, indent, valueToken === ">");
+      result[key] = parseFoldedScalar(lines, cursor, indent);
     } else if (valueToken === "|") {
       throw new YamlError("literal block scalar '|' is not supported in this YAML subset");
     } else {
@@ -345,7 +345,6 @@ function parseFoldedScalar(
   lines: LogicalLine[],
   cursor: { pos: number },
   parentIndent: number,
-  foldToSpace: boolean,
 ): string {
   const collected: string[] = [];
   while (cursor.pos < lines.length) {
@@ -354,7 +353,7 @@ function parseFoldedScalar(
     collected.push(line.text.trim());
     cursor.pos++;
   }
-  const joined = collected.join(foldToSpace ? " " : " ").trim();
+  const joined = collected.join(" ").trim();
   return joined;
 }
 

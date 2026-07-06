@@ -6,6 +6,7 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { randomBytes } from "node:crypto";
 import type { BreakGlassRecord, ProjectStage } from "../models.ts";
 import { serializeYaml, parseYaml } from "../io/yaml.ts";
 
@@ -31,8 +32,9 @@ export function readAllBreakGlass(projectRoot: string): BreakGlassRecord[] {
       const text = fs.readFileSync(path.join(dir, entry), "utf-8");
       const parsed = parseYaml(text) as BreakGlassRecord | null;
       if (parsed && parsed.id) records.push(parsed);
-    } catch {
-      /* skip unreadable */
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      process.stderr.write(`警告：break-glass 审计记录不可读，已跳过 ${entry}：${reason}\n`);
     }
   }
   return records.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
@@ -58,7 +60,7 @@ export function makeBreakGlassRecord(params: {
     );
   }
   return {
-    id: `breakglass-${compactStamp(params.timestamp)}`,
+    id: `breakglass-${compactStamp(params.timestamp)}-${slugify(params.operator)}-${randomBytes(4).toString("hex")}`,
     operator: params.operator,
     from: params.from,
     to: params.to,
@@ -71,4 +73,13 @@ export function makeBreakGlassRecord(params: {
 
 function compactStamp(iso: string): string {
   return iso.replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z");
+}
+
+function slugify(value: string): string {
+  const slug = value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return slug || "operator";
 }

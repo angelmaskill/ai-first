@@ -133,6 +133,17 @@ describe("io/yaml serialize+parse round-trip", () => {
     expect(parsed.mode).toBe("brownfield");
   });
 
+  it("parses both > and >- as folded scalars in the supported YAML subset", () => {
+    const folded = parseYaml(["description: >", "  first line", "  second line"].join("\n")) as {
+      description: string;
+    };
+    const stripped = parseYaml(["description: >-", "  first line", "  second line"].join("\n")) as {
+      description: string;
+    };
+    expect(folded.description).toBe("first line second line");
+    expect(stripped.description).toBe("first line second line");
+  });
+
   it("parses the existing project.yml format", () => {
     const text = [
       "id: proj-h7k3m",

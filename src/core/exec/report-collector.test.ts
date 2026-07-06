@@ -65,6 +65,7 @@ function runFixture(f: Fixture): ExecutionReport {
     task: f.task,
     scope: f.scope,
     codexResult: f.codexResult,
+    runtime: "codex",
     baseline: f.baseline,
     changeSet: f.changeSet,
     acceptanceResults: f.acceptanceResults,
@@ -86,6 +87,23 @@ describe("F0 report collector — fixture-driven (§6.3)", () => {
     expect(report.baselineRef).toBe(f.expected.baselineRef);
     expect(report.knowledgeSyncNeeded).toBe(true);
     expect(report.naturalLanguageSummary).toContain("实现完成");
+  });
+
+  it("preserves the caller-supplied runtime in the report", () => {
+    const f = loadFixture("sample-001");
+    const report = collectExecutionReport({
+      task: f.task,
+      scope: f.scope,
+      codexResult: f.codexResult,
+      runtime: "claude-code",
+      baseline: f.baseline,
+      changeSet: f.changeSet,
+      acceptanceResults: f.acceptanceResults,
+      domains: f.domains,
+      startedAt: f.codexResult.startedAt,
+      finishedAt: f.codexResult.finishedAt,
+    });
+    expect(report.runtime).toBe("claude-code");
   });
 
   it("sample-002: touches standards → scope_violation / blocked", () => {

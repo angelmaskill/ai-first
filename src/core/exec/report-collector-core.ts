@@ -54,6 +54,7 @@ export type CollectParams = {
   task: Task;
   scope: ChangeScope;
   codexResult: CodexRunResult;
+  runtime: RuntimeToolId;
   baseline: GitBaseline;
   changeSet: GitChangeSet;
   acceptanceResults: AcceptanceResult[];
@@ -113,7 +114,7 @@ export function collectExecutionReport(params: CollectParams): ExecutionReport {
   return {
     id: `report-${params.task.id}-${stamp(params.finishedAt)}`,
     taskId: params.task.id,
-    runtime: params.codexResult.executionMode === "dry-run" ? "codex" : "codex",
+    runtime: params.runtime,
     startedAt: params.startedAt,
     finishedAt: params.finishedAt,
     status: decision.status,
@@ -135,12 +136,6 @@ export function collectExecutionReport(params: CollectParams): ExecutionReport {
     knowledgeSyncNeeded: filesChanged.length > 0,
   };
 }
-
-// Runtime field is a RuntimeToolId; we always run codex through this path.
-function ensureRuntime(_r: RuntimeToolId): RuntimeToolId {
-  return "codex";
-}
-void ensureRuntime;
 
 function decideStatus(
   codexResult: CodexRunResult,

@@ -169,6 +169,31 @@ describe("canAdvance (fixture 驱动)", () => {
     expect(d.blockers.some((b) => b.includes("无 ExecutionReport"))).toBe(true);
   });
 
+  it("build→qa：done task 最新 report 是 review_pending → blocked", () => {
+    const t = makeTask({ stage: "build", status: "done", domainIds: ["domain-backend"] });
+    writeTask(t);
+    writeReport({
+      id: "r-review",
+      taskId: t.id,
+      runtime: "codex",
+      startedAt: "2026-01-01T00:00:00Z",
+      finishedAt: "2026-01-01T00:01:00Z",
+      status: "review_pending",
+      outcomeReason: "acceptance_failed",
+      filesChanged: ["src/x.ts"],
+      scopeViolations: [],
+      acceptanceResults: [],
+      risks: [],
+      blockers: [],
+      followUps: [],
+      knowledgeSyncNeeded: true,
+    });
+    writeArtifact("implementation-summary.md");
+    const d = canAdvance(tmp, "build", "qa");
+    expect(d.allowed).toBe(false);
+    expect(d.blockers.some((b) => b.includes("review_pending"))).toBe(true);
+  });
+
   it("build→release（跨级）→ blocked", () => {
     const d = canAdvance(tmp, "build", "release");
     expect(d.allowed).toBe(false);
@@ -269,6 +294,23 @@ describe("canAdvance (fixture 驱动)", () => {
     const d = canAdvance(tmp, "qa", "release");
     expect(d.allowed).toBe(false);
     expect(d.blockers.some((b) => b.includes("failed review"))).toBe(true);
+  });
+
+  it("qa→release：历史文本提到 FAILED 或 status:not-failed 不应误判 failed", () => {
+    writeReview(
+      "review-1.md",
+      [
+        "# Review",
+        "",
+        "Verdict: PASSED",
+        "Previously FAILED but now resolved.",
+        "status: not-failed",
+      ].join("\n"),
+    );
+    writeArtifact("release-notes.md");
+    writeArtifact("delivery-handoff.md");
+    const d = canAdvance(tmp, "qa", "release");
+    expect(d.allowed).toBe(true);
   });
 
   it("canceled task 不阻塞 + 不要求 report", () => {

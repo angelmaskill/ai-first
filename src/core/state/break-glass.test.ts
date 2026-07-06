@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import * as os from "node:os";
@@ -17,9 +17,15 @@ describe("break-glass makeBreakGlassRecord", () => {
 
   it("合法参数构造记录，id 含 compactTs", () => {
     const r = makeBreakGlassRecord(base);
-    expect(r.id).toBe("breakglass-20260706T084500Z");
+    expect(r.id).toMatch(/^breakglass-20260706T084500Z-alice-[a-f0-9]{8}$/);
     expect(r.operator).toBe("alice");
     expect(r.priorBlockers).toEqual(["task-x in_progress"]);
+  });
+
+  it("同一秒内连续构造也不会产生相同 id", () => {
+    const r1 = makeBreakGlassRecord(base);
+    const r2 = makeBreakGlassRecord(base);
+    expect(r1.id).not.toBe(r2.id);
   });
 
   it("缺 operator → throw", () => {
@@ -88,7 +94,57 @@ describe("break-glass writeBreakGlass + readAllBreakGlass (round-trip)", () => {
     expect(records[0].priorBlockers).toEqual(["blocker-2"]);
   });
 
+  it("同 timestamp 连续写入不会覆盖旧审计", () => {
+    const r1 = makeBreakGlassRecord({
+      operator: "alice",
+      from: "build",
+      to: "qa",
+      reason: "a",
+      risk: "x",
+      priorBlockers: ["one"],
+      timestamp: "2026-07-06T08:45:00.000Z",
+    });
+    const r2 = makeBreakGlassRecord({
+      operator: "alice",
+      from: "build",
+      to: "qa",
+      reason: "a",
+      risk: "x",
+      priorBlockers: ["two"],
+      timestamp: "2026-07-06T08:45:00.000Z",
+    });
+    writeBreakGlass(tmp, r1);
+    writeBreakGlass(tmp, r2);
+
+    const records = readAllBreakGlass(tmp);
+    expect(records).toHaveLength(2);
+    expect(records.map((r) => r.id)).toEqual(expect.arrayContaining([r1.id, r2.id]));
+  });
+
   it("空目录返回空数组", () => {
     expect(readAllBreakGlass(tmp)).toEqual([]);
+  });
+
+  it("遇到不可解析审计记录时 warning，但继续返回可读记录", () => {
+    const spy = vi.spyOn(process.stderr, "write").mockImplementation(() => true);
+    const r = makeBreakGlassRecord({
+      operator: "alice",
+      from: "build",
+      to: "qa",
+      reason: "a",
+      risk: "x",
+      priorBlockers: [],
+      timestamp: "2026-07-06T08:45:00.000Z",
+    });
+    writeBreakGlass(tmp, r);
+    const dir = path.join(tmp, ".ai-first", "logs", "break-glass");
+    fs.writeFileSync(path.join(dir, "broken.yml"), "id: |\n  unsupported\n", "utf-8");
+
+    const records = readAllBreakGlass(tmp);
+
+    expect(records).toHaveLength(1);
+    expect(records[0].id).toBe(r.id);
+    expect(spy).toHaveBeenCalledWith(expect.stringContaining("break-glass 审计记录不可读"));
+    spy.mockRestore();
   });
 });
