@@ -1,5 +1,9 @@
 # AI-first 研发阶段表达与操作手册
 
+> 🗺️ **阅读路径**：[README](../README.md) → 📗 [团队试点落地指南](AI-first-团队试点落地指南.md) → 📘 [使用指南](AI-first-使用指南.md) → 📙 **研发阶段表达与操作手册**（你在这）
+>
+> 本文角色：**阶段字典**——按 10 个阶段查「目标 / 表达 / 命令 / 产出 / 下一步判断」。命令清单见 §16，已知限制见 §16.4。
+
 ## 1. 文档目的
 
 本文档汇总研发人员在 AI-first 项目开发全过程中可以使用的自然语言表达、slash command、本地命令和典型操作。
@@ -50,13 +54,7 @@ npm run scan:domains -- .
 npm run check
 ```
 
-未来产品化后，对应统一 CLI：
-
-```bash
-ai-first guide
-ai-first task create
-ai-first task exec
-```
+也可用统一 CLI 入口（`npm run ai-first -- help` 列全部子命令，详见 16.3 节）。
 
 ### 2.3 有风险的动作要说清边界
 
@@ -78,7 +76,7 @@ ai-first task exec
 | 看健康度 | `看一下项目健康度和主要风险` | `/health` | 输出测试、review、sync、风险摘要 |
 | 重新扫描 | `重新扫描项目结构、风险和规范缺口` | `/scan` | 生成扫描报告和阶段评估 |
 | 创建任务 | `创建一个登录功能任务，包含前后端和测试` | `/task "登录功能"` | 生成 task 和 change scope |
-| 执行任务 | `用 Codex 执行这个任务，完成后写 report` | `npm run task:exec -- ... --runtime codex` | 执行、写 report、更新状态 |
+| 执行任务 | `用 Codex 执行这个任务，完成后写 report` | `npm run task:exec -- --task <task.yml> --runtime codex` | 执行、写 report、更新状态 |
 | 质量检查 | `review 最近改动，按门禁列问题` | `/review` | 生成 review 报告 |
 | 完成后置链 | `对当前任务跑完整质量链` | `/complete task-id` | 执行 scan、sync、review |
 | 文档同步 | `检查这次改动是否让文档或规范过期` | `/sync` | 生成同步建议 |
@@ -117,12 +115,7 @@ ai-first task exec
 /init /path/to/project
 ```
 
-未来 CLI：
-
-```bash
-npm run init -- /path/to/project
-ai-first init /path/to/project
-```
+本地命令：暂无。greenfield 初始化目前只能用 `/init`（Claude Code 内），没有 npm 入口（详见 16.4 已知限制）。
 
 ### 4.4 产出
 
@@ -220,11 +213,10 @@ ai-first init /path/to/project
 /standards
 ```
 
-未来 CLI：
+或用本地命令：
 
 ```bash
-npm run task:create -- "实现用户登录"
-ai-first task create "实现用户登录"
+npm run task:create -- "实现用户登录" --domain domain-backend
 ```
 
 ### 6.4 产出
@@ -440,11 +432,11 @@ npm run scan:domains -- /path/to/project
 /sync
 ```
 
-未来 CLI：
+或用本地命令：
 
 ```bash
-npm run task:create -- "实现用户登录"
-npm run task:exec -- . --task .ai-first/tasks/task-login.yml --runtime codex
+npm run task:create -- "实现用户登录" --domain domain-frontend --domain domain-backend
+npm run task:exec -- --task .ai-first/tasks/task-login.yml --runtime codex
 ```
 
 ### 9.8 产出
@@ -910,36 +902,57 @@ review 这个任务，重点检查 logic、security、architecture、docs、test
 | `/wiki` | 生成或刷新项目 wiki |
 | `/advance` | 检查并推进阶段 |
 
-### 16.2 当前 npm 命令
+### 16.2 当前可用 npm 命令（v0.1）
+
+研发日常命令（在目标业务项目根目录执行，不是在本仓库根目录）：
 
 | 命令 | 用途 |
 | --- | --- |
-| `npm run adopt -- <path>` | 接入已有项目 |
-| `npm run scan:domains -- <path>` | 扫描 domain |
+| `npm run adopt -- <path>` | 接入已有项目，建立 `.ai-first/` 控制层 |
+| `npm run scan:domains -- <path>` | 扫描并输出 domain（只读） |
+| `npm run scan:domains:write -- <path> [--max-depth=4]` | 扫描并写入 domain 配置 |
+| `npm run guide -- <path>` | 输出当前位置、下一步、推荐 runtime |
+| `npm run task:create -- "标题" --domain <id> [--runtime codex]` | 创建任务 + 推断 change scope |
+| `npm run task:exec -- --task <task.yml> [--runtime codex\|claude-code] [--dry-run] [--allow-dirty]` | 执行任务，写 ExecutionReport |
+| `npm run sync -- --files <changed-file>` | 检查文档/规范是否过期，生成 SyncEvent |
+| `npm run stage:gate -- <from> <to>` | 客观判断能否推进阶段（不接受自报完成） |
+| `npm run stage:advance -- <from> <to>` | 通过 gate 后实际推进阶段 |
+
+本仓库开发命令：
+
+| 命令 | 用途 |
+| --- | --- |
 | `npm run check` | typecheck + test + lint + format check |
-| `npm run typecheck` | TypeScript 类型检查 |
-| `npm test` | 运行测试 |
-| `npm run lint` | 运行 lint |
-| `npm run dev` | 启动本仓库前端开发服务 |
+| `npm run typecheck` / `npm test` / `npm run lint` / `npm run format:check` | 单项检查 |
+| `npm run dev` | 启动本仓库前端 dashboard |
+| `npm run validate:example-lifecycle` | 跑示例 fixture 全套校验 |
 
-### 16.3 规划中的 CLI / npm 命令
+### 16.3 统一 CLI 入口（与上面等价）
 
-| 命令 | 用途 |
+> **口径**：散装命令（16.2）和统一 CLI（本节）完全等价，跑的是同一份 core。**团队日常推荐散装命令**（直观、易记）；**统一 CLI 适合脚本化、CI 或只想记一个入口**。选其一即可，不必混用。
+
+以上命令均可通过统一 CLI 触发（`src/cli/index.ts`）：
+
+```bash
+npm run ai-first -- help                 # 列出所有子命令
+npm run ai-first -- guide <path>         # 等价 npm run guide
+npm run ai-first -- scan --write <path>  # 等价 scan:domains:write
+npm run ai-first -- pilot <path>         # dry-run 跑通主链路（adopt→guide→task→exec→sync）
+npm run ai-first -- check                # typecheck + test + lint + format
+```
+
+### 16.4 已知限制
+
+| 限制 | 说明 |
 | --- | --- |
-| `npm run init -- <path>` | 初始化新项目 |
-| `npm run guide -- <path>` | 输出研发导航 |
-| `npm run task:create -- "<title>"` | 创建任务 |
-| `npm run task:exec -- <path> --task <task.yml> --runtime codex` | 用 Codex 执行任务 |
-| `ai-first init` | 产品化初始化 |
-| `ai-first adopt` | 产品化接入 |
-| `ai-first scan` | 产品化扫描 |
-| `ai-first guide` | 产品化导航 |
-| `ai-first task create` | 产品化任务创建 |
-| `ai-first task exec` | 产品化任务执行 |
+| 无 `npm run init` | greenfield（新项目）初始化目前只能通过 Claude Code 的 `/init` 完成，没有 npm 命令入口。用 Codex 的团队暂不支持纯命令行初始化新项目，需先在 Claude Code 里 `/init`。 |
+| 真实 runtime 执行 | `task:exec --runtime codex/claude-code` 已接入，dry-run 验证通过；真实（非 dry-run）执行尚未在真实项目验证，建议试点首次用低风险任务跑通。 |
 
 ## 17. 典型连续工作流
 
 ### 17.1 新项目从 0 到开发
+
+> 命令级 step-by-step 见使用指南 §1「从零开始一个项目」。greenfield 必须用 Claude Code `/init`，无 npm 入口（见 §16.4）。
 
 ```text
 这是一个新 AI 项目，帮我初始化 AI-first 控制层。
