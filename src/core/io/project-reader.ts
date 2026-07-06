@@ -278,7 +278,7 @@ function normalizeTask(data: Partial<Task> | null): Task {
     title: data?.title ?? "Untitled",
     description: data?.description ?? "",
     stage: (data?.stage as ProjectStage | undefined) ?? "build",
-    mode: data?.mode ?? "execute",
+    mode: normalizeTaskMode(data?.mode).mode,
     domainIds: data?.domainIds ?? [],
     owner: data?.owner,
     reviewer: data?.reviewer,
@@ -290,6 +290,42 @@ function normalizeTask(data: Partial<Task> | null): Task {
     createdAt: data?.createdAt ?? now,
     updatedAt: data?.updatedAt ?? now,
   };
+}
+
+/**
+ * 阶段门方案 §7.2 + ADR-010：纯读 normalize，不写 timeline。
+ * Task.mode 类型已收紧移除 "skip"；旧 yml 仍可能含 mode:"skip"，
+ * 读时降级为 "execute" 并返回 warning，由调用方（CLI/health）统一输出。
+ */
+export type NormalizedMode = { mode: Task["mode"]; warning?: string };
+
+export function normalizeTaskMode(raw: unknown): NormalizedMode {
+  if (raw === "generate" || raw === "reuse" || raw === "execute") return { mode: raw };
+  if (raw === "skip") {
+    return {
+      mode: "execute",
+      warning: `task mode "skip" 已废弃，降级为 execute；阶段推进须过 stage:gate`,
+    };
+  }
+  return { mode: "execute" };
+}
+
+/**
+ * 扫描所有 task yml，返回 mode:"skip" 类的降级 warning（reader 纯读，不写副作用）。
+ * 供 CLI / health / doctor 命令统一输出，不在 reader 里产生 timeline 副作用。
+ */
+export function collectTaskModeWarnings(projectRoot: string): string[] {
+  const dir = path.join(projectRoot, ".ai-first", "tasks");
+  const items = readYamlDir<{ id?: string; mode?: string }>(dir);
+  const warnings: string[] = [];
+  for (const { file, data } of items) {
+    if (!data) continue;
+    const normalized = normalizeTaskMode(data.mode);
+    if (normalized.warning) {
+      warnings.push(`${file} (task ${data.id ?? "?"}): ${normalized.warning}`);
+    }
+  }
+  return warnings;
 }
 
 function normalizeScope(data: Partial<ChangeScope> | null): ChangeScope {

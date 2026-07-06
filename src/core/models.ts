@@ -138,7 +138,7 @@ export type Task = {
   title: string;
   description: string;
   stage: ProjectStage;
-  mode: "generate" | "reuse" | "skip" | "execute";
+  mode: "generate" | "reuse" | "execute";
   domainIds: string[];
   owner?: OwnerRef;
   reviewer?: OwnerRef;
@@ -590,4 +590,38 @@ export type StandardFrontmatter = {
   stability: StandardStability;
   severity: StandardSeverity;
   relatedPaths: string[];
+};
+
+// ──────────────────────────────────────────────────────────────────────────
+// 阶段门与编码自由（docs/AI-first-阶段门与编码自由-技术方案.md）
+// GateCheck / AdvanceDecision: canAdvance() 的输入输出
+// BreakGlassRecord: 显式绕过门的审计记录（永久，写入 .ai-first/logs/break-glass/）
+// ──────────────────────────────────────────────────────────────────────────
+
+export type GateCheck = {
+  name: string; // 如 "active-tasks-done"
+  passed: boolean;
+  detail: string; // 通过/未过的原因（含具体 task id / artifact 路径）
+  evidence: string[]; // 客观证据指针（文件路径 / task id / report id）
+};
+
+export type AdvanceDecision = {
+  from: ProjectStage;
+  to: ProjectStage;
+  allowed: boolean; // 全部 check 过才 true
+  checks: GateCheck[]; // 5 项检查的明细
+  blockers: string[]; // = checks.filter(!passed).map(detail)，便于 CLI 直读
+  evidence: string[]; // = checks.filter(passed).flatMap(evidence)，便于审计
+  checkedAt: string; // ISO 时间戳
+};
+
+export type BreakGlassRecord = {
+  id: string; // breakglass-<compactTs>
+  operator: string; // 必填，触发者
+  from: ProjectStage;
+  to: ProjectStage;
+  reason: string; // 必填，为什么绕过门
+  risk: string; // 必填，承担的风险
+  timestamp: string; // ISO 时间戳
+  priorBlockers: string[]; // 绕过前 canAdvance 报告的 blockers（留痕）
 };

@@ -27,6 +27,8 @@
     "task:exec": "npx tsx src/core/task/task-exec-cli.ts",
     "pilot:dry-run": "npx tsx src/core/task/task-exec-cli.ts --dry-run --allow-dirty --task",
     "sync": "npx tsx src/core/sync/sync-cli.ts",
+    "stage:gate": "npx tsx src/core/stage/stage-gate-cli.ts",
+    "stage:advance": "npx tsx src/core/stage/stage-advance-cli.ts",
     "ai-first": "npx tsx src/cli/index.ts",
     "data:sync": "npx tsx scripts/generate-frontend-data.ts",
     "dev": "npm run data:sync && npx vite",

@@ -19,10 +19,11 @@ idea → discovery → spec → architecture → scaffold → build → qa → r
 
 ### 0. Determine Advancement Mode
 
-Read the mode from the most recent active task, or default to `generate`:
+Read the mode from the most recent active task, or default to `generate`.
+> **`skip` 模式已废弃**（阶段门 §7.1）：task `mode` 类型已收紧为 `generate | reuse | execute`，
+> 旧 yml 里的 `mode: skip` 会被 reader 降级为 `execute`。阶段推进只能通过客观门（step 2）。
 
 ```bash
-# Find the mode from the most recent task that targets the NEXT stage
 MODE="generate"  # default
 ACTIVE_TASK=$(ls -t .ai-first/tasks/task-*.yml 2>/dev/null | head -1)
 if [ -n "$ACTIVE_TASK" ]; then
@@ -31,25 +32,11 @@ if [ -n "$ACTIVE_TASK" ]; then
     MODE="$TASK_MODE"
   fi
 fi
-
 echo "Advancement mode: $MODE"
-
-case "$MODE" in
-  skip)
-    echo "Mode is SKIP — will advance without running lead agent or checking artifacts"
-    ;;
-  reuse)
-    echo "Mode is REUSE — will look for existing artifacts/templates to reuse"
-    ;;
-  generate|execute)
-    echo "Mode is $MODE — full generation/execution flow"
-    ;;
-esac
 ```
 
-Mode behavior:
-- **skip**: Skip artifact checks for the current stage, skip dispatching the lead agent. Just transition.
-- **reuse**: Check for existing artifacts; if found, copy/adapt them instead of generating new. Dispatch lead agent with "reuse existing" instruction.
+Mode behavior（无 skip 分支）：
+- **reuse**: Check for existing artifacts; if found, copy/adapt them instead of generating new.
 - **generate**: Normal flow — lead agent generates all artifacts from scratch.
 - **execute**: Like generate, but for build/implementation stages.
 
@@ -75,139 +62,53 @@ Map current stage to next stage:
 | stage-09-operate | stage-10-evolve |
 | stage-10-evolve | stage-02-discovery |
 
-### 2. Stage Exit Checklist
+### 2. 客观阶段门（mandatory）
 
-Before advancing, verify ALL of the following:
-
-#### 2.1 Active Tasks Check
-```bash
-echo "=== Active Tasks ==="
-# Check for tasks not in 'done' or 'canceled' status
-grep -rl "status: \(todo\|in_progress\|blocked\|review_pending\)" .ai-first/tasks/ 2>/dev/null || echo "No active tasks — OK"
-```
-If any active tasks found: **ABORT**. All tasks must be `done` or `canceled`.
-
-#### 2.2 Sync Events Check
-```bash
-echo "=== Pending Sync Events ==="
-grep -rl "status: suggested\|status: pending" .ai-first/sync/ 2>/dev/null || echo "No pending sync events — OK"
-```
-If any pending sync events: **ABORT**. All must be `confirmed` or `dismissed`.
-
-#### 2.3 Review Gates Check
-```bash
-echo "=== Review Status ==="
-# Look for FAILED verdicts in review reports
-grep -rl "Verdict.*FAILED" .ai-first/reviews/ 2>/dev/null || echo "No failed reviews — OK"
-```
-If any FAILED reviews: **ABORT**. All gates must pass.
-
-#### 2.4 Required Artifacts Check
-
-**If mode is `skip`**: Skip this check entirely.
-
-**If mode is `reuse`**: Check for existing artifacts to reuse; warn if none found but proceed.
-
-**If mode is `generate` or `execute`**: Verify the expected artifact exists:
-
-| Stage | Required Artifact |
-|-------|-------------------|
-| idea | `.ai-first/artifacts/goals.md` |
-| discovery | `.ai-first/artifacts/requirements.md` |
-| architecture | `.ai-first/artifacts/architecture.md` |
-| scaffold | `.ai-first/artifacts/scaffold-plan.md` |
-| build | `.ai-first/artifacts/implementation-*.md` or compiled output |
-| qa | `.ai-first/reviews/` (at least one review report) |
-| release | `.ai-first/artifacts/release-notes.md` |
+**所有推进必须先过客观门**（阶段门方案 §4.2 + ADR-005）。门是纯函数 `canAdvance()`，
+消费 task yml + ExecutionReport + artifacts + sync events，不接受 agent 自报、不接受 skip。
 
 ```bash
-echo "=== Required Artifact ==="
-# Check based on current stage
-ls .ai-first/artifacts/ 2>/dev/null || echo "No artifacts — check required"
+# 只检查（不推进）：
+npm run stage:gate -- "$CURRENT_STAGE_NAME" "$NEXT_STAGE_NAME"
+# 例如：npm run stage:gate -- build qa
 ```
 
-#### 2.5 Knowledge Sync Check
-```bash
-echo "=== Recent Knowledge Sync ==="
-ls -lt .ai-first/reports/sync-*.md 2>/dev/null | head -1 || echo "No sync reports — WARNING"
-```
-Knowledge-sync-agent must have been called. If no sync report exists, run `/sync` first.
+- 退出码 0 = allowed；非 0 = blocked，输出 blockers 后**必须 ABORT**。
+- **不允许** 用 `mode: skip`、自报"做完了"、或绕过门。`skip` 已从 Task.mode 移除。
+- 如确实需异常恢复（维护者通道），手动跑：
+  `npm run stage:gate -- <from> <to> --break-glass --operator <name> --reason <必填> --risk <必填>`
+  （强制写审计到 `.ai-first/logs/break-glass/`，且先于推进）
 
-### 3. Perform Transition
-
-If all checks pass:
+**门通过后推进**（唯一状态写入点，advanceState — ADR-009）：
 
 ```bash
-CURRENT_STAGE_NUM=$(echo $CURRENT | grep -o '[0-9]\+' | head -1)
-NEXT_NUM=$((CURRENT_STAGE_NUM + 1))
-
-# Map to directory name
-case $NEXT_NUM in
-  2) NEXT="stage-02-discovery" ;;
-  3) NEXT="stage-03-spec" ;;
-  4) NEXT="stage-04-architecture" ;;
-  5) NEXT="stage-05-scaffold" ;;
-  6) NEXT="stage-06-build" ;;
-  7) NEXT="stage-07-qa" ;;
-  8) NEXT="stage-08-release" ;;
-  9) NEXT="stage-09-operate" ;;
-  10) NEXT="stage-10-evolve" ;;
-esac
-
-# Create next stage directory and situation
-mkdir -p ".ai-first/state/$NEXT"
-cat > ".ai-first/state/$NEXT/situation.md" << SITUATION
-# Stage: ${NEXT#stage-??-}
-**Started**: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
-**Lead Agent**: {lead agent for this stage}
-**Previous Stage**: $CURRENT
-
-## Current State
-
-Stage advanced from $CURRENT. Ready for ${NEXT#stage-??-} stage work.
-SITUATION
-
-# Update symlink
-rm .ai-first/state/current
-ln -sf "$NEXT" .ai-first/state/current
-
-# Update project.yml
-STAGE_NAME=$(echo $NEXT | sed 's/stage-[0-9]*-//')
-# Use sed to update currentStage in project.yml
-sed -i '' "s/currentStage: .*/currentStage: $STAGE_NAME/" .ai-first/project.yml
-
-# Bible lock management: lock standards/ during execution stages, unlock during evolve
-case "$STAGE_NAME" in
-  build|qa|release)
-    cat > .ai-first/locks/rules.lock << LOCKFILE
-# Rules Lock
-**Locked at**: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
-**Stage**: $STAGE_NAME
-**Effect**: standards/ and stable knowledge/ are READ-ONLY
-**Reason**: Rules are locked during execution stages. Code must conform to rules — rules do not change to fit code.
-**Unlock**: Advance to evolve stage.
-LOCKFILE
-    echo "Rules locked — standards/ and stable knowledge/ are now read-only"
-    ;;
-  evolve|idea|discovery)
-    rm -f .ai-first/locks/rules.lock
-    echo "Rules unlocked — standards/ and knowledge/ can be modified"
-    ;;
-esac
-
-# Append to timeline (append-only, never modify previous entries)
-cat >> .ai-first/logs/timeline.md << TLENTRY
-[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] [STAGE_TRANSITION] $CURRENT → $NEXT ($STAGE_NAME) — mode: $MODE
-TLENTRY
-
-echo "Advanced to $NEXT (stage: $STAGE_NAME)"
+npm run stage:advance -- "$CURRENT_STAGE_NAME" "$NEXT_STAGE_NAME"
 ```
+
+`stage:advance` 内部再次校验门通过，然后创建下一阶段目录、改 symlink、改 project.yml、写 timeline、
+处理 rules.lock——一步到位，避免多处写状态。
+
+#### 2.1–2.5 人类可读补充清单（客观判定以 stage:gate 退出码为准）
+
+Below is a human-readable summary of what `canAdvance()` checks. It is **not** the source of truth —
+the CLI exit code is. Use this only to understand blockers.
+
+- **2.1 Active Tasks**: 当前阶段（from）所有 task 必须 `done` 或 `canceled`。
+- **2.2 Sync Events**: 无 `status: pending/suggested` 的 SyncEvent。
+- **2.3 Review Gates**: `.ai-first/reviews/` 无 `Verdict.*FAILED` 或 `status: failed`（QA 阶段强制非空）。
+- **2.4 Required Artifacts**: 见 `STAGE_EXIT_REQUIREMENTS`（idea=goals.md / discovery=requirements.md / architecture=architecture.md / scaffold=architecture.md（v0.1 复用）/ build=implementation-summary.md / release=release-notes.md+delivery-handoff.md）。
+- **2.5 Knowledge Sync**: `npm run sync` 已跑过（无 critical findings）。
+
+### 3. Transition（由 stage:advance 完成，不再手写 bash）
+
+> **不要** 在本命令里手写 mkdir/symlink/sed/timeline——那会与 `advanceState()` 形成两套状态逻辑（ADR-009 禁止）。
+> Step 2 调用的 `npm run stage:advance` 已经完成了：
+> 创建下一阶段 state 目录 → 改 `state/current` symlink → 改 `project.yml.currentStage` → 写 timeline → 处理 `rules.lock`（execution 阶段锁 standards/，evolve/idea/discovery 解锁）。
 
 ### 4. Dispatch Lead Agent (mode-aware)
 
 | Mode | Action |
 |------|--------|
-| **skip** | Do NOT dispatch. Report: "Stage skipped per task mode." |
 | **reuse** | Dispatch lead agent with instruction: "Reuse existing {artifact} from .ai-first/artifacts/ — adapt for current context without regenerating from scratch." |
 | **generate** | Dispatch lead agent normally — full generation. |
 | **execute** | Dispatch builder-agent normally — full implementation. |
@@ -224,12 +125,12 @@ Normal lead agent assignments:
 ## Safety Rules
 
 ### YOU MUST
-- Run every checklist item — do not skip any
-- Abort if any check fails, with a clear message about what's blocking
-- Update BOTH the symlink AND project.yml in the same step
+- Step 2 的 `stage:gate` 退出码为 0 才能推进；非 0 必须修 blockers
+- 推进只能通过 `stage:advance`（或维护者显式 `--break-glass`），不得手写 bash 改状态
 - Report the transition clearly
 
 ### YOU MUST NOT
-- Skip stage exit checks even if "it looks fine"
+- 用 `mode: skip` 或自报"做完了"绕过门（`skip` 已从 Task.mode 移除）
+- 在本命令里直接 mkdir/symlink/sed 改状态（违反 ADR-009 单一状态入口）
 - Advance with active tasks or pending sync events
 - Leave project.yml and symlink out of sync

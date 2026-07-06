@@ -29,6 +29,7 @@ const ENTRY_POINTS = {
   "task:create": "src/core/task/task-cli.ts",
   "task:exec": "src/core/task/task-exec-cli.ts",
   sync: "src/core/sync/sync-cli.ts",
+  "stage:gate": "src/core/stage/stage-gate-cli.ts",
 } as const;
 
 type SubCommand = keyof typeof ENTRY_POINTS | "scan:write" | "pilot" | "check" | "help";
