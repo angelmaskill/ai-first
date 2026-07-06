@@ -1,13 +1,14 @@
 // §4.5 F1 — task:exec end-to-end.
 //
 // Reads task + scope → collects GitBaseline → preflight dirty check → builds
-// the context bundle + renders prompt v0 → CodexAdapter.executePrompt() →
+// the context bundle + renders prompt v0 → selected runtime adapter
+// .executePrompt() (Codex or Claude Code, routed by --runtime) →
 // collects GitChangeSet → runs the acceptance plan → collectExecutionReport()
 // → writes .ai-first/reports/exec-*.yml → updates task.status → appends
 // timeline → prints a human-readable summary with location/next-step sense.
 //
 // Usage:
-//   npm run task:exec -- --task .ai-first/tasks/task-x.yml [--runtime codex] [--allow-dirty] [--dry-run]
+//   npm run task:exec -- --task .ai-first/tasks/task-x.yml [--runtime codex|claude-code] [--allow-dirty] [--dry-run]
 
 import * as fs from "node:fs";
 import * as path from "node:path";
@@ -28,6 +29,10 @@ import {
 } from "../exec/report-collector-core.ts";
 import { buildTaskContextBundle, renderPromptV0 } from "./context-bundle-core.ts";
 import { CodexAdapter } from "../tools/codex-adapter.ts";
+import type { CodexAdapterOptions } from "../tools/codex-adapter.ts";
+import { ClaudeCodeAdapter } from "../tools/claude-code-adapter.ts";
+import type { ClaudeCodeAdapterOptions } from "../tools/claude-code-adapter.ts";
+import type { PromptExecutor } from "../tools/tool-adapter-protocol.ts";
 
 type ExecArgs = {
   taskRef: string;
@@ -62,24 +67,44 @@ function parseRuntime(value: string): RuntimeToolId {
   process.exit(2);
 }
 
-function assertSupportedRuntime(runtime: RuntimeToolId): void {
-  // TODO(M-4): remove this guard when task:exec routes claude-code to ClaudeCodeAdapter.
-  if (runtime === "codex") return;
-  process.stderr.write(
-    `错误：task:exec 当前仅接通 runtime=codex；${runtime} 尚未接入执行适配器。\n`,
-  );
-  process.exit(2);
+type ExecutorOptions = {
+  executionMode: "dry-run" | "exec";
+  timeoutMs: number;
+};
+
+/**
+ * M-4: route `--runtime` to the matching PromptExecutor. Both adapters share
+ * the {@link PromptExecutor} contract, so the rest of task:exec stays
+ * runtime-agnostic. `parseRuntime` has already validated the value, so the
+ * codex branch is the exhaustive default.
+ */
+export function selectPromptExecutor(
+  runtime: RuntimeToolId,
+  id: string,
+  options: ExecutorOptions,
+): PromptExecutor {
+  if (runtime === "claude-code") {
+    const claudeOptions: ClaudeCodeAdapterOptions = {
+      executionMode: options.executionMode,
+      timeoutMs: options.timeoutMs,
+    };
+    return new ClaudeCodeAdapter(id, claudeOptions);
+  }
+  const codexOptions: CodexAdapterOptions = {
+    executionMode: options.executionMode,
+    timeoutMs: options.timeoutMs,
+  };
+  return new CodexAdapter(id, codexOptions);
 }
 
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
   if (!args.taskRef) {
     process.stderr.write(
-      "Usage: npm run task:exec -- --task .ai-first/tasks/<task>.yml [--runtime codex] [--allow-dirty] [--dry-run]\n",
+      "Usage: npm run task:exec -- --task .ai-first/tasks/<task>.yml [--runtime codex|claude-code] [--allow-dirty] [--dry-run]\n",
     );
     process.exit(2);
   }
-  assertSupportedRuntime(args.runtime);
 
   const projectRoot = process.cwd();
   const project = readProjectYml(projectRoot);
@@ -119,7 +144,7 @@ async function main(): Promise<void> {
     const reportPath = writeReport(projectRoot, report);
     updateTaskStatus(projectRoot, task, "blocked");
     appendTimeline(projectRoot, `task blocked (preflight dirty worktree): ${task.id}`);
-    printSummary(report, reportPath, /* codexRan */ false);
+    printSummary(report, reportPath, /* executorRan */ false);
     process.exit(0);
   }
 
@@ -134,12 +159,12 @@ async function main(): Promise<void> {
   );
   const prompt = renderPromptV0(bundle);
 
-  // 4. Execute via Codex (dry-run or exec).
-  const adapter = new CodexAdapter(`task-exec-${task.id}`, {
+  // 4. Execute via the selected runtime adapter (dry-run or exec).
+  const executor = selectPromptExecutor(args.runtime, `task-exec-${task.id}`, {
     executionMode: args.dryRun ? "dry-run" : "exec",
     timeoutMs: 600_000,
   });
-  const codexResult = await adapter.executePrompt(prompt, { cwd: projectRoot });
+  const codexResult = await executor.executePrompt(prompt, { cwd: projectRoot });
 
   // 5. Post git snapshot + change set.
   const postSnapshot = await collectGitStatus(projectRoot);
@@ -171,7 +196,7 @@ async function main(): Promise<void> {
     `task executed: ${task.id} → ${report.status} (${report.outcomeReason})`,
   );
 
-  printSummary(report, reportPath, /* codexRan */ true);
+  printSummary(report, reportPath, /* executorRan */ true);
 }
 
 function writeReport(projectRoot: string, report: ExecutionReport): string {
@@ -209,11 +234,11 @@ function appendTimeline(projectRoot: string, line: string): void {
   }
 }
 
-function printSummary(report: ExecutionReport, reportPath: string, codexRan: boolean): void {
+function printSummary(report: ExecutionReport, reportPath: string, executorRan: boolean): void {
   const icon = report.status === "done" ? "✅" : report.status === "review_pending" ? "🟡" : "🚫";
   process.stdout.write(`${icon} 任务执行完成：${report.status}（${report.outcomeReason}）\n`);
   process.stdout.write(`   report: ${reportPath}\n`);
-  if (codexRan) {
+  if (executorRan) {
     process.stdout.write(`   files changed: ${report.filesChanged.length}\n`);
     if (report.filesChanged.length > 0) {
       process.stdout.write(`     - ${report.filesChanged.slice(0, 5).join("\n     - ")}\n`);
@@ -234,7 +259,7 @@ function printSummary(report: ExecutionReport, reportPath: string, codexRan: boo
     for (const r of report.risks.slice(0, 5)) process.stdout.write(`     - ${r}\n`);
   }
   if (report.naturalLanguageSummary) {
-    process.stdout.write(`   Codex 自述：${report.naturalLanguageSummary.slice(0, 200)}\n`);
+    process.stdout.write(`   执行器自述：${report.naturalLanguageSummary.slice(0, 200)}\n`);
   }
   process.stdout.write(`   baseline: ${report.baselineRef ?? "(unknown)"}\n`);
 }

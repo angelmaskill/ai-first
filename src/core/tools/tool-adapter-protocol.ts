@@ -9,7 +9,7 @@
  * When adding a new tool backend, implement the ToolAdapter interface.
  */
 
-import type { ProjectStage, AgentRole } from "../models.ts";
+import type { ProjectStage, AgentRole, CodexRunResult } from "../models.ts";
 
 // ---- Capability Profile ----
 
@@ -89,6 +89,19 @@ export interface ToolAdapter {
 
   /** Graceful shutdown */
   disconnect(): Promise<void>;
+}
+
+// ---- Prompt Executor (M-4) ----
+
+/**
+ * Contract for adapters that can run a free-form prompt and return a structured
+ * subprocess result. {@link CodexAdapter} and {@link ClaudeCodeAdapter} both
+ * implement this so `task:exec` can route by `--runtime` without caring which
+ * CLI is underneath. The `CodexRunResult` name is historical (predates the
+ * second adapter); it is the generic "prompt execution result" shape.
+ */
+export interface PromptExecutor {
+  executePrompt(prompt: string, options?: { cwd?: string }): Promise<CodexRunResult>;
 }
 
 // ---- Factory ----

@@ -1,10 +1,16 @@
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import type {
   ToolAdapter,
   ToolCapabilityProfile,
   ToolMessage,
   AdapterStatus,
+  PromptExecutor,
 } from "./tool-adapter-protocol.ts";
-import type { ProjectStage, AgentRole } from "../models.ts";
+import type { ProjectStage, AgentRole, CodexRunResult } from "../models.ts";
+
+const execFileAsync = promisify(execFile);
+type ExecFileError = Error & { stdout?: string | Buffer; stderr?: string | Buffer; code?: number };
 
 const CLAUDE_CODE_PROFILE: ToolCapabilityProfile = {
   id: "claude-code-v1",
@@ -64,7 +70,17 @@ export type AgentInvocation = {
   error?: string;
 };
 
-export class ClaudeCodeAdapter implements ToolAdapter {
+export type ClaudeExecutionMode = "dry-run" | "exec";
+
+export type ClaudeCodeAdapterOptions = {
+  cliPath?: string;
+  execArgs?: string[];
+  cwd?: string;
+  timeoutMs?: number;
+  executionMode?: ClaudeExecutionMode;
+};
+
+export class ClaudeCodeAdapter implements ToolAdapter, PromptExecutor {
   readonly id: string;
   readonly toolName = "Claude Code";
   readonly capabilities = CLAUDE_CODE_PROFILE;
@@ -72,9 +88,19 @@ export class ClaudeCodeAdapter implements ToolAdapter {
   readonly supportedRoles = ALL_ROLES;
   private _status: AdapterStatus = "disconnected";
   private _invocations: Map<string, AgentInvocation> = new Map();
+  private readonly cliPath: string;
+  private readonly execArgs: string[];
+  private readonly cwd?: string;
+  private readonly timeoutMs: number;
+  private readonly executionMode: ClaudeExecutionMode;
 
-  constructor(id?: string) {
+  constructor(id?: string, options: ClaudeCodeAdapterOptions = {}) {
     this.id = id ?? `claude-code-${crypto.randomUUID().slice(0, 8)}`;
+    this.cliPath = options.cliPath ?? "claude";
+    this.execArgs = options.execArgs ?? ["-p"];
+    this.cwd = options.cwd;
+    this.timeoutMs = options.timeoutMs ?? 600_000;
+    this.executionMode = options.executionMode ?? "dry-run";
   }
 
   get status(): AdapterStatus {
@@ -215,6 +241,70 @@ export class ClaudeCodeAdapter implements ToolAdapter {
     });
   }
 
+  /**
+   * §4.6 / M-4: Execute a free-form prompt through `claude -p` (print mode),
+   * returning a structured {@link CodexRunResult}. Mirrors CodexAdapter so
+   * task:exec can treat both runtimes uniformly via the PromptExecutor contract.
+   *
+   * dry-run short-circuits with a synthetic result (no process spawn). Timeouts
+   * never throw to the caller: they are captured as
+   * `{ timedOut: true, exitCode: 124 }` so the report collector can still write
+   * a blocked ExecutionReport to disk.
+   */
+  async executePrompt(prompt: string, options: { cwd?: string } = {}): Promise<CodexRunResult> {
+    const startedAt = new Date().toISOString();
+    const startedMs = Date.now();
+    const argv = [...this.execArgs, prompt];
+    const command = [this.cliPath, ...argv];
+
+    if (this.executionMode === "dry-run") {
+      return {
+        executionMode: "dry-run",
+        command,
+        stdout: "<dry-run>",
+        stderr: "",
+        exitCode: 0,
+        timedOut: false,
+        startedAt,
+        finishedAt: new Date().toISOString(),
+        durationMs: 0,
+      };
+    }
+
+    try {
+      const { stdout, stderr } = await execFileAsync(this.cliPath, argv, {
+        cwd: options.cwd ?? this.cwd,
+        timeout: this.timeoutMs,
+        maxBuffer: 10 * 1024 * 1024,
+      });
+      return {
+        executionMode: "exec",
+        command,
+        stdout,
+        stderr,
+        exitCode: 0,
+        timedOut: false,
+        startedAt,
+        finishedAt: new Date().toISOString(),
+        durationMs: Date.now() - startedMs,
+      };
+    } catch (err) {
+      const execErr = err as ExecFileError & { signal?: string; killed?: boolean };
+      const timedOut = Boolean(execErr.killed && execErr.signal === "SIGTERM");
+      return {
+        executionMode: "exec",
+        command,
+        stdout: bufferToString(execErr.stdout) ?? "",
+        stderr: bufferToString(execErr.stderr) ?? execErr.message ?? "",
+        exitCode: typeof execErr.code === "number" ? execErr.code : timedOut ? 124 : 1,
+        timedOut,
+        startedAt,
+        finishedAt: new Date().toISOString(),
+        durationMs: Date.now() - startedMs,
+      };
+    }
+  }
+
   async healthCheck(): Promise<AdapterStatus> {
     this._status = "healthy";
     return this._status;
@@ -225,6 +315,14 @@ export class ClaudeCodeAdapter implements ToolAdapter {
   }
 }
 
-export function createClaudeCodeAdapter(id?: string): ClaudeCodeAdapter {
-  return new ClaudeCodeAdapter(id);
+export function createClaudeCodeAdapter(
+  id?: string,
+  options?: ClaudeCodeAdapterOptions,
+): ClaudeCodeAdapter {
+  return new ClaudeCodeAdapter(id, options);
+}
+
+function bufferToString(value: string | Buffer | undefined): string | undefined {
+  if (value === undefined) return undefined;
+  return Buffer.isBuffer(value) ? value.toString("utf-8") : value;
 }

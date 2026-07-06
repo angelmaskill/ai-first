@@ -157,3 +157,62 @@ describe("createClaudeCodeAdapter", () => {
     expect(a.id).toBe("my-id");
   });
 });
+
+describe("ClaudeCodeAdapter.executePrompt (M-4)", () => {
+  it("dry-run returns a synthetic result without spawning a process", async () => {
+    const adapter = new ClaudeCodeAdapter("dry-cc-prompt", {
+      cliPath: "/never/invoked",
+      executionMode: "dry-run",
+    });
+    const result = await adapter.executePrompt("do something useful");
+    expect(result.executionMode).toBe("dry-run");
+    expect(result.exitCode).toBe(0);
+    expect(result.timedOut).toBe(false);
+    expect(result.stdout).toBe("<dry-run>");
+    expect(result.command.join(" ")).toContain("do something useful");
+    expect(result.startedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect(result.finishedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+  });
+
+  it("exec mode returns real stdout/stderr and exit 0 on success", async () => {
+    const script = "console.log(JSON.stringify({ ok: true }));";
+    const adapter = new ClaudeCodeAdapter("exec-cc-prompt", {
+      cliPath: process.execPath,
+      execArgs: ["-e", script],
+      executionMode: "exec",
+    });
+    const result = await adapter.executePrompt("the prompt payload");
+    expect(result.executionMode).toBe("exec");
+    expect(result.exitCode).toBe(0);
+    expect(result.timedOut).toBe(false);
+    expect(result.stdout).toContain('"ok":true');
+    expect(result.command[0]).toBe(process.execPath);
+    expect(result.command.at(-1)).toBe("the prompt payload");
+    expect(result.durationMs).toBeGreaterThanOrEqual(0);
+  });
+
+  it("captures non-zero exit without throwing", async () => {
+    const adapter = new ClaudeCodeAdapter("failing-cc-prompt", {
+      cliPath: process.execPath,
+      execArgs: ["-e", 'console.error("boom"); process.exit(7);'],
+      executionMode: "exec",
+    });
+    const result = await adapter.executePrompt("anything");
+    expect(result.exitCode).toBe(7);
+    expect(result.timedOut).toBe(false);
+    expect(result.stderr).toContain("boom");
+  });
+
+  it("reports timedOut=true and exit 124 when the child exceeds timeoutMs", async () => {
+    const adapter = new ClaudeCodeAdapter("slow-cc-prompt", {
+      cliPath: process.execPath,
+      execArgs: ["-e", "setTimeout(() => process.exit(0), 5000);"],
+      executionMode: "exec",
+      timeoutMs: 300,
+    });
+    const result = await adapter.executePrompt("slow");
+    expect(result.timedOut).toBe(true);
+    expect(result.exitCode).toBe(124);
+    expect(result.executionMode).toBe("exec");
+  });
+});
