@@ -14,10 +14,13 @@ coverage/
 # Playwright MCP browser artifacts
 .playwright-mcp/
 
-# ai-first runtime state (symlinks, locks, sync events)
+# ai-first runtime state (regenerable: symlinks, locks, sync, reports, snapshots, logs)
 .ai-first/state/current
 .ai-first/locks/
 .ai-first/sync/
+.ai-first/reports/
+.ai-first/snapshots/
+.ai-first/logs/
 
 # Claude Code local plans
 .claude/plans/

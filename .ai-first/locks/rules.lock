@@ -1,6 +1,0 @@
-# Rules Lock
-**Locked at**: 2026-04-26T23:50:00Z
-**Stage**: qa
-**Effect**: standards/ and stable knowledge/ are READ-ONLY
-**Reason**: Rules are locked during execution stages. Code must conform to rules — rules do not change to fit code.
-**Unlock**: Advance to evolve stage.
