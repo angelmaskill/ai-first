@@ -7,7 +7,7 @@
 
 本模拟项目选择放在 `examples/ai-project-lifecycle-sim/`。原因：
 
-- `examples/legacy-fullstack/` 过于简单，只包含 frontend/backend placeholder，适合 brownfield smoke test，但不足以覆盖算法、数据、规范同步和阶段门。
+- 早期 `examples/legacy-fullstack/` 仅含 frontend/backend placeholder，适合 brownfield smoke test，但不足以覆盖算法、数据、规范同步和阶段门，已被本 sim 项目取代并移除。
 - 新建独立样例不会污染已有示例，也便于后续作为回归 fixture 持续演进。
 - 样例无外部依赖，`npm test`、`npm run typecheck`、`npm run lint` 均使用 Node.js 内置能力，适合本地和 CI 复跑。
 
