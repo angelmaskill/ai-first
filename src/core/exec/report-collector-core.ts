@@ -1,8 +1,8 @@
-// §4.3 F0 — Codex report collector (PURE core).
+// §4.3 F0 — Runtime report collector (PURE core).
 //
 // "Lenient out": the tool-side objectively collects an ExecutionReport from
-// recorded facts (GitChangeSet / CodexRunResult / AcceptanceResult[]). Codex
-// is never asked to fill a schema. This module spawns nothing, calls no git,
+// recorded facts (GitChangeSet / PromptRunResult / AcceptanceResult[]). The
+// runtime is never asked to fill a schema. This module spawns nothing, calls no git,
 // writes no files — it only consumes structured inputs and returns a structured
 // report. Status is a 3-state decision; outcomeReason is diagnostic-only.
 
@@ -10,7 +10,7 @@ import type {
   AcceptanceCriterion,
   AcceptanceResult,
   ChangeScope,
-  CodexRunResult,
+  PromptRunResult,
   CodeDomain,
   ExecutionReport,
   ExecutionOutcomeReason,
@@ -53,7 +53,7 @@ const TEST_DOC_HELPER_PATTERNS = [
 export type CollectParams = {
   task: Task;
   scope: ChangeScope;
-  codexResult: CodexRunResult;
+  runResult: PromptRunResult;
   runtime: RuntimeToolId;
   baseline: GitBaseline;
   changeSet: GitChangeSet;
@@ -64,7 +64,7 @@ export type CollectParams = {
   finishedAt: string;
 };
 
-/** §4.3.1 — build the report for a Codex run that actually executed. */
+/** §4.3.1 — build the report for a runtime prompt run that actually executed. */
 export function collectExecutionReport(params: CollectParams): ExecutionReport {
   const filesChanged = [...params.changeSet.trackedChanges, ...params.changeSet.untrackedChanges];
   const tainted = params.changeSet.taintedPaths;
@@ -74,7 +74,7 @@ export function collectExecutionReport(params: CollectParams): ExecutionReport {
     params.domains,
     params.task,
   );
-  const naturalLanguageSummary = extractTailSummary(params.codexResult.stdout);
+  const naturalLanguageSummary = extractTailSummary(params.runResult.stdout);
 
   const requiredCriteria = params.task.acceptanceCriteria.filter((c) => c.required);
   const requiredPassed = requiredCriteria.every(
@@ -82,7 +82,7 @@ export function collectExecutionReport(params: CollectParams): ExecutionReport {
   );
 
   const decision = decideStatus(
-    params.codexResult,
+    params.runResult,
     scopeViolations,
     requiredPassed,
     requiredCriteria,
@@ -106,10 +106,9 @@ export function collectExecutionReport(params: CollectParams): ExecutionReport {
     }
   }
 
-  if (params.codexResult.timedOut)
-    blockers.push(`Codex 超时（${params.codexResult.durationMs}ms）`);
-  else if (params.codexResult.exitCode !== 0)
-    blockers.push(`Codex 退出码 ${params.codexResult.exitCode}`);
+  if (params.runResult.timedOut) blockers.push(`执行器超时（${params.runResult.durationMs}ms）`);
+  else if (params.runResult.exitCode !== 0)
+    blockers.push(`执行器退出码 ${params.runResult.exitCode}`);
 
   return {
     id: `report-${params.task.id}-${stamp(params.finishedAt)}`,
@@ -126,9 +125,9 @@ export function collectExecutionReport(params: CollectParams): ExecutionReport {
     filesChanged,
     scopeViolations,
     acceptanceResults: params.acceptanceResults,
-    codexStdout: params.codexResult.stdout,
-    codexStderr: params.codexResult.stderr || undefined,
-    codexExitCode: params.codexResult.exitCode,
+    runtimeStdout: params.runResult.stdout,
+    runtimeStderr: params.runResult.stderr || undefined,
+    runtimeExitCode: params.runResult.exitCode,
     naturalLanguageSummary,
     risks,
     blockers,
@@ -138,13 +137,13 @@ export function collectExecutionReport(params: CollectParams): ExecutionReport {
 }
 
 function decideStatus(
-  codexResult: CodexRunResult,
+  runResult: PromptRunResult,
   scopeViolations: ScopeViolation[],
   requiredPassed: boolean,
   requiredCriteria: AcceptanceCriterion[],
 ): { status: ExecutionReport["status"]; outcomeReason: ExecutionOutcomeReason } {
-  if (codexResult.timedOut) return { status: "blocked", outcomeReason: "timeout" };
-  if (codexResult.exitCode !== 0) return { status: "blocked", outcomeReason: "non_zero_exit" };
+  if (runResult.timedOut) return { status: "blocked", outcomeReason: "timeout" };
+  if (runResult.exitCode !== 0) return { status: "blocked", outcomeReason: "non_zero_exit" };
   if (scopeViolations.some((v) => v.severity === "block"))
     return { status: "blocked", outcomeReason: "scope_violation" };
   if (scopeViolations.some((v) => v.severity === "review"))

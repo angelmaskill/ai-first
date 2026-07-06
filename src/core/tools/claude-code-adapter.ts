@@ -7,7 +7,7 @@ import type {
   AdapterStatus,
   PromptExecutor,
 } from "./tool-adapter-protocol.ts";
-import type { ProjectStage, AgentRole, CodexRunResult } from "../models.ts";
+import type { ProjectStage, AgentRole, PromptRunResult } from "../models.ts";
 
 const execFileAsync = promisify(execFile);
 type ExecFileError = Error & { stdout?: string | Buffer; stderr?: string | Buffer; code?: number };
@@ -243,7 +243,7 @@ export class ClaudeCodeAdapter implements ToolAdapter, PromptExecutor {
 
   /**
    * §4.6 / M-4: Execute a free-form prompt through `claude -p` (print mode),
-   * returning a structured {@link CodexRunResult}. Mirrors CodexAdapter so
+   * returning a structured {@link PromptRunResult}. Mirrors CodexAdapter so
    * task:exec can treat both runtimes uniformly via the PromptExecutor contract.
    *
    * dry-run short-circuits with a synthetic result (no process spawn). Timeouts
@@ -251,7 +251,7 @@ export class ClaudeCodeAdapter implements ToolAdapter, PromptExecutor {
    * `{ timedOut: true, exitCode: 124 }` so the report collector can still write
    * a blocked ExecutionReport to disk.
    */
-  async executePrompt(prompt: string, options: { cwd?: string } = {}): Promise<CodexRunResult> {
+  async executePrompt(prompt: string, options: { cwd?: string } = {}): Promise<PromptRunResult> {
     const startedAt = new Date().toISOString();
     const startedMs = Date.now();
     const argv = [...this.execArgs, prompt];

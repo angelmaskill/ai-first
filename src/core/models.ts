@@ -477,7 +477,7 @@ export type AllowedCommand = {
 };
 
 // ──────────────────────────────────────────────────────────────────────────
-// §3.2 Codex execution report (F3 — tool-side collected, "lenient out")
+// §3.2 Runtime execution report (F3 — tool-side collected, "lenient out")
 // ──────────────────────────────────────────────────────────────────────────
 
 export type AcceptanceResult = {
@@ -515,9 +515,9 @@ export type ExecutionReport = {
   filesChanged: string[];
   scopeViolations: ScopeViolation[];
   acceptanceResults: AcceptanceResult[];
-  codexStdout?: string;
-  codexStderr?: string;
-  codexExitCode?: number;
+  runtimeStdout?: string;
+  runtimeStderr?: string;
+  runtimeExitCode?: number;
   naturalLanguageSummary?: string;
   risks: string[];
   blockers: string[];
@@ -525,8 +525,8 @@ export type ExecutionReport = {
   knowledgeSyncNeeded: boolean;
 };
 
-// §3.2 Codex subprocess result (executePrompt return value)
-export type CodexRunResult = {
+// §3.2 Prompt subprocess result (executePrompt return value)
+export type PromptRunResult = {
   executionMode: "dry-run" | "exec";
   command: string[];
   stdout: string;

@@ -41,7 +41,7 @@
 | `contracts/contracts-core.ts` | 41 | 跨域契约影响 | §5.6 B3 |
 | `sync/sync-core.ts` + `sync-cli.ts` | 202 | doc-rot 同步建议 | §5.7 I |
 | `scanners/repo-domain-detector.ts` + `domain-enricher.ts` | 480 | domain 识别 + techStack 探测 | §5.6 B1/B2 |
-| `tools/codex-adapter.ts` | 316 | `executePrompt()` → CodexRunResult | §4.6 |
+| `tools/codex-adapter.ts` | 316 | `executePrompt()` → PromptRunResult | §4.6 |
 | `cli/index.ts` | 106 | 统一 `ai-first` 入口 | §7 M1 |
 | `models.ts` | 593 | 类型定义 | §3 |
 

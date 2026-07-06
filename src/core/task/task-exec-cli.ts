@@ -164,7 +164,7 @@ async function main(): Promise<void> {
     executionMode: args.dryRun ? "dry-run" : "exec",
     timeoutMs: 600_000,
   });
-  const codexResult = await executor.executePrompt(prompt, { cwd: projectRoot });
+  const runResult = await executor.executePrompt(prompt, { cwd: projectRoot });
 
   // 5. Post git snapshot + change set.
   const postSnapshot = await collectGitStatus(projectRoot);
@@ -178,7 +178,7 @@ async function main(): Promise<void> {
   const report = collectExecutionReport({
     task,
     scope,
-    codexResult,
+    runResult,
     runtime: args.runtime,
     baseline,
     changeSet,

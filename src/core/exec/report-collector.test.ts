@@ -11,7 +11,7 @@ import {
 import type {
   AcceptanceResult,
   ChangeScope,
-  CodexRunResult,
+  PromptRunResult,
   CodeDomain,
   ExecutionReport,
   GitBaseline,
@@ -28,7 +28,7 @@ const FIXTURE_DIR = path.resolve(
 type Fixture = {
   task: Task;
   scope: ChangeScope;
-  codexResult: CodexRunResult;
+  runResult: PromptRunResult;
   baseline: GitBaseline;
   changeSet: GitChangeSet;
   acceptanceResults: AcceptanceResult[];
@@ -51,7 +51,7 @@ function loadFixture(name: string): Fixture {
   return {
     task: read("task.json"),
     scope: read("scope.json"),
-    codexResult: read("codex-result.json"),
+    runResult: read("codex-result.json"),
     baseline: read("git-baseline.json"),
     changeSet: read("git-change-set.json"),
     acceptanceResults: read("acceptance-results.json"),
@@ -64,14 +64,14 @@ function runFixture(f: Fixture): ExecutionReport {
   return collectExecutionReport({
     task: f.task,
     scope: f.scope,
-    codexResult: f.codexResult,
+    runResult: f.runResult,
     runtime: "codex",
     baseline: f.baseline,
     changeSet: f.changeSet,
     acceptanceResults: f.acceptanceResults,
     domains: f.domains,
-    startedAt: f.codexResult.startedAt,
-    finishedAt: f.codexResult.finishedAt,
+    startedAt: f.runResult.startedAt,
+    finishedAt: f.runResult.finishedAt,
   });
 }
 
@@ -94,14 +94,14 @@ describe("F0 report collector — fixture-driven (§6.3)", () => {
     const report = collectExecutionReport({
       task: f.task,
       scope: f.scope,
-      codexResult: f.codexResult,
+      runResult: f.runResult,
       runtime: "claude-code",
       baseline: f.baseline,
       changeSet: f.changeSet,
       acceptanceResults: f.acceptanceResults,
       domains: f.domains,
-      startedAt: f.codexResult.startedAt,
-      finishedAt: f.codexResult.finishedAt,
+      startedAt: f.runResult.startedAt,
+      finishedAt: f.runResult.finishedAt,
     });
     expect(report.runtime).toBe("claude-code");
   });
@@ -213,8 +213,8 @@ describe("createPreflightBlockedReport (§4.3.4)", () => {
     });
     expect(report.status).toBe("blocked");
     expect(report.outcomeReason).toBe("dirty_worktree_blocked");
-    expect(report.codexExitCode).toBeUndefined();
-    expect(report.codexStdout).toBeUndefined();
+    expect(report.runtimeExitCode).toBeUndefined();
+    expect(report.runtimeStdout).toBeUndefined();
     expect(report.acceptanceResults).toEqual([]);
     expect(report.blockers[0]).toContain("preflight");
     expect(report.preExistingChanges).toEqual(["src/dirty.ts"]);

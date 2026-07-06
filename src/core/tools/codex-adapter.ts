@@ -6,7 +6,7 @@ import type {
   ToolMessage,
   AdapterStatus,
 } from "./tool-adapter-protocol.ts";
-import type { ProjectStage, AgentRole, CodexRunResult } from "../models.ts";
+import type { ProjectStage, AgentRole, PromptRunResult } from "../models.ts";
 
 const execFileAsync = promisify(execFile);
 type ExecFileError = Error & { stdout?: string | Buffer; stderr?: string | Buffer; code?: number };
@@ -158,7 +158,7 @@ export class CodexAdapter implements ToolAdapter {
 
   /**
    * §4.6: Execute a free-form prompt through Codex CLI, returning a structured
-   * {@link CodexRunResult}. Unlike send()/executeSubtask (which carry the
+   * {@link PromptRunResult}. Unlike send()/executeSubtask (which carry the
    * ToolMessage ceremony), this takes a raw prompt string — the new task:exec
    * pipeline renders the prompt itself (renderPromptV0) and only needs Codex's
    * raw stdout/stderr/exit back.
@@ -168,7 +168,7 @@ export class CodexAdapter implements ToolAdapter {
    * `{ timedOut: true, exitCode: 124 }` so the report collector can still
    * write a blocked ExecutionReport to disk.
    */
-  async executePrompt(prompt: string, options: { cwd?: string } = {}): Promise<CodexRunResult> {
+  async executePrompt(prompt: string, options: { cwd?: string } = {}): Promise<PromptRunResult> {
     const startedAt = new Date().toISOString();
     const startedMs = Date.now();
     const argv = [...this.execArgs, prompt];
